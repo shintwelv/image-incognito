@@ -81,8 +81,7 @@ struct EditorView: View {
             Spacer()
 
             NavigationLink {
-                // ExportView will be wired here in Screen 3
-                ExportPlaceholderView(image: viewModel.sourceImage)
+                ExportView(maskedImage: viewModel.sourceImage)
             } label: {
                 Text("내보내기")
                     .font(.appBodyEmphasized)
@@ -405,44 +404,6 @@ private struct NoFaceFoundView: View {
         .padding(.vertical, Spacing.large)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-    }
-}
-
-// MARK: - Export Placeholder (will be replaced by Screen 3)
-
-struct ExportPlaceholderView: View {
-    let image: UIImage
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        ZStack {
-            Color.appBackground.ignoresSafeArea()
-            VStack(spacing: Spacing.medium) {
-                Image(systemName: "square.and.arrow.up")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 56)
-                    .foregroundStyle(Color.appPrimary)
-                Text("내보내기")
-                    .font(.appTitle2)
-                    .foregroundStyle(Color.appLabelPrimary)
-                Text("Screen 3: Export & Metadata Settings")
-                    .font(.appFootnote)
-                    .foregroundStyle(Color.appLabelTertiary)
-            }
-        }
-        .toolbar(.hidden, for: .navigationBar)
-        .overlay(alignment: .topLeading) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .imageScale(.large)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color.appLabelSecondary)
-                    .padding(Spacing.medium)
-            }
-        }
     }
 }
 
