@@ -119,11 +119,11 @@ private struct SectionHeader: View {
                 .imageScale(.small)
                 .foregroundStyle(Color.appPrimary)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.appTitle3)
                     .foregroundStyle(Color.appLabelPrimary)
                 if let subtitle {
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(.appCaption)
                         .foregroundStyle(Color.appLabelSecondary)
                 }
@@ -141,7 +141,7 @@ private struct InfoRow: View {
 
     var body: some View {
         HStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.appBody)
                 .foregroundStyle(Color.appLabelPrimary)
             Spacer()

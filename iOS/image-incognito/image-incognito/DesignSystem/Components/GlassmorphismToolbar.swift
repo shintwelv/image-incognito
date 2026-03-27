@@ -55,7 +55,7 @@ struct StylePill: View {
                     .clipShape(RoundedRectangle(cornerRadius: Radius.element, style: .continuous))
                     .animation(AppAnimation.snappy, value: isSelected)
 
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(.appCaption2)
                     .foregroundStyle(
                         isSelected ? Color.appPrimary : Color.appLabelSecondary
@@ -76,7 +76,7 @@ struct ToastView: View {
         HStack(spacing: Spacing.xSmall) {
             Image(systemName: icon)
                 .imageScale(.small)
-            Text(message)
+            Text(LocalizedStringKey(message))
                 .font(.appSubheadline)
         }
         .padding(.horizontal, Spacing.medium)

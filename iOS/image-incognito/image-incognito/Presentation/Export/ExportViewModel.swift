@@ -49,7 +49,7 @@ final class ExportViewModel {
             guard status == .authorized || status == .limited else {
                 await MainActor.run {
                     isSaving = false
-                    saveError = "사진 접근 권한이 없습니다. 설정 앱에서 권한을 허용해주세요."
+                    saveError = String(localized: "사진 접근 권한이 없습니다. 설정 앱에서 권한을 허용해주세요.")
                 }
                 return
             }

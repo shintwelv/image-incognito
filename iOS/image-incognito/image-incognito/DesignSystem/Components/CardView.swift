@@ -50,12 +50,12 @@ struct ToggleCardRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: Radius.element, style: .continuous))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.appBody)
                     .foregroundStyle(Color.appLabelPrimary)
 
                 if let subtitle {
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(.appCaption)
                         .foregroundStyle(Color.appLabelSecondary)
                 }
