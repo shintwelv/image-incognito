@@ -39,6 +39,17 @@ struct EditorView: View {
         .task {
             try? await viewModel.detectFaces()
         }
+        // Navigate to ExportView once the masked image is ready
+        .navigationDestination(
+            isPresented: Binding(
+                get: { viewModel.renderedImage != nil },
+                set: { if !$0 { viewModel.renderedImage = nil } }
+            )
+        ) {
+            if let image = viewModel.renderedImage {
+                ExportView(maskedImage: image)
+            }
+        }
     }
 
     // MARK: - Top Bar
@@ -80,17 +91,26 @@ struct EditorView: View {
 
             Spacer()
 
-            NavigationLink {
-                ExportView(maskedImage: viewModel.sourceImage)
+            Button {
+                Task { await viewModel.exportTapped() }
             } label: {
-                Text("내보내기")
-                    .font(.appBodyEmphasized)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, Spacing.medium)
-                    .padding(.vertical, Spacing.xSmall)
-                    .background(Color.appPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.button, style: .continuous))
+                HStack(spacing: Spacing.xxSmall) {
+                    if viewModel.isRendering {
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(0.75)
+                    }
+                    Text(viewModel.isRendering ? "준비 중..." : "내보내기")
+                        .font(.appBodyEmphasized)
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, Spacing.medium)
+                .padding(.vertical, Spacing.xSmall)
+                .background(Color.appPrimary.opacity(viewModel.isRendering ? 0.6 : 1))
+                .clipShape(RoundedRectangle(cornerRadius: Radius.button, style: .continuous))
+                .animation(AppAnimation.snappy, value: viewModel.isRendering)
             }
+            .disabled(viewModel.isRendering)
         }
         .animation(AppAnimation.snappy, value: viewModel.isDetecting)
         .animation(AppAnimation.snappy, value: viewModel.faces.count)

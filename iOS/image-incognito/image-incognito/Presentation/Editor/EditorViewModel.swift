@@ -32,6 +32,17 @@ final class EditorViewModel {
     /// Controls whether the adjustment sliders are visible.
     var showAdjustmentSliders: Bool = false
 
+    // MARK: - Export state
+
+    /// True while the mask is being baked into the image pixels.
+    var isRendering: Bool = false
+    /// Set once rendering completes; triggers navigation to ExportView.
+    var renderedImage: UIImage? = nil
+
+    // MARK: - Services
+
+    private let maskRenderer = MaskRenderingService()
+
     // MARK: - Init
 
     init(sourceImage: UIImage) {
@@ -99,6 +110,32 @@ final class EditorViewModel {
             withAnimation(AppAnimation.standard) {
                 showAdjustmentSliders = true
             }
+        }
+    }
+
+    // MARK: - Export
+
+    /// Bakes all active masks onto the source image on a background thread,
+    /// then sets `renderedImage` to trigger navigation to ExportView.
+    func exportTapped() async {
+        guard !isRendering else { return }
+        AppHaptics.medium()
+        isRendering = true
+
+        let result = await Task.detached(priority: .userInitiated) { [weak self] () -> UIImage? in
+            guard let self else { return nil }
+            return try? self.maskRenderer.render(
+                image: self.sourceImage,
+                faces: self.faces,
+                intensity: self.intensity,
+                sizeMultiplier: self.sizeMultiplier
+            )
+        }.value
+
+        await MainActor.run {
+            isRendering = false
+            // Fall back to sourceImage if rendering failed (e.g. no faces masked)
+            renderedImage = result ?? sourceImage
         }
     }
 }
