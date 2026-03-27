@@ -2,13 +2,8 @@
   "colors" : [
     {
       "color" : {
-        "color-space" : "srgb",
-        "components" : {
-          "alpha" : "1.000",
-          "blue" : "0.902",
-          "green" : "0.361",
-          "red" : "0.369"
-        }
+        "platform" : "ios",
+        "reference" : "systemBackgroundColor"
       },
       "idiom" : "universal"
     },
@@ -23,9 +18,9 @@
         "color-space" : "srgb",
         "components" : {
           "alpha" : "1.000",
-          "blue" : "0.969",
-          "green" : "0.510",
-          "red" : "0.431"
+          "blue" : "0.153",
+          "green" : "0.141",
+          "red" : "0.141"
         }
       },
       "idiom" : "universal"
