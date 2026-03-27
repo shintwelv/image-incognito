@@ -37,7 +37,7 @@ struct HomeView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { headerToolbar }
+            .toolbar { settingsToolbar }
             // PHPicker Sheet
             .sheet(isPresented: $viewModel.isShowingPhotoPicker) {
                 PhotoPickerRepresentable(
@@ -56,7 +56,7 @@ struct HomeView: View {
             }
             // Settings Sheet
             .sheet(isPresented: $viewModel.isShowingSettings) {
-                SettingsPlaceholderView()
+                SettingsView()
             }
             // Navigate to AI Editor when an image is selected
             .navigationDestination(
@@ -72,17 +72,10 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Header Toolbar
+    // MARK: - Settings Toolbar
 
     @ToolbarContentBuilder
-    private var headerToolbar: some ToolbarContent {
-        // Logo (leading)
-        ToolbarItem(placement: .topBarLeading) {
-            Image(systemName: "person.fill.viewfinder")
-                .imageScale(.large)
-                .foregroundStyle(Color.appPrimary)
-        }
-        // Settings (trailing)
+    private var settingsToolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
             Button {
                 viewModel.settingsTapped()
@@ -250,43 +243,14 @@ private struct CameraPlaceholderView: View {
     }
 }
 
-private struct SettingsPlaceholderView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.appBackground.ignoresSafeArea()
-                VStack(spacing: Spacing.medium) {
-                    Image(systemName: "gearshape.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60)
-                        .foregroundStyle(Color.appPrimary)
-                    Text("설정 화면")
-                        .font(.appTitle2)
-                }
-            }
-            .navigationTitle("설정")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("닫기") { dismiss() }
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Preview
 
 #Preview("Empty state") {
     HomeView()
+        .environment(SettingsStore())
 }
 
 #Preview("With recent items") {
-    let view = HomeView()
-    // Cannot inject recentItems directly without access to viewModel from outside,
-    // but the structure is correct — use HomeView() with state set in makePreview.
-    return view
+    HomeView()
+        .environment(SettingsStore())
 }

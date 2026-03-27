@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ExportSettings {
+struct ExportSettings: Codable {
     /// Strip GPS / location metadata from EXIF. Default ON.
     var removeLocation: Bool = true
     /// Strip all EXIF metadata (camera model, shutter speed, etc.). Default ON.

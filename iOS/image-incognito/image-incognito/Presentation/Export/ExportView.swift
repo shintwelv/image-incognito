@@ -11,6 +11,7 @@ import SwiftUI
 struct ExportView: View {
 
     @State private var viewModel: ExportViewModel
+    @Environment(SettingsStore.self) private var settingsStore
     @Environment(\.dismiss) private var dismiss
 
     init(maskedImage: UIImage) {
@@ -40,6 +41,10 @@ struct ExportView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        // Seed settings from the app-wide store when the view first appears.
+        .onAppear {
+            viewModel.settings = settingsStore.exportSettings
+        }
         // System share sheet
         .sheet(isPresented: $viewModel.isShowingShareSheet) {
             ShareSheet(items: [viewModel.maskedImage])
@@ -220,12 +225,14 @@ struct ExportView: View {
     NavigationStack {
         ExportView(maskedImage: previewMaskedImage())
     }
+    .environment(SettingsStore())
 }
 
 #Preview("Export – Dark Mode") {
     NavigationStack {
         ExportView(maskedImage: previewMaskedImage())
     }
+    .environment(SettingsStore())
     .preferredColorScheme(.dark)
 }
 
