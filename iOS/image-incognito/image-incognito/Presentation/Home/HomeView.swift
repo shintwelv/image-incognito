@@ -58,6 +58,17 @@ struct HomeView: View {
             .sheet(isPresented: $viewModel.isShowingSettings) {
                 SettingsPlaceholderView()
             }
+            // Navigate to AI Editor when an image is selected
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { viewModel.selectedImage != nil },
+                    set: { if !$0 { viewModel.selectedImage = nil } }
+                )
+            ) {
+                if let image = viewModel.selectedImage {
+                    EditorView(image: image)
+                }
+            }
         }
     }
 
