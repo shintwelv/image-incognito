@@ -11,7 +11,7 @@ import SwiftUI
 struct image_incognitoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
         }
     }
 }
