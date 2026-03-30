@@ -29,14 +29,14 @@ struct AppCard<Content: View>: View {
 
 struct ToggleCardRow: View {
     let icon: String
-    let title: String
-    let subtitle: String?
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey?
     @Binding var isOn: Bool
 
     init(icon: String, title: String, subtitle: String? = nil, isOn: Binding<Bool>) {
         self.icon = icon
-        self.title = title
-        self.subtitle = subtitle
+        self.title = LocalizedStringKey(title)
+        self.subtitle = LocalizedStringKey(subtitle ?? "")
         self._isOn = isOn
     }
 
@@ -50,12 +50,12 @@ struct ToggleCardRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: Radius.element, style: .continuous))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(LocalizedStringKey(title))
+                Text(title)
                     .font(.appBody)
                     .foregroundStyle(Color.appLabelPrimary)
 
                 if let subtitle {
-                    Text(LocalizedStringKey(subtitle))
+                    Text(subtitle)
                         .font(.appCaption)
                         .foregroundStyle(Color.appLabelSecondary)
                 }

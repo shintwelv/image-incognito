@@ -11,12 +11,12 @@ import SwiftUI
 // MARK: - Primary Button
 
 struct PrimaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String?
     let action: () -> Void
 
     init(_ title: String, icon: String? = nil, action: @escaping () -> Void) {
-        self.title = title
+        self.title = LocalizedStringKey(title)
         self.icon = icon
         self.action = action
     }
@@ -48,11 +48,11 @@ struct PrimaryButton: View {
 // MARK: - Secondary Button
 
 struct SecondaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String?
     let action: () -> Void
 
-    init(_ title: String, icon: String? = nil, action: @escaping () -> Void) {
+    init(_ title: LocalizedStringKey, icon: String? = nil, action: @escaping () -> Void) {
         self.title = title
         self.icon = icon
         self.action = action
