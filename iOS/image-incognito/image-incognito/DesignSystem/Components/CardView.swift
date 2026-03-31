@@ -30,13 +30,11 @@ struct AppCard<Content: View>: View {
 struct ToggleCardRow: View {
     let icon: String
     let title: LocalizedStringKey
-    let subtitle: LocalizedStringKey?
     @Binding var isOn: Bool
 
-    init(icon: String, title: String, subtitle: String? = nil, isOn: Binding<Bool>) {
+    init(icon: String, title: String, isOn: Binding<Bool>) {
         self.icon = icon
         self.title = LocalizedStringKey(title)
-        self.subtitle = LocalizedStringKey(subtitle ?? "")
         self._isOn = isOn
     }
 
@@ -49,17 +47,9 @@ struct ToggleCardRow: View {
                 .foregroundStyle(Color.appPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: Radius.element, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.appBody)
-                    .foregroundStyle(Color.appLabelPrimary)
-
-                if let subtitle {
-                    Text(subtitle)
-                        .font(.appCaption)
-                        .foregroundStyle(Color.appLabelSecondary)
-                }
-            }
+            Text(title)
+                .font(.appBody)
+                .foregroundStyle(Color.appLabelPrimary)
 
             Spacer()
 
@@ -113,21 +103,18 @@ struct SectionCard<Content: View>: View {
                 ToggleCardRow(
                     icon: "location.slash",
                     title: "위치 정보 제거",
-                    subtitle: "Remove Location",
                     isOn: $loc
                 )
                 Divider().padding(.leading, 60)
                 ToggleCardRow(
                     icon: "info.circle",
                     title: "촬영 정보 제거",
-                    subtitle: "Remove Exif",
                     isOn: $exif
                 )
                 Divider().padding(.leading, 60)
                 ToggleCardRow(
                     icon: "photo",
                     title: "고해상도 유지",
-                    subtitle: "Original Resolution",
                     isOn: $hires
                 )
             }

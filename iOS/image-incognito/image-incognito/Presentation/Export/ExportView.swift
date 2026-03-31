@@ -153,7 +153,6 @@ struct ExportView: View {
                 ToggleCardRow(
                     icon: "location.slash.fill",
                     title: "위치 정보 제거",
-                    subtitle: "Remove Location",
                     isOn: $viewModel.settings.removeLocation
                 )
 
@@ -163,7 +162,6 @@ struct ExportView: View {
                 ToggleCardRow(
                     icon: "info.circle.fill",
                     title: "촬영 정보 제거",
-                    subtitle: "Remove Exif",
                     isOn: $viewModel.settings.removeExif
                 )
 
@@ -173,7 +171,6 @@ struct ExportView: View {
                 ToggleCardRow(
                     icon: "photo.fill",
                     title: "고해상도 유지",
-                    subtitle: "Original Resolution",
                     isOn: $viewModel.settings.keepOriginalResolution
                 )
             }
