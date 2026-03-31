@@ -281,7 +281,7 @@ private struct FaceOverlayView: View {
 
         case .solidClean:
             RoundedRectangle(cornerRadius: Radius.element, style: .continuous)
-                .fill(Color.appPrimary.opacity(0.55 + 0.35 * intensity))
+                .fill(Color.appPrimary.opacity(intensity))
         }
     }
 

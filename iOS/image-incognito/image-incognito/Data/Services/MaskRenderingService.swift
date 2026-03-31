@@ -144,7 +144,7 @@ final class MaskRenderingService {
 
     private func applySolid(rect: CGRect, intensity: Double) {
         // #5E5CE6 – App primary indigo
-        UIColor(red: 94/255, green: 92/255, blue: 230/255, alpha: 0.55 + 0.35 * intensity)
+        UIColor(red: 94/255, green: 92/255, blue: 230/255, alpha: intensity)
             .setFill()
         UIBezierPath(roundedRect: rect, cornerRadius: 12).fill()
     }
