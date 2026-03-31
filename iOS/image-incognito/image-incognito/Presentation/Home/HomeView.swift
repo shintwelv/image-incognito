@@ -51,8 +51,17 @@ struct HomeView: View {
                 .ignoresSafeArea()
             }
             // Camera Sheet
-            .sheet(isPresented: $viewModel.isShowingCamera) {
-                CameraPlaceholderView()
+            .fullScreenCover(isPresented: $viewModel.isShowingCamera) {
+                CameraPickerRepresentable(
+                    selectedImage: .init(
+                        get: { viewModel.selectedImage },
+                        set: { image in
+                            if let image { viewModel.didSelectImage(image) }
+                        }
+                    ),
+                    onDismiss: { viewModel.isShowingCamera = false }
+                )
+                .ignoresSafeArea()
             }
             // Settings Sheet
             .sheet(isPresented: $viewModel.isShowingSettings) {
@@ -210,36 +219,6 @@ private struct RecentItemThumbnail: View {
             .padding(Spacing.xSmall)
         }
         .appShadow(.card)
-    }
-}
-
-// MARK: - Placeholder Screens (will be replaced by actual screens)
-
-private struct CameraPlaceholderView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.appBackground.ignoresSafeArea()
-                VStack(spacing: Spacing.medium) {
-                    Image(systemName: "camera.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60)
-                        .foregroundStyle(Color.appPrimary)
-                    Text("카메라 화면")
-                        .font(.appTitle2)
-                }
-            }
-            .navigationTitle("카메라")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("닫기") { dismiss() }
-                }
-            }
-        }
     }
 }
 

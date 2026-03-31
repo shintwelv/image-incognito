@@ -790,6 +790,7 @@
       }
     },
     "카메라" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -846,6 +847,7 @@
       }
     },
     "카메라 화면" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
