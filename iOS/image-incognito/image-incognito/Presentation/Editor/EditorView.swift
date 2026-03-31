@@ -361,7 +361,7 @@ private struct AdjustmentSlidersView: View {
 }
 
 private struct SliderRow: View {
-    let title: String
+    let title: LocalizedStringKey
     @Binding var value: Double
     let range: ClosedRange<Double>
     let displayValue: String
