@@ -25,6 +25,8 @@ final class EditorViewModel {
     // MARK: - Style & adjustments
 
     var selectedStyle: MaskingStyle = .blurredGlass
+    /// Fill color used for the solidClean mask style.
+    var solidCleanColor: Color = Color.appPrimary
     /// Masking intensity: 0 (transparent) → 1 (fully opaque).
     var intensity: Double = 0.75
     /// Bounding-box size multiplier: 0.5 (tighter) → 2.0 (larger).
@@ -128,7 +130,8 @@ final class EditorViewModel {
                 image: self.sourceImage,
                 faces: self.faces,
                 intensity: self.intensity,
-                sizeMultiplier: self.sizeMultiplier
+                sizeMultiplier: self.sizeMultiplier,
+                solidCleanColor: UIColor(self.solidCleanColor)
             )
         }.value
 

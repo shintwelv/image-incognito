@@ -21,7 +21,8 @@ final class MaskRenderingService {
         image: UIImage,
         faces: [FaceBox],
         intensity: Double,
-        sizeMultiplier: Double
+        sizeMultiplier: Double,
+        solidCleanColor: UIColor = UIColor(red: 94/255, green: 92/255, blue: 230/255, alpha: 1)
     ) throws -> UIImage {
         let size = image.size
         let format = UIGraphicsImageRendererFormat()
@@ -42,7 +43,7 @@ final class MaskRenderingService {
                 switch face.style {
                 case .blurredGlass: applyBlur(rect: rect, image: image, intensity: intensity)
                 case .pixelArt:     applyPixelArt(rect: rect, image: image, intensity: intensity)
-                case .solidClean:   applySolid(rect: rect, intensity: intensity)
+                case .solidClean:   applySolid(rect: rect, intensity: intensity, color: solidCleanColor)
                 }
             }
         }
@@ -142,10 +143,8 @@ final class MaskRenderingService {
 
     // MARK: - Solid fill (solidClean)
 
-    private func applySolid(rect: CGRect, intensity: Double) {
-        // #5E5CE6 – App primary indigo
-        UIColor(red: 94/255, green: 92/255, blue: 230/255, alpha: intensity)
-            .setFill()
+    private func applySolid(rect: CGRect, intensity: Double, color: UIColor) {
+        color.withAlphaComponent(intensity).setFill()
         UIBezierPath(roundedRect: rect, cornerRadius: 12).fill()
     }
 }

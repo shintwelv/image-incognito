@@ -141,7 +141,8 @@ struct EditorView: View {
                     FaceOverlayView(
                         faceBox: face,
                         intensity: viewModel.intensity,
-                        sizeMultiplier: viewModel.sizeMultiplier
+                        sizeMultiplier: viewModel.sizeMultiplier,
+                        solidCleanColor: viewModel.solidCleanColor
                     )
                     .frame(width: frame.width, height: frame.height)
                     .position(x: frame.midX, y: frame.midY)
@@ -175,7 +176,9 @@ struct EditorView: View {
             if viewModel.showAdjustmentSliders {
                 AdjustmentSlidersView(
                     intensity: $viewModel.intensity,
-                    sizeMultiplier: $viewModel.sizeMultiplier
+                    sizeMultiplier: $viewModel.sizeMultiplier,
+                    selectedStyle: viewModel.selectedStyle,
+                    solidCleanColor: $viewModel.solidCleanColor
                 )
                 .padding(.horizontal, Spacing.large)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -254,6 +257,7 @@ private struct FaceOverlayView: View {
     let faceBox: FaceBox
     let intensity: Double
     let sizeMultiplier: Double
+    let solidCleanColor: Color
 
     var body: some View {
         ZStack {
@@ -281,7 +285,7 @@ private struct FaceOverlayView: View {
 
         case .solidClean:
             RoundedRectangle(cornerRadius: Radius.element, style: .continuous)
-                .fill(Color.appPrimary.opacity(intensity))
+                .fill(solidCleanColor.opacity(intensity))
         }
     }
 
@@ -337,6 +341,8 @@ private struct PixelArtMaskView: View {
 private struct AdjustmentSlidersView: View {
     @Binding var intensity: Double
     @Binding var sizeMultiplier: Double
+    let selectedStyle: MaskingStyle
+    @Binding var solidCleanColor: Color
 
     var body: some View {
         VStack(spacing: Spacing.medium) {
@@ -352,11 +358,16 @@ private struct AdjustmentSlidersView: View {
                 range: 0.5...2.0,
                 displayValue: "\(Int(sizeMultiplier * 100))%"
             )
+            if selectedStyle == .solidClean {
+                ColorPickerRow(color: $solidCleanColor)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
         .padding(Spacing.medium)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .appShadow(.card)
+        .animation(AppAnimation.standard, value: selectedStyle)
     }
 }
 
@@ -382,6 +393,22 @@ private struct SliderRow: View {
             Slider(value: $value, in: range, step: 0.05)
                 .tint(Color.appPrimary)
                 .onChange(of: value) { _, _ in AppHaptics.selection() }
+        }
+    }
+}
+
+private struct ColorPickerRow: View {
+    @Binding var color: Color
+
+    var body: some View {
+        HStack {
+            Text("색상")
+                .font(.appFootnote)
+                .foregroundStyle(Color.appLabelSecondary)
+            Spacer()
+            ColorPicker("", selection: $color, supportsOpacity: false)
+                .labelsHidden()
+                .onChange(of: color) { _, _ in AppHaptics.selection() }
         }
     }
 }
