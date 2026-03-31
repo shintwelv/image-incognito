@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E5CCEE3D2F7B6A5F00BF2F3D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E5CCEE3C2F7B6A5E00BF2F3D /* GoogleService-Info.plist */; };
+		E5CCEE402F7B6AFA00BF2F3D /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = E5CCEE3F2F7B6AFA00BF2F3D /* FirebaseAnalytics */; };
+		E5CCEE422F7B6AFA00BF2F3D /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = E5CCEE412F7B6AFA00BF2F3D /* FirebaseCrashlytics */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E5F558CF2F765AA9007C9201 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E5CCEE3C2F7B6A5E00BF2F3D /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E5F558C12F765AA8007C9201 /* image-incognito.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "image-incognito.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5F558CE2F765AA9007C9201 /* image-incognitoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "image-incognitoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5F558D82F765AA9007C9201 /* image-incognitoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "image-incognitoUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,6 +59,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5CCEE402F7B6AFA00BF2F3D /* FirebaseAnalytics in Frameworks */,
+				E5CCEE422F7B6AFA00BF2F3D /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +84,7 @@
 		E5F558B82F765AA8007C9201 = {
 			isa = PBXGroup;
 			children = (
+				E5CCEE3C2F7B6A5E00BF2F3D /* GoogleService-Info.plist */,
 				E5F558C32F765AA8007C9201 /* image-incognito */,
 				E5F558D12F765AA9007C9201 /* image-incognitoTests */,
 				E5F558DB2F765AA9007C9201 /* image-incognitoUITests */,
@@ -112,6 +122,8 @@
 			);
 			name = "image-incognito";
 			packageProductDependencies = (
+				E5CCEE3F2F7B6AFA00BF2F3D /* FirebaseAnalytics */,
+				E5CCEE412F7B6AFA00BF2F3D /* FirebaseCrashlytics */,
 			);
 			productName = "image-incognito";
 			productReference = E5F558C12F765AA8007C9201 /* image-incognito.app */;
@@ -195,6 +207,9 @@
 			);
 			mainGroup = E5F558B82F765AA8007C9201;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E5CCEE3E2F7B6AFA00BF2F3D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E5F558C22F765AA8007C9201 /* Products */;
 			projectDirPath = "";
@@ -212,6 +227,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5CCEE3D2F7B6A5F00BF2F3D /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -584,6 +600,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E5CCEE3E2F7B6AFA00BF2F3D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E5CCEE3F2F7B6AFA00BF2F3D /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E5CCEE3E2F7B6AFA00BF2F3D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		E5CCEE412F7B6AFA00BF2F3D /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E5CCEE3E2F7B6AFA00BF2F3D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E5F558B92F765AA8007C9201 /* Project object */;
 }
