@@ -31,11 +31,21 @@ final class ExportViewModel {
     // MARK: - Share state
 
     var isShowingShareSheet: Bool = false
+    /// Settings-applied image to hand off to the share sheet.
+    private(set) var imageToShare: UIImage?
+
+    // MARK: - Dependencies
+
+    private let processingService: ExportImageProcessingService
 
     // MARK: - Init
 
-    init(maskedImage: UIImage) {
+    init(
+        maskedImage: UIImage,
+        processingService: ExportImageProcessingService = ExportImageProcessingService()
+    ) {
         self.maskedImage = maskedImage
+        self.processingService = processingService
     }
 
     // MARK: - Intent: Save to Photos
@@ -54,8 +64,10 @@ final class ExportViewModel {
                 return
             }
 
+            let processed = await processingService.process(maskedImage, settings: settings)
+
             try await PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: self.maskedImage)
+                PHAssetChangeRequest.creationRequestForAsset(from: processed)
             }
 
             await MainActor.run {
@@ -77,7 +89,14 @@ final class ExportViewModel {
 
     func shareImageTapped() {
         AppHaptics.light()
-        isShowingShareSheet = true
+        Task.detached(priority: .background) { [weak self] in
+            guard let self = self else { return }
+            let processed = await self.processingService.process(maskedImage, settings: settings)
+            await MainActor.run {
+                self.imageToShare = processed
+                self.isShowingShareSheet = true
+            }
+        }
     }
 
     // MARK: - Error dismiss

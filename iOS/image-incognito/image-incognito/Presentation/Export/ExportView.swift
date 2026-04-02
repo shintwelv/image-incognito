@@ -47,7 +47,7 @@ struct ExportView: View {
         }
         // System share sheet
         .sheet(isPresented: $viewModel.isShowingShareSheet) {
-            ShareSheet(items: [viewModel.maskedImage])
+            ShareSheet(items: [viewModel.imageToShare ?? viewModel.maskedImage])
                 .ignoresSafeArea()
         }
         // Save error alert

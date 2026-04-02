@@ -126,7 +126,7 @@ final class EditorViewModel {
 
         let result = await Task.detached(priority: .userInitiated) { [weak self] () -> UIImage? in
             guard let self else { return nil }
-            return try? self.maskRenderer.render(
+            return try? await self.maskRenderer.render(
                 image: self.sourceImage,
                 faces: self.faces,
                 intensity: self.intensity,
