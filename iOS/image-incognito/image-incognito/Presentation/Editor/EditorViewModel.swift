@@ -22,6 +22,9 @@ final class EditorViewModel {
 
     var faces: [FaceBox] = []
     var isDetecting: Bool = false
+    /// True only after the first detection run finishes (success or failure).
+    /// Prevents the "no faces found" empty state from flashing before detection starts.
+    var detectionCompleted: Bool = false
 
     // MARK: - Style & adjustments
 
@@ -64,7 +67,10 @@ final class EditorViewModel {
     func detectFaces() async throws {
         guard !isDetecting else { return }
         isDetecting = true
-        defer { isDetecting = false }
+        defer {
+            isDetecting = false
+            detectionCompleted = true
+        }
 
         let detected = try await detectFacesUseCase.execute(image: sourceImage)
         // Apply the currently selected style to all newly detected faces.

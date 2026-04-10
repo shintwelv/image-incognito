@@ -211,7 +211,7 @@ struct EditorView: View {
                 }
 
                 // Empty state when no faces found after detection
-                if !vm.isDetecting && vm.faces.isEmpty {
+                if vm.detectionCompleted && vm.faces.isEmpty {
                     NoFaceFoundView()
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 }
