@@ -1,8 +1,0 @@
-/* 
-  InfoPlist.strings
-  image-incognito
-
-  Created by elvin on 4/10/26.
-  
-*/
-NSPhotoLibraryUsageDescription = "이 앱은 이미지를 저장하기 위해 사진 라이브러리에 접근해야 합니다.";
