@@ -1,0 +1,8 @@
+/* 
+  InfoPlist.strings
+  image-incognito
+
+  Created by elvin on 4/10/26.
+  
+*/
+NSPhotoLibraryUsageDescription = "このアプリは画像を保存するために、あなたの写真ライブラリへのアクセス権限を必要とします。";

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E5C2483A2F88A3C6003F9E83 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E5C248382F88A3C6003F9E83 /* InfoPlist.strings */; };
 		E5CCEE3D2F7B6A5F00BF2F3D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E5CCEE3C2F7B6A5E00BF2F3D /* GoogleService-Info.plist */; };
 		E5CCEE402F7B6AFA00BF2F3D /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = E5CCEE3F2F7B6AFA00BF2F3D /* FirebaseAnalytics */; };
 		E5CCEE422F7B6AFA00BF2F3D /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = E5CCEE412F7B6AFA00BF2F3D /* FirebaseCrashlytics */; };
@@ -30,6 +31,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E5C248392F88A3C6003F9E83 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E5C2483B2F88A41E003F9E83 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E5C2483C2F88A44E003F9E83 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E5C2483D2F88A453003F9E83 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		E5C2483E2F88A45C003F9E83 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E5CCEE3C2F7B6A5E00BF2F3D /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E5F558C12F765AA8007C9201 /* image-incognito.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "image-incognito.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5F558CE2F765AA9007C9201 /* image-incognitoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "image-incognitoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,6 +90,7 @@
 		E5F558B82F765AA8007C9201 = {
 			isa = PBXGroup;
 			children = (
+				E5C248382F88A3C6003F9E83 /* InfoPlist.strings */,
 				E5CCEE3C2F7B6A5E00BF2F3D /* GoogleService-Info.plist */,
 				E5F558C32F765AA8007C9201 /* image-incognito */,
 				E5F558D12F765AA9007C9201 /* image-incognitoTests */,
@@ -204,6 +211,10 @@
 			knownRegions = (
 				en,
 				Base,
+				ko,
+				ja,
+				"zh-Hans",
+				es,
 			);
 			mainGroup = E5F558B82F765AA8007C9201;
 			minimizedProjectReferenceProxies = 1;
@@ -227,6 +238,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5C2483A2F88A3C6003F9E83 /* InfoPlist.strings in Resources */,
 				E5CCEE3D2F7B6A5F00BF2F3D /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -284,12 +296,28 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		E5C248382F88A3C6003F9E83 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E5C248392F88A3C6003F9E83 /* en */,
+				E5C2483B2F88A41E003F9E83 /* ko */,
+				E5C2483C2F88A44E003F9E83 /* ja */,
+				E5C2483D2F88A453003F9E83 /* zh-Hans */,
+				E5C2483E2F88A45C003F9E83 /* es */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		E5F558E02F765AA9007C9201 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -345,6 +373,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -354,6 +383,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -402,6 +432,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -419,6 +450,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Incognify;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take picture to mask faces";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save Masked";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -455,6 +487,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Incognify;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take picture to mask faces";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save Masked";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

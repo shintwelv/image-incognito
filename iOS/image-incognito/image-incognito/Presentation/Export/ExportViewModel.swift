@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import Photos
 import Observation
 
 @Observable
@@ -37,15 +36,18 @@ final class ExportViewModel {
     // MARK: - Dependencies
 
     private let processingService: ExportImageProcessingService
+    private let photoService: PhotoLibraryService
 
     // MARK: - Init
 
     init(
         maskedImage: UIImage,
-        processingService: ExportImageProcessingService = ExportImageProcessingService()
+        processingService: ExportImageProcessingService = ExportImageProcessingService(),
+        photoService: PhotoLibraryService = PhotoLibraryService()
     ) {
         self.maskedImage = maskedImage
         self.processingService = processingService
+        self.photoService = photoService
     }
 
     // MARK: - Intent: Save to Photos
@@ -55,20 +57,8 @@ final class ExportViewModel {
         isSaving = true
 
         do {
-            let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
-            guard status == .authorized || status == .limited else {
-                await MainActor.run {
-                    isSaving = false
-                    saveError = String(localized: "사진 접근 권한이 없습니다. 설정 앱에서 권한을 허용해주세요.")
-                }
-                return
-            }
-
             let processed = await processingService.process(maskedImage, settings: settings)
-
-            try await PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: processed)
-            }
+            try await photoService.saveImageToAlbum(processed)
 
             await MainActor.run {
                 isSaving = false
