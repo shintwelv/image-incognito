@@ -2,10 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Incognify</string>
-
-	<!-- Document types: lets the app appear in the share sheet / Open In -->
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -21,25 +21,19 @@
 			</array>
 		</dict>
 	</array>
-
 	<key>NSCameraUsageDescription</key>
 	<string>Take picture to mask faces</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save Masked</string>
-
-	<!-- Scene manifest (SwiftUI lifecycle, no explicit SceneDelegate) -->
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
-
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-
 	<key>UILaunchScreen</key>
 	<dict/>
-
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

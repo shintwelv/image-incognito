@@ -37,6 +37,15 @@ You are a senior iOS engineer with expertise in SwiftUI and Clean Architecture.
   - Domain entities (`struct`/`enum`) and use cases must be `nonisolated` + `Sendable`.
   - Repository protocols must inherit `: Sendable`.
 
+## Localization
+- Supported languages: English (`en`), Korean (`ko`), Japanese (`ja`), Spanish (`es`), Chinese Simplified (`zh-Hans`).
+- All user-facing strings must use `String(localized:)` or `LocalizedStringKey` — never hardcode raw strings in UI code.
+- Store all localizations in `Localizable.xcstrings` (String Catalog format, Xcode 15+). Do not use legacy `.strings` / `.stringsdict` files.
+- Use dot-notation keys that reflect context, e.g. `editor.noFaceFound.title`, `home.permissionDenied.message`.
+- Provide a base English value and translations for all five languages whenever adding or editing a localized string.
+- Locale-sensitive formatting (dates, numbers, units) must use `Foundation` formatters (e.g. `formatted()`, `NumberFormatter`) — never manual string concatenation.
+- RTL is not required for the current language set, but avoid hardcoded `.leading`/`.trailing` layout assumptions.
+
 ## Domain Languages
 - Mask: The instance of applying a filter to a face to protect privacy.
 - Obfuscation: The behavior of applying a filter to a face to protect privacy.
