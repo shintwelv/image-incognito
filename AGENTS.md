@@ -1,72 +1,34 @@
 # Agent Rules
 
-You are a senior iOS engineer with expertise in SwiftUI and Clean Architecture.
+iOS app (Incognify) — detects faces in photos and applies privacy masks. iOS 17+, SwiftUI, Clean Architecture (Domain / Data / Presentation), MVVM.
 
-## Project Overview
-- App Name: Incognify
-- Objective: An iOS application that automatically detects faces in photos and applies aesthetic masking (Blur, Pixelation, etc.) to protect privacy while maintaining the photo's visual quality for SNS sharing.
-- Target Platform: iOS (17.0 +)
-- Primary User: SNS users (Instagram, etc.) who care about portrait rights and aesthetics.
-
-## Technical Stack & Architecture
-- Language: Swift
-- UI Framework: SwiftUI
-- Architecture: Clean Architecture with MVVM
-- Domain Layer: Entities, Use Cases, Repository Protocols (Logic-heavy, no dependencies).
-- Data Layer: Repository Implementations, Image Processing Services (Vision Framework, Core Image).
-- Presentation Layer: SwiftUI Views, ViewModels (State-driven).
-- Core Libraries: * Vision: For high-performance face detection. * Core Image / Metal: For image filtering and masking. * PhotosUI: For system gallery access.
-
-### Folder Structure
-- Domain: Entities, UseCases, Interfaces
-- Data: Repositories, Services (Vision, Filter)
-- Presentation: Views, ViewModels
-
-### Coding Convention
-- Use Swift Package Manager for dependency management.
-- Use Async/Await for asynchronous operations.
-- Use `@Observable` macro for state management.
-- Use `ViewModifier` for reusable UI components.
-- Use Initializer Injection for dependency injection.
-- Use `throws` for error handling.
-- Write code compatible with Swift 6 strict concurrency (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`):
-  - Mark background-safe types and methods `nonisolated`.
-  - Use `nonisolated(unsafe)` only for non-`Sendable` stored properties that are safe post-init (e.g., `CIContext`).
-  - Wrap non-`Sendable` ObjC types in a local `@unchecked Sendable` box when crossing actor boundaries (e.g., `NSItemProvider` in `group.addTask`).
-  - Prefer `TaskGroup` / `withCheckedContinuation` over `DispatchGroup` for structured concurrency.
-  - Domain entities (`struct`/`enum`) and use cases must be `nonisolated` + `Sendable`.
-  - Repository protocols must inherit `: Sendable`.
+## Coding Conventions
+- Async/Await, `@Observable`, `ViewModifier`, Initializer Injection, `throws`.
+- Swift 6 strict concurrency (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`):
+  - Background-safe methods: `nonisolated`. Non-`Sendable` stored properties safe post-init: `nonisolated(unsafe)`.
+  - Wrap non-`Sendable` ObjC types in `@unchecked Sendable` when crossing actor boundaries.
+  - `TaskGroup` / `withCheckedContinuation` over `DispatchGroup`.
+  - Domain entities + use cases: `nonisolated` + `Sendable`. Repository protocols: `: Sendable`.
 
 ## Localization
-- Supported languages: English (`en`), Korean (`ko`), Japanese (`ja`), Spanish (`es`), Chinese Simplified (`zh-Hans`).
-- All user-facing strings must use `String(localized:)` or `LocalizedStringKey` — never hardcode raw strings in UI code.
-- Store all localizations in `Localizable.xcstrings` (String Catalog format, Xcode 15+). Do not use legacy `.strings` / `.stringsdict` files.
-- Use dot-notation keys that reflect context, e.g. `editor.noFaceFound.title`, `home.permissionDenied.message`.
-- Provide a base English value and translations for all five languages whenever adding or editing a localized string.
-- Locale-sensitive formatting (dates, numbers, units) must use `Foundation` formatters (e.g. `formatted()`, `NumberFormatter`) — never manual string concatenation.
-- RTL is not required for the current language set, but avoid hardcoded `.leading`/`.trailing` layout assumptions.
+- Languages: `en`, `ko`, `ja`, `es`, `zh-Hans`.
+- Use `String(localized:)` / `LocalizedStringKey`. Store in `Localizable.xcstrings` (String Catalog). No legacy `.strings` files.
+- Dot-notation keys with context prefix, e.g. `editor.noFaceFound.title`.
+- All 5 translations required when adding/editing a string.
 
-## Domain Languages
-- Mask: The instance of applying a filter to a face to protect privacy.
-- Obfuscation: The behavior of applying a filter to a face to protect privacy.
-
-## Engineering Principles & Constraints
-- Clean Code: Follow SOLID principles. Prioritize readability and maintainability.
-- Side-Effect Management: Ensure image processing happens on background threads to keep the UI responsive. Use Async/Await.
-- Test-Driven approach: Write Unit Tests for the Domain Logic (e.g., face detection coordinate mapping) and Data Layer (e.g., image processing pipelines).
-- UI/UX: Minimalist and "Apple-like" interface. Use SF Symbols for icons.
-- VisionKit doesn't work on Simulator
+## Domain Terms
+- **Mask**: an applied filter instance on a detected face.
+- **Obfuscation**: the act of applying that filter.
 
 ## Design Tokens
+| Category | Value |
+| :--- | :--- |
+| Primary color | `#5E5CE6` (Indigo) |
+| Background | `#F2F2F7` / Dark: `#1C1C1E` |
+| Border radius | Elements 12pt · Buttons 16pt · Cards 20pt |
+| Typography | SF, Body 17pt, Title 28pt Bold |
 
-| Category | Specification | Notes |
-| :---- | :---- | :---- |
-| **Color Palette** | Main: \#5E5CE6 (Indigo) / BG: \#F2F2F7 (System Gray 6\) / Dark Mode Support | Emphasize trust and sophistication |
-| **Typography** | Font: San Francisco (iOS System Font) / Body: 17pt, Title: 28pt Bold | Prioritize readability |
-| **Icons** | SF Symbols 5.0 (Standard, Variable Color) | Maintain system consistency |
-| **Border Radius** | Elements: 12pt / Buttons: 16pt / Cards: 20pt | Soft curvature of 'Continuous' style |
-
-## UI Guidelines (Design Mockup Image Description)
-* **Glassmorphism:** Apply a subtle blur effect to the bottom toolbar to create a modern feel.  
-* **Empty State:** When photo access permission is not granted, place a clean illustration and guide button to direct the user to system settings.  
-* **Dark Mode:** Use Deep Gray (1C1C1E) instead of pure Black (000000) for all backgrounds to reduce eye strain.
+## Constraints
+- VisionKit does not work on Simulator — use device for face detection testing.
+- Image processing must run on background threads.
+- Unit-test Domain logic and Data layer pipelines.
