@@ -66,9 +66,14 @@ struct PhotoPickerRepresentable: UIViewControllerRepresentable {
                 }
             }
 
-            group.notify(queue: .main) { [weak self] in
+            // Capture the callback by value so it is always called even if the
+            // coordinator is deallocated before the DispatchGroup fires (which can
+            // happen when the PHPickerViewController is released mid-decode).
+            let onImagesSelected = parent.onImagesSelected
+
+            group.notify(queue: .main) {
                 let sorted = orderedImages.sorted { $0.key < $1.key }.map(\.value)
-                self?.parent.onImagesSelected(sorted)
+                onImagesSelected(sorted)
             }
         }
     }
