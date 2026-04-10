@@ -50,7 +50,12 @@ struct HomeView: View {
             .onChange(of: incomingImageStore.pendingImages) { _, images in
                 guard !images.isEmpty else { return }
                 incomingImageStore.pendingImages = []
-                viewModel.didSelectImages(images)
+                // Clear first so any existing navigation (e.g. ExportView on top of EditorView)
+                // is popped before pushing a fresh EditorView with the incoming image.
+                viewModel.selectedImages = []
+                Task { @MainActor in
+                    viewModel.didSelectImages(images)
+                }
             }
             // PHPicker Sheet
             .sheet(isPresented: $viewModel.isShowingPhotoPicker) {
