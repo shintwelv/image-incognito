@@ -29,6 +29,13 @@ You are a senior iOS engineer with expertise in SwiftUI and Clean Architecture.
 - Use `ViewModifier` for reusable UI components.
 - Use Initializer Injection for dependency injection.
 - Use `throws` for error handling.
+- Write code compatible with Swift 6 strict concurrency (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`):
+  - Mark background-safe types and methods `nonisolated`.
+  - Use `nonisolated(unsafe)` only for non-`Sendable` stored properties that are safe post-init (e.g., `CIContext`).
+  - Wrap non-`Sendable` ObjC types in a local `@unchecked Sendable` box when crossing actor boundaries (e.g., `NSItemProvider` in `group.addTask`).
+  - Prefer `TaskGroup` / `withCheckedContinuation` over `DispatchGroup` for structured concurrency.
+  - Domain entities (`struct`/`enum`) and use cases must be `nonisolated` + `Sendable`.
+  - Repository protocols must inherit `: Sendable`.
 
 ## Domain Languages
 - Mask: The instance of applying a filter to a face to protect privacy.
