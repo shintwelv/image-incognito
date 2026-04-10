@@ -33,6 +33,13 @@ final class PhotoLibraryService: PhotoLibraryRepositoryProtocol {
 
     private let albumName = "Incognify"
 
+    // Serializes album lookup/creation to prevent concurrent duplicate creation.
+    private let albumGateway: AlbumGateway
+
+    init() {
+        self.albumGateway = AlbumGateway(albumName: "Incognify")
+    }
+
     // MARK: - Public API
 
     /// Saves the `image` to the "Incognify" album in the Photo Library.
@@ -44,8 +51,8 @@ final class PhotoLibraryService: PhotoLibraryRepositoryProtocol {
             throw PhotoLibraryError.unauthorized
         }
 
-        // 2. Find or Create Album
-        let album = try await getOrCreateAlbum()
+        // 2. Find or Create Album (serialized via actor to prevent duplicates)
+        let album = try await albumGateway.getOrCreate()
 
         // 3. Perform Changes
         try await PHPhotoLibrary.shared().performChanges {
@@ -58,25 +65,34 @@ final class PhotoLibraryService: PhotoLibraryRepositoryProtocol {
             }
         }
     }
+}
 
-    // MARK: - Internal Logic
+// MARK: - AlbumGateway
 
-    /// Fetches the "Incognify" album, creating it if it doesn't already exist.
-    nonisolated private func getOrCreateAlbum() async throws -> PHAssetCollection? {
+/// Serializes album lookup and creation so concurrent saves never produce duplicate albums.
+private actor AlbumGateway {
+    private let albumName: String
+
+    init(albumName: String) {
+        self.albumName = albumName
+    }
+
+    func getOrCreate() async throws -> PHAssetCollection? {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)
-        let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
 
-        if let album = collection.firstObject {
+        let existing = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        if let album = existing.firstObject {
             return album
-        } else {
-            // Create the album
-            try await PHPhotoLibrary.shared().performChanges {
-                PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: self.albumName)
-            }
-            // Re-fetch the newly created album
-            let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
-            return collection.firstObject
         }
+
+        // Not found — create it.
+        try await PHPhotoLibrary.shared().performChanges { [albumName] in
+            PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+        }
+
+        // Re-fetch; return whichever album won (handles external races too).
+        let created = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        return created.firstObject
     }
 }
