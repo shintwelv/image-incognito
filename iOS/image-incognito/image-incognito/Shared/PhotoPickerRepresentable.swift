@@ -9,6 +9,12 @@
 import SwiftUI
 import PhotosUI
 
+/// Thin `@unchecked Sendable` box for bridging ObjC reference types into
+/// Swift 6 structured concurrency (`NSItemProvider` is not `Sendable`).
+private struct SendableBox<T>: @unchecked Sendable {
+    let value: T
+}
+
 struct PhotoPickerRepresentable: UIViewControllerRepresentable {
     /// Called immediately after the picker is dismissed with a non-empty selection,
     /// before the images have finished decoding.
@@ -52,28 +58,32 @@ struct PhotoPickerRepresentable: UIViewControllerRepresentable {
             // before the (potentially slow) image decoding begins.
             parent.onLoadingStarted()
 
-            let group = DispatchGroup()
-            var orderedImages: [Int: UIImage] = [:]
-
-            for (index, result) in results.enumerated() {
-                guard result.itemProvider.canLoadObject(ofClass: UIImage.self) else { continue }
-                group.enter()
-                result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
-                    if let image = object as? UIImage {
-                        orderedImages[index] = image
-                    }
-                    group.leave()
-                }
-            }
-
             // Capture the callback by value so it is always called even if the
-            // coordinator is deallocated before the DispatchGroup fires (which can
-            // happen when the PHPickerViewController is released mid-decode).
+            // coordinator is deallocated before the Task fires.
             let onImagesSelected = parent.onImagesSelected
 
-            group.notify(queue: .main) {
-                let sorted = orderedImages.sorted { $0.key < $1.key }.map(\.value)
-                onImagesSelected(sorted)
+            Task {
+                let images: [UIImage] = await withTaskGroup(of: (Int, UIImage?).self) { group in
+                    for (index, result) in results.enumerated() {
+                        guard result.itemProvider.canLoadObject(ofClass: UIImage.self) else { continue }
+                        let box = SendableBox(value: result.itemProvider)
+                        group.addTask {
+                            await withCheckedContinuation { continuation in
+                                box.value.loadObject(ofClass: UIImage.self) { object, _ in
+                                    continuation.resume(returning: (index, object as? UIImage))
+                                }
+                            }
+                        }
+                    }
+
+                    var ordered: [Int: UIImage] = [:]
+                    for await (index, image) in group {
+                        if let image { ordered[index] = image }
+                    }
+                    return ordered.sorted { $0.key < $1.key }.map(\.value)
+                }
+
+                onImagesSelected(images)
             }
         }
     }
