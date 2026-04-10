@@ -193,6 +193,10 @@ struct EditorView: View {
                     )
                     .frame(width: frame.width, height: frame.height)
                     .position(x: frame.midX, y: frame.midY)
+                    // Without this, the stroke-only border (isMasked=false) has no filled
+                    // hit area and taps fall through to the image underneath, preventing
+                    // the user from re-enabling a mask.
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         withAnimation(AppAnimation.snappy) {
                             vm.toggleMask(id: face.id)
