@@ -10,6 +10,7 @@ import Testing
 import UIKit
 @testable import image_incognito
 
+@MainActor
 @Suite("EditorViewModel")
 struct EditorViewModelTests {
 

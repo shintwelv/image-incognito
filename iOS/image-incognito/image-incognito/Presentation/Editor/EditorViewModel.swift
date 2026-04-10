@@ -3,13 +3,14 @@
 //  image-incognito
 //
 //  Presentation – AI Editor Screen ViewModel
-//  Manages face detection (Vision), masking state, style, and adjustment controls.
+//  Manages face detection, masking state, style, and adjustment controls.
+//  Vision dependency removed: delegates to DetectFacesUseCase (Data layer).
 //
 
 import SwiftUI
-import Vision
 import Observation
 
+@MainActor
 @Observable
 final class EditorViewModel {
 
@@ -41,51 +42,33 @@ final class EditorViewModel {
     /// Set once rendering completes; triggers navigation to ExportView.
     var renderedImage: UIImage? = nil
 
-    // MARK: - Services
+    // MARK: - Use Cases
 
-    private let maskRenderer = MaskRenderingService()
+    private let detectFacesUseCase: DetectFacesUseCase
+    private let renderMaskUseCase: RenderMaskUseCase
 
     // MARK: - Init
 
-    init(sourceImage: UIImage) {
+    init(
+        sourceImage: UIImage,
+        detectFacesUseCase: DetectFacesUseCase = DetectFacesUseCase(repository: FaceDetectionService()),
+        renderMaskUseCase: RenderMaskUseCase = RenderMaskUseCase(repository: MaskRenderingService())
+    ) {
         self.sourceImage = sourceImage
+        self.detectFacesUseCase = detectFacesUseCase
+        self.renderMaskUseCase = renderMaskUseCase
     }
 
     // MARK: - Face Detection
 
     func detectFaces() async throws {
         guard !isDetecting else { return }
-        await MainActor.run { isDetecting = true }
-        defer { Task { @MainActor in self.isDetecting = false } }
+        isDetecting = true
+        defer { isDetecting = false }
 
-        guard let cgImage = sourceImage.cgImage else { return }
-
-        let request = VNDetectFaceRectanglesRequest()
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            do {
-                try handler.perform([request])
-                continuation.resume()
-            } catch {
-                continuation.resume(throwing: error)
-            }
-        }
-
-        let results = request.results ?? []
-        let detected: [FaceBox] = results.map { observation in
-            // Vision uses bottom-left origin; convert to top-left (UIKit/SwiftUI).
-            let flipped = CGRect(
-                x: observation.boundingBox.origin.x,
-                y: 1 - observation.boundingBox.origin.y - observation.boundingBox.height,
-                width: observation.boundingBox.width,
-                height: observation.boundingBox.height
-            )
-            return FaceBox(rect: flipped, style: selectedStyle)
-        }
-
-        await MainActor.run {
-            self.faces = detected
-        }
+        let detected = try await detectFacesUseCase.execute(image: sourceImage)
+        // Apply the currently selected style to all newly detected faces.
+        faces = detected.map { FaceBox(id: $0.id, rect: $0.rect, isMasked: $0.isMasked, style: selectedStyle) }
     }
 
     // MARK: - Intent
@@ -119,7 +102,7 @@ final class EditorViewModel {
 
     /// Renders all active masks onto the source image and returns the result.
     func renderImage() async -> UIImage {
-        let result = try? await maskRenderer.render(
+        let result = try? await renderMaskUseCase.execute(
             image: sourceImage,
             faces: faces,
             intensity: intensity,
@@ -136,7 +119,7 @@ final class EditorViewModel {
         AppHaptics.medium()
         isRendering = true
 
-        let result = try? await maskRenderer.render(
+        let result = try? await renderMaskUseCase.execute(
             image: sourceImage,
             faces: faces,
             intensity: intensity,
@@ -144,10 +127,9 @@ final class EditorViewModel {
             solidCleanColor: UIColor(solidCleanColor)
         )
 
-        await MainActor.run {
-            isRendering = false
-            // Fall back to sourceImage if rendering failed (e.g. no faces masked)
-            renderedImage = result ?? sourceImage
-        }
+        isRendering = false
+        // Fall back to sourceImage if rendering failed (e.g. no faces masked)
+        renderedImage = result ?? sourceImage
     }
 }
+

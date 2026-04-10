@@ -9,6 +9,7 @@
 import SwiftUI
 import Observation
 
+@MainActor
 @Observable
 final class ExportViewModel {
 
@@ -39,21 +40,21 @@ final class ExportViewModel {
     /// Settings-applied image to hand off to the share sheet.
     private(set) var imageToShare: UIImage?
 
-    // MARK: - Dependencies
+    // MARK: - Use Cases
 
-    private let processingService: ExportImageProcessingService
-    private let photoService: PhotoLibraryService
+    private let processExportUseCase: ProcessExportUseCase
+    private let saveToPhotosUseCase: SaveToPhotosUseCase
 
     // MARK: - Init
 
     init(
         maskedImages: [UIImage],
-        processingService: ExportImageProcessingService = ExportImageProcessingService(),
-        photoService: PhotoLibraryService = PhotoLibraryService()
+        processExportUseCase: ProcessExportUseCase = ProcessExportUseCase(repository: ExportImageProcessingService()),
+        saveToPhotosUseCase: SaveToPhotosUseCase = SaveToPhotosUseCase(repository: PhotoLibraryService())
     ) {
         self.maskedImages = maskedImages
-        self.processingService = processingService
-        self.photoService = photoService
+        self.processExportUseCase = processExportUseCase
+        self.saveToPhotosUseCase = saveToPhotosUseCase
     }
 
     // MARK: - Intent: Save to Photos
@@ -67,26 +68,24 @@ final class ExportViewModel {
 
         for image in maskedImages {
             do {
-                let processed = await processingService.process(image, settings: settings)
-                try await photoService.saveImageToAlbum(processed)
+                let processed = await processExportUseCase.execute(image: image, settings: settings)
+                try await saveToPhotosUseCase.execute(image: processed)
                 savedCount += 1
             } catch {
                 lastError = error
             }
         }
 
-        await MainActor.run {
-            isSaving = false
-            if savedCount > 0 {
-                AppHaptics.success()
-                saveToastMessage = maskedImages.count > 1 ? "\(savedCount)장 저장 완료" : "저장 완료"
-                withAnimation(AppAnimation.standard) {
-                    showSaveToast = true
-                }
+        isSaving = false
+        if savedCount > 0 {
+            AppHaptics.success()
+            saveToastMessage = maskedImages.count > 1 ? "\(savedCount)장 저장 완료" : "저장 완료"
+            withAnimation(AppAnimation.standard) {
+                showSaveToast = true
             }
-            if let error = lastError {
-                saveError = error.localizedDescription
-            }
+        }
+        if let error = lastError {
+            saveError = error.localizedDescription
         }
     }
 
@@ -97,9 +96,9 @@ final class ExportViewModel {
         let imageToProcess = maskedImages[currentPreviewIndex]
         Task { [weak self] in
             guard let self else { return }
-            let processed = await processingService.process(imageToProcess, settings: settings)
-            imageToShare = processed
-            isShowingShareSheet = true
+            let processed = await self.processExportUseCase.execute(image: imageToProcess, settings: self.settings)
+            self.imageToShare = processed
+            self.isShowingShareSheet = true
         }
     }
 

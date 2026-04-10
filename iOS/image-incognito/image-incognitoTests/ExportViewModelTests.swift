@@ -11,12 +11,13 @@ import Testing
 import UIKit
 @testable import image_incognito
 
+@MainActor
 @Suite("ExportViewModel")
 struct ExportViewModelTests {
 
     @Test("Initial state is clean")
     func initialState() {
-        let vm = ExportViewModel(maskedImage: makeTestImage())
+        let vm = ExportViewModel(maskedImages: [makeTestImage()])
 
         #expect(vm.isSaving == false)
         #expect(vm.showSaveToast == false)
@@ -24,17 +25,17 @@ struct ExportViewModelTests {
         #expect(vm.isShowingShareSheet == false)
     }
 
-    @Test("maskedImage is stored from init")
-    func maskedImageStored() {
+    @Test("maskedImages is stored from init")
+    func maskedImagesStored() {
         let image = makeTestImage()
-        let vm = ExportViewModel(maskedImage: image)
+        let vm = ExportViewModel(maskedImages: [image])
 
-        #expect(vm.maskedImage === image)
+        #expect(vm.maskedImages.first === image)
     }
 
     @Test("Default ExportSettings have all options enabled")
     func defaultExportSettings() {
-        let vm = ExportViewModel(maskedImage: makeTestImage())
+        let vm = ExportViewModel(maskedImages: [makeTestImage()])
 
         #expect(vm.settings.removeLocation == true)
         #expect(vm.settings.removeExif == true)
@@ -43,7 +44,7 @@ struct ExportViewModelTests {
 
     @Test("shareImageTapped sets isShowingShareSheet to true")
     func shareImageTapped() {
-        let vm = ExportViewModel(maskedImage: makeTestImage())
+        let vm = ExportViewModel(maskedImages: [makeTestImage()])
         vm.shareImageTapped()
 
         #expect(vm.isShowingShareSheet == true)
@@ -51,7 +52,7 @@ struct ExportViewModelTests {
 
     @Test("dismissError clears saveError")
     func dismissError() {
-        let vm = ExportViewModel(maskedImage: makeTestImage())
+        let vm = ExportViewModel(maskedImages: [makeTestImage()])
         vm.saveError = "Something went wrong"
         vm.dismissError()
 
@@ -60,7 +61,7 @@ struct ExportViewModelTests {
 
     @Test("dismissError is a no-op when saveError is already nil")
     func dismissErrorWhenAlreadyNil() {
-        let vm = ExportViewModel(maskedImage: makeTestImage())
+        let vm = ExportViewModel(maskedImages: [makeTestImage()])
         vm.dismissError()
 
         #expect(vm.saveError == nil)
@@ -68,7 +69,7 @@ struct ExportViewModelTests {
 
     @Test("saveError can be set and cleared independently")
     func saveErrorLifecycle() {
-        let vm = ExportViewModel(maskedImage: makeTestImage())
+        let vm = ExportViewModel(maskedImages: [makeTestImage()])
 
         vm.saveError = "First error"
         #expect(vm.saveError == "First error")
@@ -82,7 +83,7 @@ struct ExportViewModelTests {
 
     @Test("settings can be mutated after init")
     func settingsMutation() {
-        let vm = ExportViewModel(maskedImage: makeTestImage())
+        let vm = ExportViewModel(maskedImages: [makeTestImage()])
         vm.settings.removeLocation = false
         vm.settings.removeExif = false
 

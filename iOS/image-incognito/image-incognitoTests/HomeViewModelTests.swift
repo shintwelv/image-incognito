@@ -9,17 +9,18 @@ import Testing
 import UIKit
 @testable import image_incognito
 
+@MainActor
 @Suite("HomeViewModel")
 struct HomeViewModelTests {
 
-    @Test("Initial state: all flags false, no selected image, no recent items")
+    @Test("Initial state: all flags false, no selected images, no recent items")
     func initialState() {
         let vm = HomeViewModel()
 
         #expect(vm.isShowingPhotoPicker == false)
         #expect(vm.isShowingCamera == false)
         #expect(vm.isShowingSettings == false)
-        #expect(vm.selectedImage == nil)
+        #expect(vm.selectedImages.isEmpty)
         #expect(vm.recentItems.isEmpty)
     }
 
@@ -47,25 +48,25 @@ struct HomeViewModelTests {
         #expect(vm.isShowingSettings == true)
     }
 
-    @Test("didSelectImage stores the provided image")
-    func didSelectImage() {
+    @Test("didSelectImages stores the provided images")
+    func didSelectImages() {
         let vm = HomeViewModel()
         let image = makeTestImage()
-        vm.didSelectImage(image)
+        vm.didSelectImages([image])
 
-        #expect(vm.selectedImage === image)
+        #expect(vm.selectedImages.first === image)
     }
 
-    @Test("didSelectImage replaces a previously selected image")
-    func replaceSelectedImage() {
+    @Test("didSelectImages replaces previously selected images")
+    func replaceSelectedImages() {
         let vm = HomeViewModel()
         let first = makeTestImage(color: .red)
         let second = makeTestImage(color: .green)
 
-        vm.didSelectImage(first)
-        #expect(vm.selectedImage === first)
+        vm.didSelectImages([first])
+        #expect(vm.selectedImages.first === first)
 
-        vm.didSelectImage(second)
-        #expect(vm.selectedImage === second)
+        vm.didSelectImages([second])
+        #expect(vm.selectedImages.first === second)
     }
 }
