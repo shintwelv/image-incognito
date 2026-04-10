@@ -10,7 +10,11 @@ import SwiftUI
 import PhotosUI
 
 struct PhotoPickerRepresentable: UIViewControllerRepresentable {
-    @Binding var selectedImages: [UIImage]
+    /// Called immediately after the picker is dismissed with a non-empty selection,
+    /// before the images have finished decoding.
+    var onLoadingStarted: () -> Void
+    /// Called once all selected images have been decoded and are ready.
+    var onImagesSelected: ([UIImage]) -> Void
     var onDismiss: (() -> Void)?
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
@@ -44,6 +48,10 @@ struct PhotoPickerRepresentable: UIViewControllerRepresentable {
 
             guard !results.isEmpty else { return }
 
+            // Notify immediately so the caller can show a loading state
+            // before the (potentially slow) image decoding begins.
+            parent.onLoadingStarted()
+
             let group = DispatchGroup()
             var orderedImages: [Int: UIImage] = [:]
 
@@ -60,7 +68,7 @@ struct PhotoPickerRepresentable: UIViewControllerRepresentable {
 
             group.notify(queue: .main) { [weak self] in
                 let sorted = orderedImages.sorted { $0.key < $1.key }.map(\.value)
-                self?.parent.selectedImages = sorted
+                self?.parent.onImagesSelected(sorted)
             }
         }
     }

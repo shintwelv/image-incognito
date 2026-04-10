@@ -35,13 +35,21 @@ struct HomeView: View {
                         Spacer(minLength: Spacing.xxxLarge)
                     }
                 }
+
+                // Shown while photo library images are being decoded
+                if viewModel.isLoadingImages {
+                    ImageLoadingOverlay()
+                        .transition(.opacity)
+                }
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { settingsToolbar }
+            .animation(AppAnimation.standard, value: viewModel.isLoadingImages)
             // PHPicker Sheet
             .sheet(isPresented: $viewModel.isShowingPhotoPicker) {
                 PhotoPickerRepresentable(
-                    selectedImages: $viewModel.selectedImages
+                    onLoadingStarted: { viewModel.isLoadingImages = true },
+                    onImagesSelected: { images in viewModel.didSelectImages(images) }
                 )
                 .ignoresSafeArea()
             }
@@ -214,6 +222,31 @@ private struct RecentItemThumbnail: View {
             .padding(Spacing.xSmall)
         }
         .appShadow(.card)
+    }
+}
+
+// MARK: - Image Loading Overlay
+
+private struct ImageLoadingOverlay: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.35)
+                .ignoresSafeArea()
+
+            VStack(spacing: Spacing.medium) {
+                ProgressView()
+                    .tint(Color.appPrimary)
+                    .scaleEffect(1.2)
+                Text("사진 불러오는 중...")
+                    .font(.appSubheadline)
+                    .foregroundStyle(Color.appLabelSecondary)
+            }
+            .padding(.horizontal, Spacing.xLarge)
+            .padding(.vertical, Spacing.large)
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            .appShadow(.card)
+        }
     }
 }
 

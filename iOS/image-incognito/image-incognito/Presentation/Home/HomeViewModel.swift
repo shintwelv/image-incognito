@@ -18,6 +18,11 @@ final class HomeViewModel {
     var isShowingCamera = false
     var isShowingSettings = false
 
+    // MARK: - Loading state
+
+    /// True while photo library images are being decoded after picker dismissal.
+    var isLoadingImages = false
+
     // MARK: - Selected images (passed to AI Editor)
 
     var selectedImages: [UIImage] = []
@@ -45,6 +50,7 @@ final class HomeViewModel {
 
     /// Called once PHPicker returns images (up to 5).
     func didSelectImages(_ images: [UIImage]) {
+        isLoadingImages = false
         selectedImages = images
     }
 }
