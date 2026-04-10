@@ -146,7 +146,9 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         let ci = CIImage(cgImage: cropped)
         let filter = CIFilter.gaussianBlur()
         filter.inputImage = ci
-        filter.radius = Float(max(2, intensity * 28))
+        let minEdge = CGFloat(cropped.width)
+        let maxRadius: CGFloat = minEdge * 0.1
+        filter.radius = Float(maxRadius * intensity)
 
         guard let output = filter.outputImage,
               let result = ciContext.createCGImage(output, from: ci.extent) else { return nil }
@@ -177,7 +179,10 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         let ci = CIImage(cgImage: cropped)
         let filter = CIFilter.pixellate()
         filter.inputImage = ci
-        filter.scale = Float(max(6, intensity * 30))
+        
+        let minEdge = min(ci.extent.width, ci.extent.height)
+        let maxScale = Float(minEdge * 0.08) // it is natural to set block's size between shorter edge's 5% ~ 8%
+        filter.scale = 1.0 + (maxScale - 1.0) * Float(intensity)
         filter.center = CGPoint(x: ci.extent.midX, y: ci.extent.midY)
 
         guard let output = filter.outputImage,
