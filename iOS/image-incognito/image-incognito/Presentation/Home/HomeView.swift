@@ -11,6 +11,7 @@ import SwiftUI
 struct HomeView: View {
 
     @State private var viewModel = HomeViewModel()
+    @Environment(IncomingImageStore.self) private var incomingImageStore
 
     var body: some View {
         NavigationStack {
@@ -45,6 +46,12 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { settingsToolbar }
             .animation(AppAnimation.standard, value: viewModel.isLoadingImages)
+            // Receive images shared from external apps (e.g. Photos share sheet)
+            .onChange(of: incomingImageStore.pendingImages) { _, images in
+                guard !images.isEmpty else { return }
+                incomingImageStore.pendingImages = []
+                viewModel.didSelectImages(images)
+            }
             // PHPicker Sheet
             .sheet(isPresented: $viewModel.isShowingPhotoPicker) {
                 PhotoPickerRepresentable(
