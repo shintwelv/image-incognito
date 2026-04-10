@@ -201,7 +201,7 @@ private struct RecentItemThumbnail: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             // Blurred thumbnail for privacy
-            Image(uiImage: item.thumbnail)
+            Image(uiImage: item.thumbnailImage ?? UIImage())
                 .resizable()
                 .scaledToFill()
                 .frame(width: 120, height: 120)
