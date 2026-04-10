@@ -47,6 +47,12 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         sizeMultiplier: Double,
         solidCleanColor: UIColor
     ) throws -> UIImage {
+        // Normalize to .up before any CGImage operations.
+        // UIGraphicsImageRenderer + image.draw() both respect UIImage.imageOrientation,
+        // but CGImage.cropping(to:) operates on raw, unrotated pixels. For a portrait
+        // photo (imageOrientation=.right) the raw CGImage is landscape, so rect-based
+        // cropping would hit the wrong region and produce rotated/misaligned masks.
+        let image = normalizeOrientation(image)
         let size = image.size
         let format = UIGraphicsImageRendererFormat()
         format.scale = image.scale
@@ -69,6 +75,21 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
                 case .solidClean:   applySolid(rect: rect, intensity: intensity, color: solidCleanColor)
                 }
             }
+        }
+    }
+
+    // MARK: - Orientation normalisation
+
+    /// Redraws `image` into a new UIImage with `imageOrientation == .up` so that
+    /// `image.cgImage` pixel coordinates match the display coordinate space.
+    /// This is a no-op for images already in the `.up` orientation.
+    nonisolated private func normalizeOrientation(_ image: UIImage) -> UIImage {
+        guard image.imageOrientation != .up else { return image }
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+        format.opaque = false
+        return UIGraphicsImageRenderer(size: image.size, format: format).image { _ in
+            image.draw(at: .zero)
         }
     }
 
