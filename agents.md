@@ -39,6 +39,7 @@ You are a senior iOS engineer with expertise in SwiftUI and Clean Architecture.
 - Side-Effect Management: Ensure image processing happens on background threads to keep the UI responsive. Use Async/Await.
 - Test-Driven approach: Write Unit Tests for the Domain Logic (e.g., face detection coordinate mapping) and Data Layer (e.g., image processing pipelines).
 - UI/UX: Minimalist and "Apple-like" interface. Use SF Symbols for icons.
+- VisionKit doesn't work on Simulator
 
 ## Design Tokens
 
