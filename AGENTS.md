@@ -3,7 +3,7 @@
 You are a senior iOS engineer with expertise in SwiftUI and Clean Architecture.
 
 ## Project Overview
-- App Name: Image Incognito
+- App Name: Incognify
 - Objective: An iOS application that automatically detects faces in photos and applies aesthetic masking (Blur, Pixelation, etc.) to protect privacy while maintaining the photo's visual quality for SNS sharing.
 - Target Platform: iOS (17.0 +)
 - Primary User: SNS users (Instagram, etc.) who care about portrait rights and aesthetics.
