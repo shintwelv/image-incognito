@@ -1,4 +1,4 @@
-# Image Incognito
+# Incognify
 
 > Automatically detect faces in photos and apply aesthetic masking to protect privacy — without sacrificing photo quality for SNS sharing.
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-**Image Incognito** is an iOS application that uses on-device face detection to instantly find every face in a photo and apply beautiful privacy masks (Blur, Pixelation, and more). Designed for SNS users who care about both portrait rights and aesthetics.
+**Incognify** is an iOS application that uses on-device face detection to instantly find every face in a photo and apply beautiful privacy masks (Blur, Pixelation, and more). Designed for SNS users who care about both portrait rights and aesthetics.
 
 - **No cloud. No account.** All processing runs entirely on-device.
 - **Automatic.** No manual cropping or tapping required.
@@ -31,40 +31,62 @@ Clean Architecture with MVVM, organized into three layers:
 ```
 iOS/image-incognito/image-incognito/
 ├── Domain/                  # Pure business logic — no frameworks
-│   └── Entities/
-│       ├── FaceBox.swift        # Detected face region model
-│       ├── MaskingStyle.swift   # Blur, Pixelation, etc.
-│       ├── ExportSettings.swift # Export resolution & format config
-│       └── RecentMaskingItem.swift
+│   ├── Entities/
+│   │   ├── ExportSettings.swift
+│   │   ├── FaceBox.swift        # Detected face region model
+│   │   ├── MaskingStyle.swift   # Blur, Pixelation, etc.
+│   │   └── RecentMaskingItem.swift
+│   ├── Interfaces/
+│   │   ├── ExportProcessingRepositoryProtocol.swift
+│   │   ├── FaceDetectionRepositoryProtocol.swift
+│   │   ├── MaskRenderingRepositoryProtocol.swift
+│   │   └── PhotoLibraryRepositoryProtocol.swift
+│   └── UseCases/
+│       ├── DetectFacesUseCase.swift
+│       ├── ProcessExportUseCase.swift
+│       ├── RenderMaskUseCase.swift
+│       └── SaveToPhotosUseCase.swift
 │
 ├── Data/                    # Framework-dependent implementations
+│   ├── Repositories/
+│   │   └── SettingsStore.swift
 │   └── Services/
-│       └── MaskRenderingService.swift  # Core Image / Metal masking
+│       ├── ExportImageProcessingService.swift
+│       ├── FaceDetectionService.swift
+│       ├── MaskRenderingService.swift  # Core Image / Metal masking
+│       └── PhotoLibraryService.swift
 │
 ├── Presentation/            # SwiftUI Views + ViewModels (MVVM)
 │   ├── Home/
 │   │   ├── HomeView.swift
-│   │   └── HomeViewModel.swift
+│   │   ├── HomeViewModel.swift
+│   │   └── RecentMaskingItem+UIImage.swift
 │   ├── Editor/
+│   │   ├── AdjustmentSlidersView.swift
+│   │   ├── EditorStateViews.swift
 │   │   ├── EditorView.swift
-│   │   └── EditorViewModel.swift
+│   │   ├── EditorViewModel.swift
+│   │   └── FaceOverlayView.swift
 │   ├── Export/
 │   │   ├── ExportView.swift
 │   │   └── ExportViewModel.swift
 │   └── Settings/
-│       ├── SettingsView.swift
-│       └── SettingsStore.swift
+│       └── SettingsView.swift
 │
 ├── DesignSystem/            # Design tokens, typography, reusable components
-│   ├── Tokens.swift
 │   ├── Colors.swift
+│   ├── Tokens.swift
 │   ├── Typography.swift
 │   └── Components/
-│       ├── PrimaryButton.swift
 │       ├── CardView.swift
-│       └── GlassmorphismToolbar.swift
+│       ├── GlassmorphismToolbar.swift
+│       ├── PrimaryButton.swift
+│       ├── Toast.swift
+│       └── ToggleCardRow.swift
 │
 └── Shared/                  # Bridges & utilities
+    ├── CameraPickerRepresentable.swift
+    ├── IncomingImageStore.swift
     ├── PhotoPickerRepresentable.swift
     └── ShareSheet.swift
 ```
@@ -114,15 +136,21 @@ Unit tests cover Domain entities and Data layer services:
 
 ```
 image-incognitoTests/
-├── FaceBoxTests.swift
-├── MaskingStyleTests.swift
-├── ExportSettingsTests.swift
-├── RecentMaskingItemTests.swift
-├── MaskRenderingServiceTests.swift
-├── HomeViewModelTests.swift
+├── DetectFacesUseCaseTests.swift
 ├── EditorViewModelTests.swift
+├── ExportSettingsTests.swift
 ├── ExportViewModelTests.swift
-└── SettingsStoreTests.swift
+├── FaceBoxTests.swift
+├── HomeViewModelTests.swift
+├── MaskRenderingServiceTests.swift
+├── MaskingStyleTests.swift
+├── ProcessExportUseCaseTests.swift
+├── RecentMaskingItemTests.swift
+├── RenderMaskUseCaseTests.swift
+├── SaveToPhotosUseCaseTests.swift
+├── SettingsStoreTests.swift
+├── TestHelpers.swift
+└── image_incognitoTests.swift
 ```
 
 Run tests in Xcode with `⌘U` or via:
