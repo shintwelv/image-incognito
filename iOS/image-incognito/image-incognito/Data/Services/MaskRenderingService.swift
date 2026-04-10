@@ -3,26 +3,49 @@
 //  image-incognito
 //
 //  Data Service – Composites face masks onto the source UIImage using Core Image.
-//  All work is done on a background thread; call via async Task.detached.
+//  Conforms to MaskRenderingRepositoryProtocol; CPU-bound rendering runs on a
+//  background executor via Task.detached.
 //
 
 import UIKit
 import CoreImage
 import CoreImage.CIFilterBuiltins
 
-final class MaskRenderingService {
+final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     private let ciContext = CIContext(options: [.useSoftwareRenderer: false])
 
-    // MARK: - Public API
+    // MARK: - MaskRenderingRepositoryProtocol
 
-    /// Returns a new UIImage with all active masks baked into the pixel data.
+    /// Composites all active masks onto `image` on a background thread.
     func render(
         image: UIImage,
         faces: [FaceBox],
         intensity: Double,
         sizeMultiplier: Double,
         solidCleanColor: UIColor = UIColor(red: 94/255, green: 92/255, blue: 230/255, alpha: 1)
+    ) async throws -> UIImage {
+        // Capture self weakly to allow deallocation during long renders.
+        let result = try await Task.detached(priority: .userInitiated) { [self] in
+            try self.renderSync(
+                image: image,
+                faces: faces,
+                intensity: intensity,
+                sizeMultiplier: sizeMultiplier,
+                solidCleanColor: solidCleanColor
+            )
+        }.value
+        return result
+    }
+
+    // MARK: - Synchronous core (background-thread safe)
+
+    private func renderSync(
+        image: UIImage,
+        faces: [FaceBox],
+        intensity: Double,
+        sizeMultiplier: Double,
+        solidCleanColor: UIColor
     ) throws -> UIImage {
         let size = image.size
         let format = UIGraphicsImageRendererFormat()

@@ -27,7 +27,7 @@ enum PhotoLibraryError: Error, LocalizedError {
     }
 }
 
-final class PhotoLibraryService {
+final class PhotoLibraryService: PhotoLibraryRepositoryProtocol {
     
     // MARK: - Constants
 

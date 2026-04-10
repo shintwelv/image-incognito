@@ -2,8 +2,9 @@
 //  SettingsStore.swift
 //  image-incognito
 //
-//  Presentation – App-wide settings container.
+//  Data Repository – App-wide settings container.
 //  Persists ExportSettings to UserDefaults so they survive app termination.
+//  Lives in the Data layer because UserDefaults is an infrastructure concern.
 //
 
 import Observation

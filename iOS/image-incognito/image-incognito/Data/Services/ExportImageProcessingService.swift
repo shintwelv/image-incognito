@@ -4,18 +4,22 @@
 //
 //  Data Service – Applies export settings (resolution, metadata stripping)
 //  to a UIImage before saving or sharing.
+//  Conforms to ExportProcessingRepositoryProtocol; CPU-bound work runs on a
+//  background executor via Task.detached.
 //
 
 import UIKit
 import ImageIO
 
-final class ExportImageProcessingService {
+final class ExportImageProcessingService: ExportProcessingRepositoryProtocol {
 
-    // MARK: - Public API
+    // MARK: - ExportProcessingRepositoryProtocol
 
     /// Applies `settings` to `image` on a background thread and returns the result.
     func process(_ image: UIImage, settings: ExportSettings) async -> UIImage {
-        return applySettings(to: image, settings: settings)
+        await Task.detached(priority: .userInitiated) {
+            self.applySettings(to: image, settings: settings)
+        }.value
     }
 
     // MARK: - Pipeline

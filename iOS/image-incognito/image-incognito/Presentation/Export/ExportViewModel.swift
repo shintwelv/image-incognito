@@ -95,13 +95,11 @@ final class ExportViewModel {
     func shareImageTapped() {
         AppHaptics.light()
         let imageToProcess = maskedImages[currentPreviewIndex]
-        Task.detached(priority: .background) { [weak self] in
-            guard let self = self else { return }
-            let processed = await self.processingService.process(imageToProcess, settings: self.settings)
-            await MainActor.run {
-                self.imageToShare = processed
-                self.isShowingShareSheet = true
-            }
+        Task { [weak self] in
+            guard let self else { return }
+            let processed = await processingService.process(imageToProcess, settings: settings)
+            imageToShare = processed
+            isShowingShareSheet = true
         }
     }
 

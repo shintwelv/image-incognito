@@ -119,16 +119,13 @@ final class EditorViewModel {
 
     /// Renders all active masks onto the source image and returns the result.
     func renderImage() async -> UIImage {
-        let result = await Task.detached(priority: .userInitiated) { [weak self] () -> UIImage? in
-            guard let self else { return nil }
-            return try? await self.maskRenderer.render(
-                image: self.sourceImage,
-                faces: self.faces,
-                intensity: self.intensity,
-                sizeMultiplier: self.sizeMultiplier,
-                solidCleanColor: UIColor(self.solidCleanColor)
-            )
-        }.value
+        let result = try? await maskRenderer.render(
+            image: sourceImage,
+            faces: faces,
+            intensity: intensity,
+            sizeMultiplier: sizeMultiplier,
+            solidCleanColor: UIColor(solidCleanColor)
+        )
         return result ?? sourceImage
     }
 
@@ -139,16 +136,13 @@ final class EditorViewModel {
         AppHaptics.medium()
         isRendering = true
 
-        let result = await Task.detached(priority: .userInitiated) { [weak self] () -> UIImage? in
-            guard let self else { return nil }
-            return try? await self.maskRenderer.render(
-                image: self.sourceImage,
-                faces: self.faces,
-                intensity: self.intensity,
-                sizeMultiplier: self.sizeMultiplier,
-                solidCleanColor: UIColor(self.solidCleanColor)
-            )
-        }.value
+        let result = try? await maskRenderer.render(
+            image: sourceImage,
+            faces: faces,
+            intensity: intensity,
+            sizeMultiplier: sizeMultiplier,
+            solidCleanColor: UIColor(solidCleanColor)
+        )
 
         await MainActor.run {
             isRendering = false
