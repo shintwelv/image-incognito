@@ -30,10 +30,10 @@ struct FaceOverlayView: View {
     private var maskLayer: some View {
         switch faceBox.style {
         case .blurredGlass:
-            RoundedRectangle(cornerRadius: Radius.element, style: .continuous)
+            Ellipse()
                 .fill(.ultraThinMaterial)
                 .overlay {
-                    RoundedRectangle(cornerRadius: Radius.element, style: .continuous)
+                    Ellipse()
                         .fill(Color.white.opacity(0.15 * intensity))
                 }
                 .opacity(intensity)
@@ -42,13 +42,13 @@ struct FaceOverlayView: View {
             PixelArtMaskView(intensity: intensity)
 
         case .solidClean:
-            RoundedRectangle(cornerRadius: Radius.element, style: .continuous)
+            Ellipse()
                 .fill(solidCleanColor.opacity(intensity))
         }
     }
 
     private var borderLayer: some View {
-        RoundedRectangle(cornerRadius: Radius.element, style: .continuous)
+        Ellipse()
             .stroke(
                 faceBox.isMasked ? Color.white.opacity(0.85) : Color.white.opacity(0.45),
                 lineWidth: faceBox.isMasked ? 2 : 1.5
@@ -90,6 +90,6 @@ struct PixelArtMaskView: View {
                 }
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: Radius.element, style: .continuous))
+        .clipShape(Ellipse())
     }
 }

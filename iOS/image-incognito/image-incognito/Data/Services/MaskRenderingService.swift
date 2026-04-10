@@ -131,7 +131,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(UIBezierPath(roundedRect: rect, cornerRadius: 12).cgPath)
+        ctx.addPath(UIBezierPath(ovalIn: rect).cgPath)
         ctx.clip()
         blurred.draw(in: rect)
         ctx.restoreGState()
@@ -164,7 +164,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(UIBezierPath(roundedRect: rect, cornerRadius: 12).cgPath)
+        ctx.addPath(UIBezierPath(ovalIn: rect).cgPath)
         ctx.clip()
         pixelated.draw(in: rect)
         ctx.restoreGState()
@@ -194,6 +194,6 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     nonisolated private func applySolid(rect: CGRect, intensity: Double, color: UIColor) {
         color.withAlphaComponent(intensity).setFill()
-        UIBezierPath(roundedRect: rect, cornerRadius: 12).fill()
+        UIBezierPath(ovalIn: rect).fill()
     }
 }
