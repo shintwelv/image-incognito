@@ -14,8 +14,8 @@ struct ExportView: View {
     @Environment(SettingsStore.self) private var settingsStore
     @Environment(\.dismiss) private var dismiss
 
-    init(maskedImage: UIImage) {
-        _viewModel = State(initialValue: ExportViewModel(maskedImage: maskedImage))
+    init(maskedImages: [UIImage]) {
+        _viewModel = State(initialValue: ExportViewModel(maskedImages: maskedImages))
     }
 
     var body: some View {
@@ -47,7 +47,7 @@ struct ExportView: View {
         }
         // System share sheet
         .sheet(isPresented: $viewModel.isShowingShareSheet) {
-            ShareSheet(items: [viewModel.imageToShare ?? viewModel.maskedImage])
+            ShareSheet(items: [viewModel.imageToShare ?? viewModel.currentImage])
                 .ignoresSafeArea()
         }
         // Save error alert
@@ -62,7 +62,7 @@ struct ExportView: View {
             }
         }
         // Save success toast
-        .appToast(isPresented: $viewModel.showSaveToast, message: "저장 완료")
+        .appToast(isPresented: $viewModel.showSaveToast, message: viewModel.saveToastMessage)
     }
 
     // MARK: - Top Bar
@@ -102,10 +102,22 @@ struct ExportView: View {
     private var resultPreviewCard: some View {
         AppCard {
             VStack(spacing: 0) {
-                Image(uiImage: viewModel.maskedImage)
-                    .resizable()
-                    .scaledToFit()
+                if viewModel.maskedImages.count > 1 {
+                    TabView(selection: Binding(
+                        get: { viewModel.currentPreviewIndex },
+                        set: { viewModel.currentPreviewIndex = $0 }
+                    )) {
+                        ForEach(viewModel.maskedImages.indices, id: \.self) { index in
+                            Image(uiImage: viewModel.maskedImages[index])
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                                .tag(index)
+                        }
+                    }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                     .frame(maxWidth: .infinity)
+                    .frame(height: 300)
                     .clipShape(
                         UnevenRoundedRectangle(
                             topLeadingRadius: Radius.card,
@@ -115,15 +127,36 @@ struct ExportView: View {
                             style: .continuous
                         )
                     )
+                } else {
+                    Image(uiImage: viewModel.currentImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .clipShape(
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: Radius.card,
+                                bottomLeadingRadius: 0,
+                                bottomTrailingRadius: 0,
+                                topTrailingRadius: Radius.card,
+                                style: .continuous
+                            )
+                        )
+                }
 
                 HStack(spacing: Spacing.xSmall) {
                     Image(systemName: "checkmark.shield.fill")
                         .imageScale(.small)
                         .foregroundStyle(Color.appSuccess)
-                    Text("마스킹 완료")
+                    Text(viewModel.maskedImages.count > 1 ? "\(viewModel.maskedImages.count)장 마스킹 완료" : "마스킹 완료")
                         .font(.appFootnote)
                         .foregroundStyle(Color.appLabelSecondary)
                     Spacer()
+                    if viewModel.maskedImages.count > 1 {
+                        Text("\(viewModel.currentPreviewIndex + 1)/\(viewModel.maskedImages.count)")
+                            .font(.appCaption)
+                            .foregroundStyle(Color.appLabelTertiary)
+                            .monospacedDigit()
+                    }
                     Text(imageSizeDescription)
                         .font(.appCaption)
                         .foregroundStyle(Color.appLabelTertiary)
@@ -136,7 +169,7 @@ struct ExportView: View {
     }
 
     private var imageSizeDescription: String {
-        let size = viewModel.maskedImage.size
+        let size = viewModel.currentImage.size
         return "\(Int(size.width)) × \(Int(size.height))"
     }
 
@@ -194,7 +227,7 @@ struct ExportView: View {
                         Image(systemName: "square.and.arrow.down")
                             .imageScale(.medium)
                     }
-                    Text(viewModel.isSaving ? "저장 중..." : "앨범에 저장")
+                    Text(viewModel.isSaving ? "저장 중..." : (viewModel.maskedImages.count > 1 ? "전체 저장 (\(viewModel.maskedImages.count)장)" : "앨범에 저장"))
                         .font(.appBodyEmphasized)
                 }
                 .frame(maxWidth: .infinity)
@@ -220,14 +253,14 @@ struct ExportView: View {
 
 #Preview("Export – Light") {
     NavigationStack {
-        ExportView(maskedImage: previewMaskedImage())
+        ExportView(maskedImages: [previewMaskedImage(), previewMaskedImage()])
     }
     .environment(SettingsStore())
 }
 
 #Preview("Export – Dark Mode") {
     NavigationStack {
-        ExportView(maskedImage: previewMaskedImage())
+        ExportView(maskedImages: [previewMaskedImage()])
     }
     .environment(SettingsStore())
     .preferredColorScheme(.dark)

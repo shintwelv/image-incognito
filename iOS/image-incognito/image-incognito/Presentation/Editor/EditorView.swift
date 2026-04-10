@@ -10,12 +10,17 @@ import SwiftUI
 
 struct EditorView: View {
 
-    @State private var viewModel: EditorViewModel
+    @State private var viewModels: [EditorViewModel]
+    @State private var currentIndex: Int = 0
+    @State private var allRenderedImages: [UIImage]? = nil
+    @State private var isExporting: Bool = false
     @Environment(\.dismiss) private var dismiss
 
-    init(image: UIImage) {
-        _viewModel = State(initialValue: EditorViewModel(sourceImage: image))
+    init(images: [UIImage]) {
+        _viewModels = State(initialValue: images.map { EditorViewModel(sourceImage: $0) })
     }
+
+    private var currentVM: EditorViewModel { viewModels[currentIndex] }
 
     var body: some View {
         ZStack {
@@ -27,27 +32,35 @@ struct EditorView: View {
                     .padding(.top, Spacing.small)
                     .padding(.bottom, Spacing.xSmall)
 
-                imageCanvas
+                imageCarousel
                     .layoutPriority(1)
 
-                bottomSection
+                if viewModels.count > 1 {
+                    pageIndicator
+                        .padding(.vertical, Spacing.xSmall)
+                }
+
+                buildBottomSection(for: currentVM)
                     .padding(.bottom, Spacing.large)
-                    .animation(AppAnimation.standard, value: viewModel.showAdjustmentSliders)
+                    .animation(AppAnimation.standard, value: currentVM.showAdjustmentSliders)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
         .task {
-            try? await viewModel.detectFaces()
+            await withTaskGroup(of: Void.self) { group in
+                for vm in viewModels {
+                    group.addTask { try? await vm.detectFaces() }
+                }
+            }
         }
-        // Navigate to ExportView once the masked image is ready
         .navigationDestination(
             isPresented: Binding(
-                get: { viewModel.renderedImage != nil },
-                set: { if !$0 { viewModel.renderedImage = nil } }
+                get: { allRenderedImages != nil },
+                set: { if !$0 { allRenderedImages = nil } }
             )
         ) {
-            if let image = viewModel.renderedImage {
-                ExportView(maskedImage: image)
+            if let images = allRenderedImages {
+                ExportView(maskedImages: images)
             }
         }
     }
@@ -72,7 +85,7 @@ struct EditorView: View {
 
             Spacer()
 
-            if viewModel.isDetecting {
+            if currentVM.isDetecting {
                 HStack(spacing: Spacing.xSmall) {
                     ProgressView()
                         .tint(Color.appPrimary)
@@ -82,85 +95,119 @@ struct EditorView: View {
                         .foregroundStyle(Color.appLabelSecondary)
                 }
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
-            } else if !viewModel.faces.isEmpty {
-                Text("\(viewModel.faces.count)명 감지됨")
-                    .font(.appFootnote)
-                    .foregroundStyle(Color.appLabelTertiary)
-                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            } else {
+                HStack(spacing: Spacing.xSmall) {
+                    if viewModels.count > 1 {
+                        Text("\(currentIndex + 1)/\(viewModels.count)")
+                            .font(.appFootnote)
+                            .foregroundStyle(Color.appLabelTertiary)
+                    }
+                    if !currentVM.faces.isEmpty {
+                        Text("\(currentVM.faces.count)명 감지됨")
+                            .font(.appFootnote)
+                            .foregroundStyle(Color.appLabelTertiary)
+                    }
+                }
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
 
             Spacer()
 
             Button {
-                Task { await viewModel.exportTapped() }
+                Task { await exportAll() }
             } label: {
                 HStack(spacing: Spacing.xxSmall) {
-                    if viewModel.isRendering {
+                    if isExporting {
                         ProgressView()
                             .tint(.white)
                             .scaleEffect(0.75)
                     }
-                    Text(viewModel.isRendering ? "준비 중..." : "내보내기")
+                    Text(isExporting ? "준비 중..." : "내보내기")
                         .font(.appBodyEmphasized)
                         .foregroundStyle(.white)
                 }
                 .padding(.horizontal, Spacing.medium)
                 .padding(.vertical, Spacing.xSmall)
-                .background(Color.appPrimary.opacity(viewModel.isRendering ? 0.6 : 1))
+                .background(Color.appPrimary.opacity(isExporting ? 0.6 : 1))
                 .clipShape(RoundedRectangle(cornerRadius: Radius.button, style: .continuous))
-                .animation(AppAnimation.snappy, value: viewModel.isRendering)
+                .animation(AppAnimation.snappy, value: isExporting)
             }
-            .disabled(viewModel.isRendering)
+            .disabled(isExporting)
         }
-        .animation(AppAnimation.snappy, value: viewModel.isDetecting)
-        .animation(AppAnimation.snappy, value: viewModel.faces.count)
+        .animation(AppAnimation.snappy, value: currentVM.isDetecting)
+        .animation(AppAnimation.snappy, value: currentVM.faces.count)
+    }
+
+    // MARK: - Image Carousel
+
+    private var imageCarousel: some View {
+        TabView(selection: $currentIndex) {
+            ForEach(viewModels.indices, id: \.self) { index in
+                imageCanvas(for: viewModels[index])
+                    .tag(index)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+    }
+
+    // MARK: - Page Indicator
+
+    private var pageIndicator: some View {
+        HStack(spacing: 6) {
+            ForEach(viewModels.indices, id: \.self) { index in
+                Capsule()
+                    .fill(index == currentIndex ? Color.appPrimary : Color.appLabelTertiary.opacity(0.4))
+                    .frame(width: index == currentIndex ? 16 : 6, height: 6)
+                    .animation(AppAnimation.snappy, value: currentIndex)
+            }
+        }
     }
 
     // MARK: - Image Canvas
 
-    private var imageCanvas: some View {
+    private func imageCanvas(for vm: EditorViewModel) -> some View {
         GeometryReader { proxy in
             let imgRect = imageRenderRect(
                 in: proxy.size,
                 imageSize: CGSize(
-                    width: viewModel.sourceImage.size.width,
-                    height: viewModel.sourceImage.size.height
+                    width: vm.sourceImage.size.width,
+                    height: vm.sourceImage.size.height
                 )
             )
 
             ZStack {
                 // Source image
-                Image(uiImage: viewModel.sourceImage)
+                Image(uiImage: vm.sourceImage)
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 // Face overlays
-                ForEach(viewModel.faces) { face in
-                    let frame = overlayFrame(for: face, imageRect: imgRect)
+                ForEach(vm.faces) { face in
+                    let frame = overlayFrame(for: face, imageRect: imgRect, sizeMultiplier: vm.sizeMultiplier)
                     FaceOverlayView(
                         faceBox: face,
-                        intensity: viewModel.intensity,
-                        sizeMultiplier: viewModel.sizeMultiplier,
-                        solidCleanColor: viewModel.solidCleanColor
+                        intensity: vm.intensity,
+                        sizeMultiplier: vm.sizeMultiplier,
+                        solidCleanColor: vm.solidCleanColor
                     )
                     .frame(width: frame.width, height: frame.height)
                     .position(x: frame.midX, y: frame.midY)
                     .onTapGesture {
                         withAnimation(AppAnimation.snappy) {
-                            viewModel.toggleMask(id: face.id)
+                            vm.toggleMask(id: face.id)
                         }
                     }
                 }
 
                 // Loading skeleton
-                if viewModel.isDetecting {
+                if vm.isDetecting {
                     DetectingSkeletonView()
                         .transition(.opacity)
                 }
 
                 // Empty state when no faces found after detection
-                if !viewModel.isDetecting && viewModel.faces.isEmpty {
+                if !vm.isDetecting && vm.faces.isEmpty {
                     NoFaceFoundView()
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                 }
@@ -171,14 +218,16 @@ struct EditorView: View {
 
     // MARK: - Bottom Section
 
-    private var bottomSection: some View {
+    @ViewBuilder
+    private func buildBottomSection(for vm: EditorViewModel) -> some View {
+        @Bindable var vm = vm
         VStack(spacing: Spacing.medium) {
-            if viewModel.showAdjustmentSliders {
+            if vm.showAdjustmentSliders {
                 AdjustmentSlidersView(
-                    intensity: $viewModel.intensity,
-                    sizeMultiplier: $viewModel.sizeMultiplier,
-                    selectedStyle: viewModel.selectedStyle,
-                    solidCleanColor: $viewModel.solidCleanColor
+                    intensity: $vm.intensity,
+                    sizeMultiplier: $vm.sizeMultiplier,
+                    selectedStyle: vm.selectedStyle,
+                    solidCleanColor: $vm.solidCleanColor
                 )
                 .padding(.horizontal, Spacing.large)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -190,13 +239,32 @@ struct EditorView: View {
                         StylePill(
                             icon: style.icon,
                             label: style.label,
-                            isSelected: viewModel.selectedStyle == style
+                            isSelected: vm.selectedStyle == style
                         ) {
-                            viewModel.selectStyle(style)
+                            vm.selectStyle(style)
                         }
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Export
+
+    private func exportAll() async {
+        guard !isExporting else { return }
+        AppHaptics.medium()
+        isExporting = true
+
+        var results: [UIImage] = []
+        for vm in viewModels {
+            let image = await vm.renderImage()
+            results.append(image)
+        }
+
+        await MainActor.run {
+            isExporting = false
+            allRenderedImages = results
         }
     }
 
@@ -229,7 +297,7 @@ struct EditorView: View {
 
     /// Maps a normalized FaceBox rect to an absolute CGRect within `imageRect`,
     /// scaled by `sizeMultiplier` about the face center.
-    private func overlayFrame(for face: FaceBox, imageRect: CGRect) -> CGRect {
+    private func overlayFrame(for face: FaceBox, imageRect: CGRect, sizeMultiplier: Double) -> CGRect {
         let base = CGRect(
             x: imageRect.minX + face.rect.minX * imageRect.width,
             y: imageRect.minY + face.rect.minY * imageRect.height,
@@ -239,7 +307,7 @@ struct EditorView: View {
         guard face.isMasked else { return base }
 
         // Apply sizeMultiplier centered on the face
-        let scale = viewModel.sizeMultiplier
+        let scale = sizeMultiplier
         let newWidth = base.width * scale
         let newHeight = base.height * scale
         return CGRect(
@@ -458,13 +526,13 @@ private struct NoFaceFoundView: View {
 
 #Preview("AI Editor – with sample faces") {
     NavigationStack {
-        EditorView(image: previewImage())
+        EditorView(images: [previewImage(), previewImage()])
     }
 }
 
 #Preview("AI Editor – Dark Mode") {
     NavigationStack {
-        EditorView(image: previewImage())
+        EditorView(images: [previewImage()])
     }
     .preferredColorScheme(.dark)
 }

@@ -3,20 +3,20 @@
 //  image-incognito
 //
 //  Shared – PHPicker wrapper (UIViewControllerRepresentable)
-//  Calls PHPickerViewController and returns the selected UIImage.
+//  Calls PHPickerViewController and returns up to 5 selected UIImages.
 //
 
 import SwiftUI
 import PhotosUI
 
 struct PhotoPickerRepresentable: UIViewControllerRepresentable {
-    @Binding var selectedImage: UIImage?
+    @Binding var selectedImages: [UIImage]
     var onDismiss: (() -> Void)?
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration(photoLibrary: .shared())
         config.filter = .images
-        config.selectionLimit = 1
+        config.selectionLimit = 5
         config.preferredAssetRepresentationMode = .current
 
         let picker = PHPickerViewController(configuration: config)
@@ -42,14 +42,25 @@ struct PhotoPickerRepresentable: UIViewControllerRepresentable {
                 self?.parent.onDismiss?()
             }
 
-            guard let provider = results.first?.itemProvider,
-                  provider.canLoadObject(ofClass: UIImage.self) else { return }
+            guard !results.isEmpty else { return }
 
-            provider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
-                guard let image = object as? UIImage else { return }
-                DispatchQueue.main.async {
-                    self?.parent.selectedImage = image
+            let group = DispatchGroup()
+            var orderedImages: [Int: UIImage] = [:]
+
+            for (index, result) in results.enumerated() {
+                guard result.itemProvider.canLoadObject(ofClass: UIImage.self) else { continue }
+                group.enter()
+                result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
+                    if let image = object as? UIImage {
+                        orderedImages[index] = image
+                    }
+                    group.leave()
                 }
+            }
+
+            group.notify(queue: .main) { [weak self] in
+                let sorted = orderedImages.sorted { $0.key < $1.key }.map(\.value)
+                self?.parent.selectedImages = sorted
             }
         }
     }

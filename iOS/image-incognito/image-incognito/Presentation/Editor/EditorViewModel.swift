@@ -117,6 +117,21 @@ final class EditorViewModel {
 
     // MARK: - Export
 
+    /// Renders all active masks onto the source image and returns the result.
+    func renderImage() async -> UIImage {
+        let result = await Task.detached(priority: .userInitiated) { [weak self] () -> UIImage? in
+            guard let self else { return nil }
+            return try? await self.maskRenderer.render(
+                image: self.sourceImage,
+                faces: self.faces,
+                intensity: self.intensity,
+                sizeMultiplier: self.sizeMultiplier,
+                solidCleanColor: UIColor(self.solidCleanColor)
+            )
+        }.value
+        return result ?? sourceImage
+    }
+
     /// Bakes all active masks onto the source image on a background thread,
     /// then sets `renderedImage` to trigger navigation to ExportView.
     func exportTapped() async {

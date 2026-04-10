@@ -41,12 +41,7 @@ struct HomeView: View {
             // PHPicker Sheet
             .sheet(isPresented: $viewModel.isShowingPhotoPicker) {
                 PhotoPickerRepresentable(
-                    selectedImage: .init(
-                        get: { viewModel.selectedImage },
-                        set: { image in
-                            if let image { viewModel.didSelectImage(image) }
-                        }
-                    )
+                    selectedImages: $viewModel.selectedImages
                 )
                 .ignoresSafeArea()
             }
@@ -54,9 +49,9 @@ struct HomeView: View {
             .fullScreenCover(isPresented: $viewModel.isShowingCamera) {
                 CameraPickerRepresentable(
                     selectedImage: .init(
-                        get: { viewModel.selectedImage },
+                        get: { viewModel.selectedImages.first },
                         set: { image in
-                            if let image { viewModel.didSelectImage(image) }
+                            if let image { viewModel.didSelectImages([image]) }
                         }
                     ),
                     onDismiss: { viewModel.isShowingCamera = false }
@@ -67,15 +62,15 @@ struct HomeView: View {
             .sheet(isPresented: $viewModel.isShowingSettings) {
                 SettingsView()
             }
-            // Navigate to AI Editor when an image is selected
+            // Navigate to AI Editor when images are selected
             .navigationDestination(
                 isPresented: Binding(
-                    get: { viewModel.selectedImage != nil },
-                    set: { if !$0 { viewModel.selectedImage = nil } }
+                    get: { !viewModel.selectedImages.isEmpty },
+                    set: { if !$0 { viewModel.selectedImages = [] } }
                 )
             ) {
-                if let image = viewModel.selectedImage {
-                    EditorView(image: image)
+                if !viewModel.selectedImages.isEmpty {
+                    EditorView(images: viewModel.selectedImages)
                 }
             }
         }

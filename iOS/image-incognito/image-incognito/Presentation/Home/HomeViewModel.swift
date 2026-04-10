@@ -18,9 +18,9 @@ final class HomeViewModel {
     var isShowingCamera = false
     var isShowingSettings = false
 
-    // MARK: - Selected image (passed to AI Editor)
+    // MARK: - Selected images (passed to AI Editor)
 
-    var selectedImage: UIImage? = nil
+    var selectedImages: [UIImage] = []
 
     // MARK: - Recent items
 
@@ -43,9 +43,8 @@ final class HomeViewModel {
         isShowingSettings = true
     }
 
-    /// Called once PHPicker returns an image.
-    func didSelectImage(_ image: UIImage) {
-        selectedImage = image
-        // Navigate to AI Editor (selectedImage being non-nil triggers navigation)
+    /// Called once PHPicker returns images (up to 5).
+    func didSelectImages(_ images: [UIImage]) {
+        selectedImages = images
     }
 }
