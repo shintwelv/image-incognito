@@ -9,14 +9,14 @@
 
 import UIKit
 
-struct ProcessExportUseCase {
-    private let repository: ExportProcessingRepositoryProtocol
+struct ProcessExportUseCase: Sendable {
+    private let repository: any ExportProcessingRepositoryProtocol
 
-    init(repository: ExportProcessingRepositoryProtocol) {
+    nonisolated init(repository: any ExportProcessingRepositoryProtocol) {
         self.repository = repository
     }
 
-    func execute(image: UIImage, settings: ExportSettings) async -> UIImage {
+    nonisolated func execute(image: UIImage, settings: ExportSettings) async -> UIImage {
         await repository.process(image, settings: settings)
     }
 }

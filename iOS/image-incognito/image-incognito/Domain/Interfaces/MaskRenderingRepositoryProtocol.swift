@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol MaskRenderingRepositoryProtocol {
+protocol MaskRenderingRepositoryProtocol: Sendable {
     /// Composites all active masks from `faces` onto `image` and returns
     /// the resulting UIImage. Runs on a background executor.
     func render(

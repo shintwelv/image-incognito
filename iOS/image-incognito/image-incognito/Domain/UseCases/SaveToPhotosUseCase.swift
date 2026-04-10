@@ -9,14 +9,14 @@
 
 import UIKit
 
-struct SaveToPhotosUseCase {
-    private let repository: PhotoLibraryRepositoryProtocol
+struct SaveToPhotosUseCase: Sendable {
+    private let repository: any PhotoLibraryRepositoryProtocol
 
-    init(repository: PhotoLibraryRepositoryProtocol) {
+    nonisolated init(repository: any PhotoLibraryRepositoryProtocol) {
         self.repository = repository
     }
 
-    func execute(image: UIImage) async throws {
+    nonisolated func execute(image: UIImage) async throws {
         try await repository.saveImageToAlbum(image)
     }
 }

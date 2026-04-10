@@ -9,7 +9,7 @@
 
 import UIKit
 
-protocol ExportProcessingRepositoryProtocol {
+protocol ExportProcessingRepositoryProtocol: Sendable {
     /// Applies `settings` to `image` (resolution, metadata) and returns
     /// the processed result. Never throws — falls back to the original on error.
     func process(_ image: UIImage, settings: ExportSettings) async -> UIImage

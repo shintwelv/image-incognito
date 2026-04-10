@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MaskingStyle: String, CaseIterable, Identifiable {
+nonisolated enum MaskingStyle: String, CaseIterable, Identifiable, Sendable {
     case blurredGlass
     case pixelArt
     case solidClean

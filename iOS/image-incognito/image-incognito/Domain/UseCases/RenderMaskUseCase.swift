@@ -8,14 +8,14 @@
 
 import UIKit
 
-struct RenderMaskUseCase {
-    private let repository: MaskRenderingRepositoryProtocol
+struct RenderMaskUseCase: Sendable {
+    private let repository: any MaskRenderingRepositoryProtocol
 
-    init(repository: MaskRenderingRepositoryProtocol) {
+    nonisolated init(repository: any MaskRenderingRepositoryProtocol) {
         self.repository = repository
     }
 
-    func execute(
+    nonisolated func execute(
         image: UIImage,
         faces: [FaceBox],
         intensity: Double,

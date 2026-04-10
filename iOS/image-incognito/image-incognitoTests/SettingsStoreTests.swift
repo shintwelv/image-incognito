@@ -11,6 +11,7 @@ import Foundation
 @testable import image_incognito
 
 @Suite("SettingsStore", .serialized)
+@MainActor
 struct SettingsStoreTests {
 
     private static let key = "com.image-incognito.exportSettings"

@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol PhotoLibraryRepositoryProtocol {
+protocol PhotoLibraryRepositoryProtocol: Sendable {
     /// Saves `image` to the app's dedicated album in the Photo Library.
     /// Throws `PhotoLibraryError` if authorization is denied or the write fails.
     func saveImageToAlbum(_ image: UIImage) async throws

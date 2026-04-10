@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct FaceBox: Identifiable {
+nonisolated struct FaceBox: Identifiable, Sendable {
     let id: UUID
     /// Normalized bounding box (top-left origin, values 0–1).
     var rect: CGRect

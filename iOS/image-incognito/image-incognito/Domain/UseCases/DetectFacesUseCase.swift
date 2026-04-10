@@ -8,14 +8,14 @@
 
 import UIKit
 
-struct DetectFacesUseCase {
-    private let repository: FaceDetectionRepositoryProtocol
+struct DetectFacesUseCase: Sendable {
+    private let repository: any FaceDetectionRepositoryProtocol
 
-    init(repository: FaceDetectionRepositoryProtocol) {
+    nonisolated init(repository: any FaceDetectionRepositoryProtocol) {
         self.repository = repository
     }
 
-    func execute(image: UIImage) async throws -> [FaceBox] {
+    nonisolated func execute(image: UIImage) async throws -> [FaceBox] {
         try await repository.detectFaces(in: image)
     }
 }

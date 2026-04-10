@@ -7,7 +7,7 @@
 //  background executor via Task.detached.
 //
 
-import UIKit
+@preconcurrency import UIKit
 import CoreImage
 import CoreImage.CIFilterBuiltins
 
@@ -18,7 +18,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
     // MARK: - MaskRenderingRepositoryProtocol
 
     /// Composites all active masks onto `image` on a background thread.
-    func render(
+    nonisolated func render(
         image: UIImage,
         faces: [FaceBox],
         intensity: Double,
@@ -40,7 +40,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Synchronous core (background-thread safe)
 
-    private func renderSync(
+    nonisolated private func renderSync(
         image: UIImage,
         faces: [FaceBox],
         intensity: Double,
@@ -76,7 +76,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     /// Converts a normalized (0–1, top-left origin) rect to point coordinates,
     /// expanded by `sizeMultiplier` and clamped to the image bounds.
-    private func pointRect(normalizedRect: CGRect, imageSize: CGSize, sizeMultiplier: Double) -> CGRect {
+    nonisolated private func pointRect(normalizedRect: CGRect, imageSize: CGSize, sizeMultiplier: Double) -> CGRect {
         let base = CGRect(
             x: normalizedRect.minX * imageSize.width,
             y: normalizedRect.minY * imageSize.height,
@@ -95,7 +95,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
     }
 
     /// Converts a point rect to CGImage pixel coords, clamped to the image bounds.
-    private func pixelBounds(for rect: CGRect, scale: CGFloat, cgImage: CGImage) -> CGRect {
+    nonisolated private func pixelBounds(for rect: CGRect, scale: CGFloat, cgImage: CGImage) -> CGRect {
         rect
             .applying(CGAffineTransform(scaleX: scale, y: scale))
             .intersection(CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
@@ -103,7 +103,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Blur (blurredGlass)
 
-    private func applyBlur(rect: CGRect, image: UIImage, intensity: Double) {
+    nonisolated private func applyBlur(rect: CGRect, image: UIImage, intensity: Double) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
             let blurred = makeBlurredCrop(of: image, rect: rect, intensity: intensity)
@@ -116,7 +116,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         ctx.restoreGState()
     }
 
-    private func makeBlurredCrop(of image: UIImage, rect: CGRect, intensity: Double) -> UIImage? {
+    nonisolated private func makeBlurredCrop(of image: UIImage, rect: CGRect, intensity: Double) -> UIImage? {
         guard let cgImage = image.cgImage else { return nil }
         let bounds = pixelBounds(for: rect, scale: image.scale, cgImage: cgImage)
         guard bounds.width > 0, bounds.height > 0,
@@ -134,7 +134,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Pixelate (pixelArt)
 
-    private func applyPixelArt(rect: CGRect, image: UIImage, intensity: Double) {
+    nonisolated private func applyPixelArt(rect: CGRect, image: UIImage, intensity: Double) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
             let pixelated = makePixelateCrop(of: image, rect: rect, intensity: intensity)
@@ -147,7 +147,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         ctx.restoreGState()
     }
 
-    private func makePixelateCrop(of image: UIImage, rect: CGRect, intensity: Double) -> UIImage? {
+    nonisolated private func makePixelateCrop(of image: UIImage, rect: CGRect, intensity: Double) -> UIImage? {
         guard let cgImage = image.cgImage else { return nil }
         let bounds = pixelBounds(for: rect, scale: image.scale, cgImage: cgImage)
         guard bounds.width > 0, bounds.height > 0,
@@ -166,7 +166,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Solid fill (solidClean)
 
-    private func applySolid(rect: CGRect, intensity: Double, color: UIColor) {
+    nonisolated private func applySolid(rect: CGRect, intensity: Double, color: UIColor) {
         color.withAlphaComponent(intensity).setFill()
         UIBezierPath(roundedRect: rect, cornerRadius: 12).fill()
     }

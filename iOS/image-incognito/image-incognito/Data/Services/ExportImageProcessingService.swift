@@ -8,23 +8,23 @@
 //  background executor via Task.detached.
 //
 
-import UIKit
+@preconcurrency import UIKit
 import ImageIO
 
-final class ExportImageProcessingService: ExportProcessingRepositoryProtocol {
+struct ExportImageProcessingService: ExportProcessingRepositoryProtocol, Sendable {
 
     // MARK: - ExportProcessingRepositoryProtocol
 
     /// Applies `settings` to `image` on a background thread and returns the result.
-    func process(_ image: UIImage, settings: ExportSettings) async -> UIImage {
+    nonisolated func process(_ image: UIImage, settings: ExportSettings) async -> UIImage {
         await Task.detached(priority: .userInitiated) {
-            self.applySettings(to: image, settings: settings)
+            applySettings(to: image, settings: settings)
         }.value
     }
 
     // MARK: - Pipeline
 
-    private func applySettings(to image: UIImage, settings: ExportSettings) -> UIImage {
+    nonisolated private func applySettings(to image: UIImage, settings: ExportSettings) -> UIImage {
         let target = settings.keepOriginalResolution ? image : downsampled(image, maxDimension: 1080)
         return strippedMetadata(from: target, settings: settings)
     }
@@ -32,25 +32,39 @@ final class ExportImageProcessingService: ExportProcessingRepositoryProtocol {
     // MARK: - Downsampling
 
     /// Downsamples `image` so its longest side fits within `maxDimension`, preserving aspect ratio.
-    private func downsampled(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+    /// Uses Core Graphics directly so the operation is safe to run off the main actor.
+    nonisolated private func downsampled(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
         let size = image.size
         let longestSide = max(size.width, size.height)
         guard longestSide > maxDimension else { return image }
 
         let scale = maxDimension / longestSide
-        let newSize = CGSize(
-            width: (size.width * scale).rounded(),
-            height: (size.height * scale).rounded()
-        )
-        return UIGraphicsImageRenderer(size: newSize).image { _ in
-            image.draw(in: CGRect(origin: .zero, size: newSize))
-        }
+        let newWidth = Int((size.width * scale).rounded())
+        let newHeight = Int((size.height * scale).rounded())
+
+        guard let cgImage = image.cgImage else { return image }
+        let colorSpace = cgImage.colorSpace ?? CGColorSpaceCreateDeviceRGB()
+        guard let context = CGContext(
+            data: nil,
+            width: newWidth,
+            height: newHeight,
+            bitsPerComponent: cgImage.bitsPerComponent,
+            bytesPerRow: 0,
+            space: colorSpace,
+            bitmapInfo: cgImage.bitmapInfo.rawValue
+        ) else { return image }
+
+        context.interpolationQuality = .high
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+
+        guard let resultCG = context.makeImage() else { return image }
+        return UIImage(cgImage: resultCG, scale: image.scale, orientation: image.imageOrientation)
     }
 
     // MARK: - Metadata Stripping
 
     /// Rewrites the image as JPEG via ImageIO, nulling out the requested metadata containers.
-    private func strippedMetadata(from image: UIImage, settings: ExportSettings) -> UIImage {
+    nonisolated private func strippedMetadata(from image: UIImage, settings: ExportSettings) -> UIImage {
         guard settings.removeExif || settings.removeLocation else { return image }
 
         guard let baseData = image.jpegData(compressionQuality: 1.0) as CFData?,

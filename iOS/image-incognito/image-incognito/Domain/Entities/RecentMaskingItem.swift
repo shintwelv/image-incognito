@@ -9,7 +9,7 @@
 
 import Foundation
 
-struct RecentMaskingItem: Identifiable {
+nonisolated struct RecentMaskingItem: Identifiable, Sendable {
     let id: UUID
     /// JPEG-encoded thumbnail of the masked result (blurred for privacy).
     let thumbnailData: Data

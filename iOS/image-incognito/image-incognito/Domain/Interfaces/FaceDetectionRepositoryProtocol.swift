@@ -9,7 +9,7 @@
 
 import UIKit
 
-protocol FaceDetectionRepositoryProtocol {
+protocol FaceDetectionRepositoryProtocol: Sendable {
     /// Detects faces in `image` and returns normalized FaceBox values
     /// (top-left origin, values 0–1 relative to the source image).
     func detectFaces(in image: UIImage) async throws -> [FaceBox]
