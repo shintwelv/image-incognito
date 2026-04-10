@@ -37,7 +37,7 @@ final class PhotoLibraryService: PhotoLibraryRepositoryProtocol {
 
     /// Saves the `image` to the "Incognify" album in the Photo Library.
     /// Requests authorization if not already granted.
-    func saveImageToAlbum(_ image: UIImage) async throws {
+    nonisolated func saveImageToAlbum(_ image: UIImage) async throws {
         // 1. Check/Request Authorization
         let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
         guard status == .authorized || status == .limited else {
@@ -62,7 +62,7 @@ final class PhotoLibraryService: PhotoLibraryRepositoryProtocol {
     // MARK: - Internal Logic
 
     /// Fetches the "Incognify" album, creating it if it doesn't already exist.
-    private func getOrCreateAlbum() async throws -> PHAssetCollection? {
+    nonisolated private func getOrCreateAlbum() async throws -> PHAssetCollection? {
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)
         let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)

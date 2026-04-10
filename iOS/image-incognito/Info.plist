@@ -34,9 +34,11 @@
 		</dict>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Take picture to mask faces</string>
+	<string>Take a photo to detect and mask faces</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select photos to detect and mask faces</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Save Masked</string>
+	<string>Save the masked photo to your library</string>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
 	<key>UIApplicationSceneManifest</key>
