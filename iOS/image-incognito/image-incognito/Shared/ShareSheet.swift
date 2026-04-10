@@ -48,7 +48,7 @@ private final class ShareableImage: NSObject, UIActivityItemSource {
         _ activityViewController: UIActivityViewController
     ) -> LPLinkMetadata? {
         let metadata = LPLinkMetadata()
-        metadata.title = Bundle.main.displayName ?? "Image Incognito"
+        metadata.title = Bundle.main.displayName ?? "Incognify"
         metadata.imageProvider = NSItemProvider(object: image)
         if let icon = UIImage(named: "AppIcon") {
             metadata.iconProvider = NSItemProvider(object: icon)
