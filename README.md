@@ -66,7 +66,8 @@ iOS/image-incognito/image-incognito/
 │   │   ├── EditorStateViews.swift
 │   │   ├── EditorView.swift
 │   │   ├── EditorViewModel.swift
-│   │   └── FaceOverlayView.swift
+│   │   ├── FaceOverlayView.swift
+│   │   └── FaceSelectionHitTester.swift
 │   ├── Export/
 │   │   ├── ExportView.swift
 │   │   └── ExportViewModel.swift
@@ -132,18 +133,22 @@ Dark Mode is fully supported across all screens.
 
 ## Tests
 
-Unit tests cover Domain entities and Data layer services:
+Unit tests cover Domain entities, use cases, ViewModels, geometry helpers, and Data layer services:
 
 ```
 image-incognitoTests/
 ├── DetectFacesUseCaseTests.swift
 ├── EditorViewModelTests.swift
+├── ExportImageProcessingServiceTests.swift
 ├── ExportSettingsTests.swift
 ├── ExportViewModelTests.swift
 ├── FaceBoxTests.swift
+├── FaceDetectionServiceTests.swift
+├── FaceSelectionHitTesterTests.swift
 ├── HomeViewModelTests.swift
 ├── MaskRenderingServiceTests.swift
 ├── MaskingStyleTests.swift
+├── PhotoPickerCoordinatorTests.swift
 ├── ProcessExportUseCaseTests.swift
 ├── RecentMaskingItemTests.swift
 ├── RenderMaskUseCaseTests.swift
@@ -159,7 +164,7 @@ Run tests in Xcode with `⌘U` or via:
 xcodebuild test \
   -project iOS/image-incognito/image-incognito.xcodeproj \
   -scheme image-incognito \
-  -destination 'platform=iOS Simulator,name=iPhone 16'
+  -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.4'
 ```
 
 ---
@@ -171,7 +176,7 @@ xcodebuild test \
 3. Select a simulator or connected device running iOS 17+
 4. Press `⌘R` to build and run
 
-No external dependencies — everything uses Apple's native frameworks via Swift Package Manager.
+Swift Package Manager dependencies resolve automatically when you open the project in Xcode. The app also includes Firebase packages for analytics and crash reporting.
 
 ---
 
