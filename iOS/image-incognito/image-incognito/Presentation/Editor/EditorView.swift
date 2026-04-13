@@ -167,7 +167,7 @@ struct EditorView: View {
 
     private func imageCanvas(for vm: EditorViewModel) -> some View {
         GeometryReader { proxy in
-            let imgRect = imageRenderRect(
+            let imgRect = FaceSelectionHitTester.imageRenderRect(
                 in: proxy.size,
                 imageSize: CGSize(
                     width: vm.sourceImage.size.width,
@@ -184,7 +184,11 @@ struct EditorView: View {
 
                 // Face overlays
                 ForEach(vm.faces) { face in
-                    let frame = overlayFrame(for: face, imageRect: imgRect, sizeMultiplier: vm.sizeMultiplier)
+                    let frame = FaceSelectionHitTester.overlayFrame(
+                        for: face,
+                        imageRect: imgRect,
+                        sizeMultiplier: vm.sizeMultiplier
+                    )
                     FaceOverlayView(
                         faceBox: face,
                         intensity: vm.intensity,
@@ -193,15 +197,6 @@ struct EditorView: View {
                     )
                     .frame(width: frame.width, height: frame.height)
                     .position(x: frame.midX, y: frame.midY)
-                    // Without this, the stroke-only border (isMasked=false) has no filled
-                    // hit area and taps fall through to the image underneath, preventing
-                    // the user from re-enabling a mask.
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(AppAnimation.snappy) {
-                            vm.toggleMask(id: face.id)
-                        }
-                    }
                 }
 
                 // Loading skeleton
@@ -214,6 +209,19 @@ struct EditorView: View {
                 if vm.detectionCompleted && vm.faces.isEmpty {
                     NoFaceFoundView()
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture(coordinateSpace: .local) { location in
+                guard let faceID = FaceSelectionHitTester.faceID(
+                    at: location,
+                    faces: vm.faces,
+                    imageRect: imgRect,
+                    sizeMultiplier: vm.sizeMultiplier
+                ) else { return }
+
+                withAnimation(AppAnimation.snappy) {
+                    vm.toggleMask(id: faceID)
                 }
             }
         }
@@ -268,56 +276,6 @@ struct EditorView: View {
 
         isExporting = false
         allRenderedImages = results
-    }
-
-    // MARK: - Layout Helpers
-
-    /// Calculates the rendered CGRect of a `.scaledToFit` image inside `containerSize`.
-    private func imageRenderRect(in containerSize: CGSize, imageSize: CGSize) -> CGRect {
-        guard imageSize.width > 0, imageSize.height > 0 else {
-            return CGRect(origin: .zero, size: containerSize)
-        }
-        let containerAspect = containerSize.width / containerSize.height
-        let imageAspect = imageSize.width / imageSize.height
-
-        let renderSize: CGSize
-        if imageAspect > containerAspect {
-            let w = containerSize.width
-            renderSize = CGSize(width: w, height: w / imageAspect)
-        } else {
-            let h = containerSize.height
-            renderSize = CGSize(width: h * imageAspect, height: h)
-        }
-
-        return CGRect(
-            x: (containerSize.width - renderSize.width) / 2,
-            y: (containerSize.height - renderSize.height) / 2,
-            width: renderSize.width,
-            height: renderSize.height
-        )
-    }
-
-    /// Maps a normalized FaceBox rect to an absolute CGRect within `imageRect`,
-    /// scaled by `sizeMultiplier` about the face center.
-    private func overlayFrame(for face: FaceBox, imageRect: CGRect, sizeMultiplier: Double) -> CGRect {
-        let base = CGRect(
-            x: imageRect.minX + face.rect.minX * imageRect.width,
-            y: imageRect.minY + face.rect.minY * imageRect.height,
-            width: face.rect.width * imageRect.width,
-            height: face.rect.height * imageRect.height
-        )
-        guard face.isMasked else { return base }
-
-        // Apply sizeMultiplier centered on the face
-        let scale = sizeMultiplier
-        let newWidth = base.width * scale
-        let newHeight = base.height * scale
-        return CGRect(
-            x: base.midX - newWidth / 2,
-            y: base.midY - newHeight / 2,
-            width: newWidth,
-            height: newHeight
-        )
     }
 }
 

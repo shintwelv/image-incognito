@@ -84,6 +84,48 @@ struct EditorViewModelTests {
         #expect(vm.faces[1].isMasked == true)
     }
 
+    @Test("face hit testing resolves the tapped face when multiple exist")
+    func faceHitTestingResolvesCorrectFace() {
+        let first = makeFace(x: 0.1, y: 0.2, width: 0.2, height: 0.2)
+        let second = makeFace(x: 0.6, y: 0.2, width: 0.2, height: 0.2)
+        let imageRect = CGRect(x: 0, y: 0, width: 300, height: 300)
+
+        let firstTap = CGPoint(x: 45, y: 90)
+        let secondTap = CGPoint(x: 225, y: 90)
+
+        #expect(
+            FaceSelectionHitTester.faceID(
+                at: firstTap,
+                faces: [first, second],
+                imageRect: imageRect,
+                sizeMultiplier: 1.0
+            ) == first.id
+        )
+        #expect(
+            FaceSelectionHitTester.faceID(
+                at: secondTap,
+                faces: [first, second],
+                imageRect: imageRect,
+                sizeMultiplier: 1.0
+            ) == second.id
+        )
+    }
+
+    @Test("face hit testing ignores taps outside the rendered image")
+    func faceHitTestingIgnoresOutsideImage() {
+        let face = makeFace(x: 0.1, y: 0.1, width: 0.2, height: 0.2)
+        let imageRect = CGRect(x: 50, y: 50, width: 200, height: 200)
+
+        #expect(
+            FaceSelectionHitTester.faceID(
+                at: CGPoint(x: 20, y: 20),
+                faces: [face],
+                imageRect: imageRect,
+                sizeMultiplier: 1.0
+            ) == nil
+        )
+    }
+
     // MARK: - selectStyle
 
     @Test("selectStyle changes selectedStyle and propagates to all faces")
