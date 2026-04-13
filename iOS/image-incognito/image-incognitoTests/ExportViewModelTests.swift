@@ -43,11 +43,21 @@ struct ExportViewModelTests {
     }
 
     @Test("shareImageTapped sets isShowingShareSheet to true")
-    func shareImageTapped() {
+    func shareImageTapped() async {
         let vm = ExportViewModel(maskedImages: [makeTestImage()])
         vm.shareImageTapped()
 
-        #expect(vm.isShowingShareSheet == true)
+        await confirmation("should show share sheet") { confirm in
+            let start = Date()
+
+            while !vm.isShowingShareSheet, Date().timeIntervalSince(start) < 1 {
+                await Task.yield()
+            }
+
+            if vm.isShowingShareSheet {
+                confirm()
+            }
+        }
     }
 
     @Test("dismissError clears saveError")
