@@ -40,15 +40,17 @@ final class FaceDetectionService: FaceDetectionRepositoryProtocol {
         }
 
         return (request.results ?? []).map { observation in
-            // Vision uses bottom-left origin; convert to top-left (UIKit/SwiftUI).
-            let flipped = CGRect(
-                x: observation.boundingBox.origin.x,
-                y: 1 - observation.boundingBox.origin.y - observation.boundingBox.height,
-                width: observation.boundingBox.width,
-                height: observation.boundingBox.height
-            )
-            return FaceBox(rect: flipped)
+            FaceBox(rect: Self.topLeftBoundingBox(fromVisionBoundingBox: observation.boundingBox))
         }
+    }
+
+    nonisolated static func topLeftBoundingBox(fromVisionBoundingBox boundingBox: CGRect) -> CGRect {
+        CGRect(
+            x: boundingBox.origin.x,
+            y: 1 - boundingBox.origin.y - boundingBox.height,
+            width: boundingBox.width,
+            height: boundingBox.height
+        )
     }
 }
 

@@ -12,7 +12,32 @@ import PhotosUI
 /// Thin `@unchecked Sendable` box for bridging ObjC reference types into
 /// Swift 6 structured concurrency (`NSItemProvider` is not `Sendable`).
 private struct SendableBox<T>: @unchecked Sendable {
-    let value: T
+    nonisolated(unsafe) let value: T
+}
+
+protocol PhotoPickerImageLoading: Sendable {
+    nonisolated func canLoadImage() -> Bool
+    nonisolated func loadImage() async -> UIImage?
+}
+
+private struct ItemProviderImageLoader: PhotoPickerImageLoading {
+    private let itemProvider: SendableBox<NSItemProvider>
+
+    init(itemProvider: NSItemProvider) {
+        self.itemProvider = SendableBox(value: itemProvider)
+    }
+
+    nonisolated func canLoadImage() -> Bool {
+        itemProvider.value.canLoadObject(ofClass: UIImage.self)
+    }
+
+    nonisolated func loadImage() async -> UIImage? {
+        await withCheckedContinuation { continuation in
+            itemProvider.value.loadObject(ofClass: UIImage.self) { object, _ in
+                continuation.resume(returning: object as? UIImage)
+            }
+        }
+    }
 }
 
 struct PhotoPickerRepresentable: UIViewControllerRepresentable {
@@ -63,28 +88,28 @@ struct PhotoPickerRepresentable: UIViewControllerRepresentable {
             let onImagesSelected = parent.onImagesSelected
 
             Task {
-                let images: [UIImage] = await withTaskGroup(of: (Int, UIImage?).self) { group in
-                    for (index, result) in results.enumerated() {
-                        guard result.itemProvider.canLoadObject(ofClass: UIImage.self) else { continue }
-                        let box = SendableBox(value: result.itemProvider)
-                        group.addTask {
-                            await withCheckedContinuation { continuation in
-                                box.value.loadObject(ofClass: UIImage.self) { object, _ in
-                                    continuation.resume(returning: (index, object as? UIImage))
-                                }
-                            }
-                        }
-                    }
-
-                    var ordered: [Int: UIImage] = [:]
-                    for await (index, image) in group {
-                        if let image { ordered[index] = image }
-                    }
-                    return ordered.sorted { $0.key < $1.key }.map(\.value)
-                }
-
-                onImagesSelected(images)
+                let loaders = results.map { ItemProviderImageLoader(itemProvider: $0.itemProvider) }
+                onImagesSelected(await PhotoPickerRepresentable.loadImages(from: loaders))
             }
+        }
+    }
+
+    nonisolated static func loadImages(from loaders: [any PhotoPickerImageLoading]) async -> [UIImage] {
+        await withTaskGroup(of: (Int, UIImage?).self) { group in
+            for (index, loader) in loaders.enumerated() {
+                guard loader.canLoadImage() else { continue }
+                group.addTask {
+                    (index, await loader.loadImage())
+                }
+            }
+
+            var ordered: [Int: UIImage] = [:]
+            for await (index, image) in group {
+                if let image {
+                    ordered[index] = image
+                }
+            }
+            return ordered.sorted { $0.key < $1.key }.map(\.value)
         }
     }
 }
