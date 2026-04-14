@@ -63,3 +63,4 @@ fastlane/test_output
 Marketing*.md
 GoogleService-Info.plist
 refactor.md
+uitest-plan.md
