@@ -186,16 +186,25 @@ struct EditorView: View {
                 ForEach(vm.faces) { face in
                     let frame = FaceSelectionHitTester.overlayFrame(
                         for: face,
-                        imageRect: imgRect,
-                        sizeMultiplier: vm.sizeMultiplier
+                        imageRect: imgRect
                     )
                     FaceOverlayView(
                         faceBox: face,
-                        intensity: vm.intensity,
-                        sizeMultiplier: vm.sizeMultiplier,
-                        solidCleanColor: vm.solidCleanColor
+                        solidCleanColor: vm.solidCleanColor,
+                        isSelected: face.id == vm.selectedFaceID
                     )
                     .frame(width: frame.width, height: frame.height)
+                    .contentShape(Ellipse())
+                    .onTapGesture {
+                        withAnimation(AppAnimation.snappy) {
+                            vm.selectFace(id: face.id)
+                        }
+                    }
+                    .onLongPressGesture(minimumDuration: 0.4) {
+                        withAnimation(AppAnimation.snappy) {
+                            vm.toggleMask(id: face.id)
+                        }
+                    }
                     .position(x: frame.midX, y: frame.midY)
                 }
 
@@ -212,16 +221,11 @@ struct EditorView: View {
                 }
             }
             .contentShape(Rectangle())
-            .onTapGesture(coordinateSpace: .local) { location in
-                guard let faceID = FaceSelectionHitTester.faceID(
-                    at: location,
-                    faces: vm.faces,
-                    imageRect: imgRect,
-                    sizeMultiplier: vm.sizeMultiplier
-                ) else { return }
-
+            .onTapGesture {
+                // If the user taps the empty canvas area, deselect and hide sliders.
                 withAnimation(AppAnimation.snappy) {
-                    vm.toggleMask(id: faceID)
+                    vm.selectedFaceID = nil
+                    vm.showAdjustmentSliders = false
                 }
             }
         }

@@ -13,13 +13,12 @@ enum FaceSelectionHitTester {
     nonisolated static func faceID(
         at point: CGPoint,
         faces: [FaceBox],
-        imageRect: CGRect,
-        sizeMultiplier: Double
+        imageRect: CGRect
     ) -> UUID? {
         guard imageRect.contains(point) else { return nil }
 
         return faces.reversed().first { face in
-            overlayFrame(for: face, imageRect: imageRect, sizeMultiplier: sizeMultiplier).contains(point)
+            overlayFrame(for: face, imageRect: imageRect).contains(point)
         }?.id
     }
 
@@ -50,7 +49,7 @@ enum FaceSelectionHitTester {
 
     /// Maps a normalized FaceBox rect to an absolute CGRect within `imageRect`,
     /// scaled by `sizeMultiplier` about the face center.
-    nonisolated static func overlayFrame(for face: FaceBox, imageRect: CGRect, sizeMultiplier: Double) -> CGRect {
+    nonisolated static func overlayFrame(for face: FaceBox, imageRect: CGRect) -> CGRect {
         let base = CGRect(
             x: imageRect.minX + face.rect.minX * imageRect.width,
             y: imageRect.minY + face.rect.minY * imageRect.height,
@@ -59,7 +58,7 @@ enum FaceSelectionHitTester {
         )
         guard face.isMasked else { return base }
 
-        let scale = sizeMultiplier
+        let scale = face.sizeMultiplier
         let newWidth = base.width * scale
         let newHeight = base.height * scale
         return CGRect(

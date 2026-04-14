@@ -21,8 +21,6 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
     nonisolated func render(
         image: UIImage,
         faces: [FaceBox],
-        intensity: Double,
-        sizeMultiplier: Double,
         solidCleanColor: UIColor = UIColor(red: 94/255, green: 92/255, blue: 230/255, alpha: 1)
     ) async throws -> UIImage {
         // Capture self weakly to allow deallocation during long renders.
@@ -30,8 +28,6 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
             try self.renderSync(
                 image: image,
                 faces: faces,
-                intensity: intensity,
-                sizeMultiplier: sizeMultiplier,
                 solidCleanColor: solidCleanColor
             )
         }.value
@@ -43,8 +39,6 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
     nonisolated private func renderSync(
         image: UIImage,
         faces: [FaceBox],
-        intensity: Double,
-        sizeMultiplier: Double,
         solidCleanColor: UIColor
     ) throws -> UIImage {
         // Normalize to .up before any CGImage operations.
@@ -65,14 +59,14 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
                 let rect = pointRect(
                     normalizedRect: face.rect,
                     imageSize: size,
-                    sizeMultiplier: sizeMultiplier
+                    sizeMultiplier: face.sizeMultiplier
                 )
                 guard rect.width > 1, rect.height > 1 else { continue }
 
                 switch face.style {
-                case .blurredGlass: applyBlur(rect: rect, image: image, intensity: intensity)
-                case .pixelArt:     applyPixelArt(rect: rect, image: image, intensity: intensity)
-                case .solidClean:   applySolid(rect: rect, intensity: intensity, color: solidCleanColor)
+                case .blurredGlass: applyBlur(rect: rect, image: image, intensity: face.intensity)
+                case .pixelArt:     applyPixelArt(rect: rect, image: image, intensity: face.intensity)
+                case .solidClean:   applySolid(rect: rect, intensity: face.intensity, color: solidCleanColor)
                 }
             }
         }

@@ -38,8 +38,6 @@ struct EditorViewModelTests {
         #expect(vm.faces.isEmpty)
         #expect(vm.isDetecting == false)
         #expect(vm.selectedStyle == .blurredGlass)
-        #expect(vm.intensity == 0.75)
-        #expect(vm.sizeMultiplier == 1.0)
         #expect(vm.showAdjustmentSliders == false)
         #expect(vm.isRendering == false)
         #expect(vm.renderedImage == nil)
@@ -97,16 +95,14 @@ struct EditorViewModelTests {
             FaceSelectionHitTester.faceID(
                 at: firstTap,
                 faces: [first, second],
-                imageRect: imageRect,
-                sizeMultiplier: 1.0
+                imageRect: imageRect
             ) == first.id
         )
         #expect(
             FaceSelectionHitTester.faceID(
                 at: secondTap,
                 faces: [first, second],
-                imageRect: imageRect,
-                sizeMultiplier: 1.0
+                imageRect: imageRect
             ) == second.id
         )
     }
@@ -120,8 +116,7 @@ struct EditorViewModelTests {
             FaceSelectionHitTester.faceID(
                 at: CGPoint(x: 20, y: 20),
                 faces: [face],
-                imageRect: imageRect,
-                sizeMultiplier: 1.0
+                imageRect: imageRect
             ) == nil
         )
     }
@@ -139,6 +134,44 @@ struct EditorViewModelTests {
         #expect(vm.faces[0].style == .pixelArt)
         #expect(vm.faces[1].style == .pixelArt)
         #expect(vm.showAdjustmentSliders == true)
+    }
+
+    @Test("toggleMask updates selectedFaceID")
+    func toggleMaskUpdatesSelection() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        let face = makeFace()
+        vm.faces = [face]
+        #expect(vm.selectedFaceID == nil)
+
+        vm.toggleMask(id: face.id)
+        #expect(vm.selectedFaceID == face.id)
+    }
+
+    @Test("Intensity and sizeMultiplier proxy to selected face")
+    func proxyProperties() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        var face1 = makeFace()
+        face1.intensity = 0.5
+        face1.sizeMultiplier = 1.5
+        var face2 = makeFace()
+        face2.intensity = 0.8
+        face2.sizeMultiplier = 0.8
+        
+        vm.faces = [face1, face2]
+
+        vm.toggleMask(id: face1.id)
+        #expect(vm.intensity == 0.5)
+        #expect(vm.sizeMultiplier == 1.5)
+
+        vm.intensity = 0.9
+        #expect(vm.faces[0].intensity == 0.9)
+
+        vm.toggleMask(id: face2.id)
+        #expect(vm.intensity == 0.8)
+        #expect(vm.sizeMultiplier == 0.8)
+
+        vm.sizeMultiplier = 2.0
+        #expect(vm.faces[1].sizeMultiplier == 2.0)
     }
 
     @Test("selectStyle with the same style toggles the adjustment slider panel")

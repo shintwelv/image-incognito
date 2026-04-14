@@ -22,12 +22,16 @@ struct MaskRenderingServiceTests {
         x: CGFloat = 0.2, y: CGFloat = 0.2,
         width: CGFloat = 0.3, height: CGFloat = 0.3,
         style: MaskingStyle = .solidClean,
-        isMasked: Bool = true
+        isMasked: Bool = true,
+        intensity: Double = 0.75,
+        sizeMultiplier: Double = 1.0
     ) -> FaceBox {
         FaceBox(
             rect: CGRect(x: x, y: y, width: width, height: height),
             isMasked: isMasked,
-            style: style
+            style: style,
+            intensity: intensity,
+            sizeMultiplier: sizeMultiplier
         )
     }
 
@@ -38,7 +42,7 @@ struct MaskRenderingServiceTests {
         let size = CGSize(width: 300, height: 400)
         let image = makeTestImage(size: size)
         let result = try await service.render(
-            image: image, faces: [makeFace()], intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: [makeFace()]
         )
 
         #expect(result.size == size)
@@ -49,7 +53,7 @@ struct MaskRenderingServiceTests {
         let size = CGSize(width: 200, height: 200)
         let image = makeTestImage(size: size)
         let result = try await service.render(
-            image: image, faces: [], intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: []
         )
 
         #expect(result.size == size)
@@ -59,7 +63,7 @@ struct MaskRenderingServiceTests {
     func renderUnmaskedFace() async throws {
         let image = makeTestImage(size: CGSize(width: 200, height: 200))
         let result = try await service.render(
-            image: image, faces: [makeFace(isMasked: false)], intensity: 0.5, sizeMultiplier: 1.0
+            image: image, faces: [makeFace(isMasked: false, intensity: 0.5)]
         )
 
         #expect(result.size == image.size)
@@ -71,7 +75,7 @@ struct MaskRenderingServiceTests {
     func renderBlurredGlass() async throws {
         let image = makeTestImage(size: CGSize(width: 300, height: 300))
         let result = try await service.render(
-            image: image, faces: [makeFace(style: .blurredGlass)], intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: [makeFace(style: .blurredGlass)]
         )
 
         #expect(result.size == image.size)
@@ -81,7 +85,7 @@ struct MaskRenderingServiceTests {
     func renderPixelArt() async throws {
         let image = makeTestImage(size: CGSize(width: 300, height: 300))
         let result = try await service.render(
-            image: image, faces: [makeFace(style: .pixelArt)], intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: [makeFace(style: .pixelArt)]
         )
 
         #expect(result.size == image.size)
@@ -91,7 +95,7 @@ struct MaskRenderingServiceTests {
     func renderSolidClean() async throws {
         let image = makeTestImage(size: CGSize(width: 300, height: 300))
         let result = try await service.render(
-            image: image, faces: [makeFace(style: .solidClean)], intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: [makeFace(style: .solidClean)]
         )
 
         #expect(result.size == image.size)
@@ -103,7 +107,7 @@ struct MaskRenderingServiceTests {
     func renderExpandedBox() async throws {
         let image = makeTestImage(size: CGSize(width: 300, height: 300))
         let result = try await service.render(
-            image: image, faces: [makeFace()], intensity: 0.75, sizeMultiplier: 2.0
+            image: image, faces: [makeFace(sizeMultiplier: 2.0)]
         )
 
         #expect(result.size == image.size)
@@ -113,7 +117,7 @@ struct MaskRenderingServiceTests {
     func renderShrunkenBox() async throws {
         let image = makeTestImage(size: CGSize(width: 300, height: 300))
         let result = try await service.render(
-            image: image, faces: [makeFace()], intensity: 0.75, sizeMultiplier: 0.5
+            image: image, faces: [makeFace(sizeMultiplier: 0.5)]
         )
 
         #expect(result.size == image.size)
@@ -125,7 +129,7 @@ struct MaskRenderingServiceTests {
     func renderIntensityMin() async throws {
         let image = makeTestImage(size: CGSize(width: 200, height: 200))
         let result = try await service.render(
-            image: image, faces: [makeFace(style: .blurredGlass)], intensity: 0.0, sizeMultiplier: 1.0
+            image: image, faces: [makeFace(style: .blurredGlass, intensity: 0.0)]
         )
 
         #expect(result.size == image.size)
@@ -135,7 +139,7 @@ struct MaskRenderingServiceTests {
     func renderIntensityMax() async throws {
         let image = makeTestImage(size: CGSize(width: 200, height: 200))
         let result = try await service.render(
-            image: image, faces: [makeFace(style: .blurredGlass)], intensity: 1.0, sizeMultiplier: 1.0
+            image: image, faces: [makeFace(style: .blurredGlass, intensity: 1.0)]
         )
 
         #expect(result.size == image.size)
@@ -153,7 +157,7 @@ struct MaskRenderingServiceTests {
         ]
 
         let result = try await service.render(
-            image: image, faces: faces, intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: faces
         )
 
         #expect(result.size == image.size)
@@ -168,7 +172,7 @@ struct MaskRenderingServiceTests {
         ]
 
         let result = try await service.render(
-            image: image, faces: faces, intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: faces
         )
 
         #expect(result.size == image.size)
@@ -183,7 +187,7 @@ struct MaskRenderingServiceTests {
         let face = makeFace(x: 0.0, y: 0.0, width: 1.0, height: 1.0)
 
         let result = try await service.render(
-            image: image, faces: [face], intensity: 0.75, sizeMultiplier: 1.0
+            image: image, faces: [face]
         )
 
         #expect(result.size == image.size)

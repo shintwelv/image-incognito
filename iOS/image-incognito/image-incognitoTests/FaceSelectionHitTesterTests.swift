@@ -20,12 +20,14 @@ struct FaceSelectionHitTesterTests {
         y: CGFloat = 0.2,
         width: CGFloat = 0.2,
         height: CGFloat = 0.2,
-        isMasked: Bool = true
+        isMasked: Bool = true,
+        sizeMultiplier: Double = 1.0
     ) -> FaceBox {
         FaceBox(
             id: id,
             rect: CGRect(x: x, y: y, width: width, height: height),
-            isMasked: isMasked
+            isMasked: isMasked,
+            sizeMultiplier: sizeMultiplier
         )
     }
 
@@ -37,8 +39,7 @@ struct FaceSelectionHitTesterTests {
         let tappedID = FaceSelectionHitTester.faceID(
             at: CGPoint(x: 45, y: 60),
             faces: [face],
-            imageRect: imageRect,
-            sizeMultiplier: 1.0
+            imageRect: imageRect
         )
 
         #expect(tappedID == face.id)
@@ -49,8 +50,7 @@ struct FaceSelectionHitTesterTests {
         let tappedID = FaceSelectionHitTester.faceID(
             at: CGPoint(x: 10, y: 10),
             faces: [makeFace()],
-            imageRect: CGRect(x: 50, y: 50, width: 200, height: 200),
-            sizeMultiplier: 1.0
+            imageRect: CGRect(x: 50, y: 50, width: 200, height: 200)
         )
 
         #expect(tappedID == nil)
@@ -61,8 +61,7 @@ struct FaceSelectionHitTesterTests {
         let tappedID = FaceSelectionHitTester.faceID(
             at: CGPoint(x: 290, y: 190),
             faces: [makeFace()],
-            imageRect: CGRect(x: 0, y: 0, width: 300, height: 200),
-            sizeMultiplier: 1.0
+            imageRect: CGRect(x: 0, y: 0, width: 300, height: 200)
         )
 
         #expect(tappedID == nil)
@@ -73,8 +72,7 @@ struct FaceSelectionHitTesterTests {
         let tappedID = FaceSelectionHitTester.faceID(
             at: CGPoint(x: 50, y: 50),
             faces: [],
-            imageRect: CGRect(x: 0, y: 0, width: 200, height: 200),
-            sizeMultiplier: 1.0
+            imageRect: CGRect(x: 0, y: 0, width: 200, height: 200)
         )
 
         #expect(tappedID == nil)
@@ -87,8 +85,7 @@ struct FaceSelectionHitTesterTests {
         let tappedID = FaceSelectionHitTester.faceID(
             at: CGPoint(x: 90, y: 90),
             faces: [first, second],
-            imageRect: CGRect(x: 0, y: 0, width: 300, height: 300),
-            sizeMultiplier: 1.0
+            imageRect: CGRect(x: 0, y: 0, width: 300, height: 300)
         )
 
         #expect(tappedID == second.id)
@@ -103,14 +100,13 @@ struct FaceSelectionHitTesterTests {
         let withoutExpansion = FaceSelectionHitTester.faceID(
             at: pointJustOutsideBase,
             faces: [face],
-            imageRect: imageRect,
-            sizeMultiplier: 1.0
+            imageRect: imageRect
         )
+        let faceExpanded = makeFace(x: 0.4, y: 0.4, width: 0.1, height: 0.1, isMasked: true, sizeMultiplier: 1.5)
         let withExpansion = FaceSelectionHitTester.faceID(
             at: pointJustOutsideBase,
-            faces: [face],
-            imageRect: imageRect,
-            sizeMultiplier: 1.5
+            faces: [faceExpanded],
+            imageRect: imageRect
         )
 
         #expect(withoutExpansion == nil)
@@ -169,8 +165,7 @@ struct FaceSelectionHitTesterTests {
     func overlayFrameMapsToImageRect() {
         let frame = FaceSelectionHitTester.overlayFrame(
             for: makeFace(x: 0.1, y: 0.2, width: 0.25, height: 0.5),
-            imageRect: CGRect(x: 20, y: 40, width: 200, height: 100),
-            sizeMultiplier: 1.0
+            imageRect: CGRect(x: 20, y: 40, width: 200, height: 100)
         )
 
         #expect(frame == CGRect(x: 40, y: 60, width: 50, height: 50))
@@ -179,9 +174,8 @@ struct FaceSelectionHitTesterTests {
     @Test("overlayFrame scales masked overlays around their center")
     func overlayFrameScalesAroundCenter() {
         let frame = FaceSelectionHitTester.overlayFrame(
-            for: makeFace(x: 0.2, y: 0.3, width: 0.2, height: 0.2, isMasked: true),
-            imageRect: CGRect(x: 0, y: 0, width: 200, height: 200),
-            sizeMultiplier: 1.5
+            for: makeFace(x: 0.2, y: 0.3, width: 0.2, height: 0.2, isMasked: true, sizeMultiplier: 1.5),
+            imageRect: CGRect(x: 0, y: 0, width: 200, height: 200)
         )
 
         #expect(frame == CGRect(x: 30, y: 50, width: 60, height: 60))
@@ -190,9 +184,8 @@ struct FaceSelectionHitTesterTests {
     @Test("overlayFrame ignores sizeMultiplier for unmasked faces")
     func overlayFrameIgnoresSizeMultiplierForUnmaskedFaces() {
         let frame = FaceSelectionHitTester.overlayFrame(
-            for: makeFace(x: 0.2, y: 0.3, width: 0.2, height: 0.2, isMasked: false),
-            imageRect: CGRect(x: 0, y: 0, width: 200, height: 200),
-            sizeMultiplier: 2.0
+            for: makeFace(x: 0.2, y: 0.3, width: 0.2, height: 0.2, isMasked: false, sizeMultiplier: 2.0),
+            imageRect: CGRect(x: 0, y: 0, width: 200, height: 200)
         )
 
         #expect(frame == CGRect(x: 40, y: 60, width: 40, height: 40))

@@ -18,15 +18,11 @@ struct RenderMaskUseCase: Sendable {
     nonisolated func execute(
         image: UIImage,
         faces: [FaceBox],
-        intensity: Double,
-        sizeMultiplier: Double,
         solidCleanColor: UIColor
     ) async throws -> UIImage {
         try await repository.render(
             image: image,
             faces: faces,
-            intensity: intensity,
-            sizeMultiplier: sizeMultiplier,
             solidCleanColor: solidCleanColor
         )
     }

@@ -20,18 +20,31 @@ struct FaceBoxTests {
         #expect(face.rect == rect)
         #expect(face.isMasked == true)
         #expect(face.style == .blurredGlass)
+        #expect(face.intensity == 0.75)
+        #expect(face.sizeMultiplier == 1.0)
     }
 
     @Test("Custom init stores all provided values")
     func customInit() {
         let id = UUID()
         let rect = CGRect(x: 0.5, y: 0.5, width: 0.2, height: 0.2)
-        let face = FaceBox(id: id, rect: rect, isMasked: false, style: .pixelArt)
+        let face = FaceBox(id: id, rect: rect, isMasked: false, style: .pixelArt, intensity: 0.5, sizeMultiplier: 1.5)
 
         #expect(face.id == id)
         #expect(face.rect == rect)
         #expect(face.isMasked == false)
         #expect(face.style == .pixelArt)
+        #expect(face.intensity == 0.5)
+        #expect(face.sizeMultiplier == 1.5)
+    }
+
+    @Test("intensity and sizeMultiplier can be mutated")
+    func mutationOfProperties() {
+        var face = FaceBox(rect: .zero)
+        face.intensity = 0.2
+        face.sizeMultiplier = 0.8
+        #expect(face.intensity == 0.2)
+        #expect(face.sizeMultiplier == 0.8)
     }
 
     @Test("isMasked can be toggled")

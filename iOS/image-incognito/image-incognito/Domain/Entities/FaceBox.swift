@@ -16,16 +16,24 @@ nonisolated struct FaceBox: Identifiable, Sendable {
     var isMasked: Bool
     /// The visual style applied when `isMasked` is true.
     var style: MaskingStyle
+    /// Masking intensity: 0 (transparent) → 1 (fully opaque).
+    var intensity: Double
+    /// Bounding-box size multiplier: 0.5 (tighter) → 2.0 (larger).
+    var sizeMultiplier: Double
 
     init(
         id: UUID = UUID(),
         rect: CGRect,
         isMasked: Bool = true,
-        style: MaskingStyle = .blurredGlass
+        style: MaskingStyle = .blurredGlass,
+        intensity: Double = 0.75,
+        sizeMultiplier: Double = 1.0
     ) {
         self.id = id
         self.rect = rect
         self.isMasked = isMasked
         self.style = style
+        self.intensity = intensity
+        self.sizeMultiplier = sizeMultiplier
     }
 }

@@ -29,13 +29,31 @@ final class EditorViewModel {
     // MARK: - Style & adjustments
 
     var selectedStyle: MaskingStyle = .blurredGlass
-    /// Fill color used for the solidClean mask style.
     var solidCleanColor: Color = Color.appPrimary
-    /// Masking intensity: 0 (transparent) → 1 (fully opaque).
-    var intensity: Double = 0.75
-    /// Bounding-box size multiplier: 0.5 (tighter) → 2.0 (larger).
-    var sizeMultiplier: Double = 1.0
-    /// Controls whether the adjustment sliders are visible.
+    var selectedFaceID: UUID?
+
+    var intensity: Double {
+        get {
+            guard let id = selectedFaceID, let face = faces.first(where: { $0.id == id }) else { return 0.75 }
+            return face.intensity
+        }
+        set {
+            guard let id = selectedFaceID, let index = faces.firstIndex(where: { $0.id == id }) else { return }
+            faces[index].intensity = newValue
+        }
+    }
+
+    var sizeMultiplier: Double {
+        get {
+            guard let id = selectedFaceID, let face = faces.first(where: { $0.id == id }) else { return 1.0 }
+            return face.sizeMultiplier
+        }
+        set {
+            guard let id = selectedFaceID, let index = faces.firstIndex(where: { $0.id == id }) else { return }
+            faces[index].sizeMultiplier = newValue
+        }
+    }
+
     var showAdjustmentSliders: Bool = false
 
     // MARK: - Export state
@@ -73,17 +91,32 @@ final class EditorViewModel {
         }
 
         let detected = try await detectFacesUseCase.execute(image: sourceImage)
-        // Apply the currently selected style to all newly detected faces.
         faces = detected.map { FaceBox(id: $0.id, rect: $0.rect, isMasked: $0.isMasked, style: selectedStyle) }
+        selectedFaceID = faces.first?.id
     }
 
     // MARK: - Intent
 
     /// Toggle masking on/off for a specific face.
     func toggleMask(id: UUID) {
+        selectedFaceID = id
         guard let index = faces.firstIndex(where: { $0.id == id }) else { return }
         AppHaptics.medium()
         faces[index].isMasked.toggle()
+        withAnimation(AppAnimation.standard) {
+            showAdjustmentSliders = true
+        }
+    }
+
+    /// Select a face to show adjustment sliders without toggling mask.
+    func selectFace(id: UUID) {
+        if selectedFaceID != id {
+            AppHaptics.selection()
+            selectedFaceID = id
+            withAnimation(AppAnimation.standard) {
+                showAdjustmentSliders = true
+            }
+        }
     }
 
     /// Select a style pill. Tapping the active style toggles the adjustment panel.
@@ -111,8 +144,6 @@ final class EditorViewModel {
         let result = try? await renderMaskUseCase.execute(
             image: sourceImage,
             faces: faces,
-            intensity: intensity,
-            sizeMultiplier: sizeMultiplier,
             solidCleanColor: UIColor(solidCleanColor)
         )
         return result ?? sourceImage
@@ -128,8 +159,6 @@ final class EditorViewModel {
         let result = try? await renderMaskUseCase.execute(
             image: sourceImage,
             faces: faces,
-            intensity: intensity,
-            sizeMultiplier: sizeMultiplier,
             solidCleanColor: UIColor(solidCleanColor)
         )
 

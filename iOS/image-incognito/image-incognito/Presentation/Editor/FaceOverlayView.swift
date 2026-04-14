@@ -13,9 +13,8 @@ import SwiftUI
 
 struct FaceOverlayView: View {
     let faceBox: FaceBox
-    let intensity: Double
-    let sizeMultiplier: Double
     let solidCleanColor: Color
+    let isSelected: Bool
 
     var body: some View {
         ZStack {
@@ -34,24 +33,24 @@ struct FaceOverlayView: View {
                 .fill(.ultraThinMaterial)
                 .overlay {
                     Ellipse()
-                        .fill(Color.white.opacity(0.15 * intensity))
+                        .fill(Color.white.opacity(0.15 * faceBox.intensity))
                 }
-                .opacity(intensity)
+                .opacity(faceBox.intensity)
 
         case .pixelArt:
-            PixelArtMaskView(intensity: intensity)
+            PixelArtMaskView(intensity: faceBox.intensity)
 
         case .solidClean:
             Ellipse()
-                .fill(solidCleanColor.opacity(intensity))
+                .fill(solidCleanColor.opacity(faceBox.intensity))
         }
     }
 
     private var borderLayer: some View {
         Ellipse()
             .stroke(
-                faceBox.isMasked ? Color.white.opacity(0.85) : Color.white.opacity(0.45),
-                lineWidth: faceBox.isMasked ? 2 : 1.5
+                isSelected ? Color.appPrimary : (faceBox.isMasked ? Color.white.opacity(0.85) : Color.white.opacity(0.45)),
+                lineWidth: isSelected ? 3 : (faceBox.isMasked ? 2 : 1.5)
             )
             .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
     }

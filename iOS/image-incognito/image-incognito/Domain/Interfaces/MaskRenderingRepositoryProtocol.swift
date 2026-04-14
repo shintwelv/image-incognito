@@ -14,8 +14,6 @@ protocol MaskRenderingRepositoryProtocol: Sendable {
     func render(
         image: UIImage,
         faces: [FaceBox],
-        intensity: Double,
-        sizeMultiplier: Double,
         solidCleanColor: UIColor
     ) async throws -> UIImage
 }
