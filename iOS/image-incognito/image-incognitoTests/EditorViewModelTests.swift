@@ -147,6 +147,21 @@ struct EditorViewModelTests {
         #expect(vm.selectedFaceID == face.id)
     }
 
+    @Test("toggleMask preserves the current slider visibility")
+    func toggleMaskPreservesSliderVisibility() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        let face = makeFace()
+        vm.faces = [face]
+
+        vm.showAdjustmentSliders = false
+        vm.toggleMask(id: face.id)
+        #expect(vm.showAdjustmentSliders == false)
+
+        vm.showAdjustmentSliders = true
+        vm.toggleMask(id: face.id)
+        #expect(vm.showAdjustmentSliders == true)
+    }
+
     @Test("Intensity and sizeMultiplier proxy to selected face")
     func proxyProperties() {
         let vm = EditorViewModel(sourceImage: makeTestImage())

@@ -195,16 +195,18 @@ struct EditorView: View {
                     )
                     .frame(width: frame.width, height: frame.height)
                     .contentShape(Ellipse())
-                    .onTapGesture {
-                        withAnimation(AppAnimation.snappy) {
-                            vm.selectFace(id: face.id)
-                        }
-                    }
-                    .onLongPressGesture(minimumDuration: 0.4) {
-                        withAnimation(AppAnimation.snappy) {
-                            vm.toggleMask(id: face.id)
-                        }
-                    }
+                    .gesture(
+                        LongPressGesture(minimumDuration: 0.4)
+                            .exclusively(before: TapGesture())
+                            .onEnded { value in
+                                switch value {
+                                case .first(_):
+                                    vm.toggleMask(id: face.id)
+                                case .second(_):
+                                    vm.selectFace(id: face.id)
+                                }
+                            }
+                    )
                     .position(x: frame.midX, y: frame.midY)
                 }
 

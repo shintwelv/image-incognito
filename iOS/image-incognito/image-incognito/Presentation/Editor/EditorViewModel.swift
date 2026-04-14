@@ -103,9 +103,6 @@ final class EditorViewModel {
         guard let index = faces.firstIndex(where: { $0.id == id }) else { return }
         AppHaptics.medium()
         faces[index].isMasked.toggle()
-        withAnimation(AppAnimation.standard) {
-            showAdjustmentSliders = true
-        }
     }
 
     /// Select a face to show adjustment sliders without toggling mask.
@@ -167,4 +164,3 @@ final class EditorViewModel {
         renderedImage = result ?? sourceImage
     }
 }
-
