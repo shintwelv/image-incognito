@@ -102,7 +102,7 @@ struct FaceSelectionHitTesterTests {
             faces: [face],
             imageRect: imageRect
         )
-        let faceExpanded = makeFace(x: 0.4, y: 0.4, width: 0.1, height: 0.1, isMasked: true, sizeMultiplier: 1.5)
+        let faceExpanded = makeFace(id: face.id, x: 0.4, y: 0.4, width: 0.1, height: 0.1, isMasked: true, sizeMultiplier: 1.5)
         let withExpansion = FaceSelectionHitTester.faceID(
             at: pointJustOutsideBase,
             faces: [faceExpanded],
