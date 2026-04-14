@@ -41,6 +41,7 @@ struct HomeView: View {
                 if viewModel.isLoadingImages {
                     ImageLoadingOverlay()
                         .transition(.opacity)
+                        .accessibilityIdentifier("home.loadingOverlay")
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -108,6 +109,7 @@ struct HomeView: View {
                     .imageScale(.medium)
                     .foregroundStyle(Color.appLabelSecondary)
             }
+            .accessibilityIdentifier("home.settingsButton")
         }
     }
 
@@ -162,6 +164,7 @@ struct HomeView: View {
             }
             .padding(.horizontal, Spacing.xxLarge)
         }
+        .accessibilityIdentifier("home.heroCard")
     }
 
     // MARK: - Action Section
@@ -171,10 +174,12 @@ struct HomeView: View {
             PrimaryButton("사진 선택", icon: "photo.on.rectangle.angled") {
                 viewModel.selectPhotoTapped()
             }
+            .accessibilityIdentifier("home.selectPhotosButton")
 
             SecondaryButton("카메라 촬영", icon: "camera") {
                 viewModel.cameraTapped()
             }
+            .accessibilityIdentifier("home.cameraButton")
         }
     }
 
@@ -186,10 +191,12 @@ struct HomeView: View {
                 Text("최근 작업")
                     .font(.appTitle3)
                     .foregroundStyle(Color.appLabelPrimary)
+                    .accessibilityIdentifier("home.recentSectionTitle")
                 Spacer()
                 Button("모두 보기") {}
                     .font(.appSubheadline)
                     .foregroundStyle(Color.appPrimary)
+                    .accessibilityIdentifier("home.recentSeeAllButton")
             }
             .padding(.horizontal, Spacing.large)
 

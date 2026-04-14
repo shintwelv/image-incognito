@@ -37,6 +37,7 @@ struct SettingsView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("닫기") { dismiss() }
                         .foregroundStyle(Color.appPrimary)
+                        .accessibilityIdentifier("settings.closeButton")
                 }
             }
         }
@@ -58,6 +59,7 @@ struct SettingsView: View {
                     title: "위치 정보 제거",
                     isOn: store.exportSettings.removeLocation
                 )
+                .accessibilityIdentifier("settings.removeLocationToggle")
 
                 Divider().padding(.leading, 60)
 
@@ -66,6 +68,7 @@ struct SettingsView: View {
                     title: "촬영 정보 제거",
                     isOn: store.exportSettings.removeExif
                 )
+                .accessibilityIdentifier("settings.removeExifToggle")
 
                 Divider().padding(.leading, 60)
 
@@ -74,6 +77,7 @@ struct SettingsView: View {
                     title: "고해상도 유지",
                     isOn: store.exportSettings.keepOriginalResolution
                 )
+                .accessibilityIdentifier("settings.keepResolutionToggle")
             }
         }
     }
@@ -91,8 +95,10 @@ struct SettingsView: View {
             AppCard {
                 VStack(spacing: 0) {
                     InfoRow(label: "버전", value: appVersion)
+                        .accessibilityIdentifier("settings.versionRow")
                     Divider().padding(.leading, Spacing.medium)
                     InfoRow(label: "개발", value: "Elvin Heo")
+                        .accessibilityIdentifier("settings.developerRow")
                 }
             }
         }

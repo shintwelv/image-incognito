@@ -82,12 +82,14 @@ struct ExportView: View {
                 }
                 .foregroundStyle(Color.appLabelSecondary)
             }
+            .accessibilityIdentifier("export.backButton")
 
             Spacer()
 
             Text("내보내기")
                 .font(.appBodyEmphasized)
                 .foregroundStyle(Color.appLabelPrimary)
+                .accessibilityIdentifier("export.title")
 
             Spacer()
 
@@ -127,6 +129,7 @@ struct ExportView: View {
                             style: .continuous
                         )
                     )
+                    .accessibilityIdentifier("export.previewImage")
                 } else {
                     Image(uiImage: viewModel.currentImage)
                         .resizable()
@@ -141,6 +144,7 @@ struct ExportView: View {
                                 style: .continuous
                             )
                         )
+                        .accessibilityIdentifier("export.previewImage")
                 }
 
                 HStack(spacing: Spacing.xSmall) {
@@ -150,6 +154,7 @@ struct ExportView: View {
                     Text(viewModel.maskedImages.count > 1 ? "\(viewModel.maskedImages.count)장 마스킹 완료" : "마스킹 완료")
                         .font(.appFootnote)
                         .foregroundStyle(Color.appLabelSecondary)
+                        .accessibilityIdentifier("export.completionBadge")
                     Spacer()
                     if viewModel.maskedImages.count > 1 {
                         Text("\(viewModel.currentPreviewIndex + 1)/\(viewModel.maskedImages.count)")
@@ -161,6 +166,7 @@ struct ExportView: View {
                         .font(.appCaption)
                         .foregroundStyle(Color.appLabelTertiary)
                         .monospacedDigit()
+                        .accessibilityIdentifier("export.dimensionLabel")
                 }
                 .padding(.horizontal, Spacing.medium)
                 .padding(.vertical, Spacing.small)
@@ -188,6 +194,7 @@ struct ExportView: View {
                     title: "위치 정보 제거",
                     isOn: $viewModel.settings.removeLocation
                 )
+                .accessibilityIdentifier("export.removeLocationToggle")
 
                 Divider()
                     .padding(.leading, 60)
@@ -197,6 +204,7 @@ struct ExportView: View {
                     title: "촬영 정보 제거",
                     isOn: $viewModel.settings.removeExif
                 )
+                .accessibilityIdentifier("export.removeExifToggle")
 
                 Divider()
                     .padding(.leading, 60)
@@ -206,6 +214,7 @@ struct ExportView: View {
                     title: "고해상도 유지",
                     isOn: $viewModel.settings.keepOriginalResolution
                 )
+                .accessibilityIdentifier("export.keepResolutionToggle")
             }
         }
     }
@@ -239,12 +248,14 @@ struct ExportView: View {
             .buttonStyle(.plain)
             .disabled(viewModel.isSaving)
             .animation(AppAnimation.snappy, value: viewModel.isSaving)
+            .accessibilityIdentifier("export.saveButton")
 
             // Secondary: Share to Instagram (system share sheet)
             SecondaryButton("인스타그램 공유", icon: "square.and.arrow.up") {
                 viewModel.shareImageTapped()
             }
             .disabled(viewModel.isSaving)
+            .accessibilityIdentifier("export.shareButton")
         }
     }
 }

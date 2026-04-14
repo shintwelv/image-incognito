@@ -2,7 +2,7 @@
 //  image_incognitoUITestsLaunchTests.swift
 //  image-incognitoUITests
 //
-//  Created by elvin on 3/27/26.
+//  Launch performance and screenshot tests.
 //
 
 import XCTest
@@ -15,5 +15,29 @@ final class image_incognitoUITestsLaunchTests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+    }
+
+    // MARK: - Launch Performance
+
+    func testLaunchPerformance() throws {
+        measure(metrics: [XCTApplicationLaunchMetric()]) {
+            let app = XCUIApplication()
+            app.launchArguments += ["--uitesting"]
+            app.launch()
+        }
+    }
+
+    // MARK: - Launch Screenshot
+
+    func testLaunchScreenshot() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["--uitesting"]
+        app.launch()
+
+        let screenshot = app.screenshot()
+        let attachment = XCTAttachment(screenshot: screenshot)
+        attachment.name = "Launch Screen"
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 }

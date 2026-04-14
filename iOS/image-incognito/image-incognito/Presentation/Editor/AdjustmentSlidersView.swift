@@ -24,15 +24,18 @@ struct AdjustmentSlidersView: View {
                 range: 0...1,
                 displayValue: "\(Int(intensity * 100))%"
             )
+            .accessibilityIdentifier("editor.intensitySlider")
             SliderRow(
                 title: "범위",
                 value: $sizeMultiplier,
                 range: 0.5...2.0,
                 displayValue: "\(Int(sizeMultiplier * 100))%"
             )
+            .accessibilityIdentifier("editor.sizeSlider")
             if selectedStyle == .solidClean {
                 ColorPickerRow(color: $solidCleanColor)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    .accessibilityIdentifier("editor.colorPicker")
             }
         }
         .padding(Spacing.medium)

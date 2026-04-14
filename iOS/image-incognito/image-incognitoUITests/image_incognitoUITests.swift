@@ -2,7 +2,12 @@
 //  image_incognitoUITests.swift
 //  image-incognitoUITests
 //
-//  Created by elvin on 3/27/26.
+//  Base test file. Individual screen tests are in separate files:
+//  - HomeViewUITests.swift
+//  - EditorViewUITests.swift
+//  - ExportViewUITests.swift
+//  - SettingsViewUITests.swift
+//  - NavigationFlowUITests.swift
 //
 
 import XCTest
@@ -10,15 +15,16 @@ import XCTest
 final class image_incognitoUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    override func tearDownWithError() throws {}
+
+    /// Smoke test: app launches without crashing.
+    func testAppLaunches() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["--uitesting"]
+        app.launch()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: UITestTimeout.standard))
     }
 }

@@ -26,6 +26,7 @@ struct ToastView: View {
         .background(.ultraThinMaterial)
         .clipShape(Capsule())
         .appShadow(.card)
+        .accessibilityIdentifier("toast")
     }
 }
 

@@ -25,6 +25,7 @@ struct DetectingSkeletonView: View {
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .appShadow(.card)
+        .accessibilityIdentifier("editor.detectingOverlay")
     }
 }
 
@@ -46,5 +47,6 @@ struct NoFaceFoundView: View {
         .padding(.vertical, Spacing.large)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .accessibilityIdentifier("editor.noFaceFound")
     }
 }

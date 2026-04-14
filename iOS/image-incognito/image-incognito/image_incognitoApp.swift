@@ -11,7 +11,9 @@ import FirebaseCore
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
+    if !ProcessInfo.processInfo.arguments.contains("--uitesting") {
+        FirebaseApp.configure()
+    }
 
     return true
   }
@@ -24,6 +26,10 @@ struct image_incognitoApp: App {
 
     @State private var settingsStore = SettingsStore()
     @State private var incomingImageStore = IncomingImageStore()
+
+    private var isUITesting: Bool {
+        ProcessInfo.processInfo.arguments.contains("--uitesting")
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -41,6 +47,23 @@ struct image_incognitoApp: App {
                         incomingImageStore.pendingImages = [image]
                     }
                 }
+                .onAppear {
+                    if isUITesting {
+                        injectUITestingState()
+                    }
+                }
         }
+    }
+
+    /// Injects stub images so UI tests can navigate to EditorView on Simulator
+    /// (where VisionKit face detection is unavailable).
+    private func injectUITestingState() {
+        let size = CGSize(width: 400, height: 600)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let stubImage = renderer.image { ctx in
+            UIColor.systemGray5.setFill()
+            ctx.fill(CGRect(origin: .zero, size: size))
+        }
+        incomingImageStore.pendingImages = [stubImage]
     }
 }

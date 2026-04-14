@@ -82,6 +82,7 @@ struct EditorView: View {
                 }
                 .foregroundStyle(Color.appLabelSecondary)
             }
+            .accessibilityIdentifier("editor.cancelButton")
 
             Spacer()
 
@@ -101,11 +102,13 @@ struct EditorView: View {
                         Text("\(currentIndex + 1)/\(viewModels.count)")
                             .font(.appFootnote)
                             .foregroundStyle(Color.appLabelTertiary)
+                            .accessibilityIdentifier("editor.imageCounter")
                     }
                     if !currentVM.faces.isEmpty {
                         Text("\(currentVM.faces.count)명 감지됨")
                             .font(.appFootnote)
                             .foregroundStyle(Color.appLabelTertiary)
+                            .accessibilityIdentifier("editor.faceCount")
                     }
                 }
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
@@ -133,6 +136,7 @@ struct EditorView: View {
                 .animation(AppAnimation.snappy, value: isExporting)
             }
             .disabled(isExporting)
+            .accessibilityIdentifier("editor.exportButton")
         }
         .animation(AppAnimation.snappy, value: currentVM.isDetecting)
         .animation(AppAnimation.snappy, value: currentVM.faces.count)
@@ -148,6 +152,7 @@ struct EditorView: View {
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
+        .accessibilityIdentifier("editor.imageCarousel")
     }
 
     // MARK: - Page Indicator
@@ -161,6 +166,7 @@ struct EditorView: View {
                     .animation(AppAnimation.snappy, value: currentIndex)
             }
         }
+        .accessibilityIdentifier("editor.pageIndicator")
     }
 
     // MARK: - Image Canvas
@@ -195,6 +201,7 @@ struct EditorView: View {
                     )
                     .frame(width: frame.width, height: frame.height)
                     .contentShape(Ellipse())
+                    .accessibilityIdentifier("editor.faceOverlay.\(face.id.uuidString)")
                     .gesture(
                         LongPressGesture(minimumDuration: 0.4)
                             .exclusively(before: TapGesture())
@@ -261,6 +268,7 @@ struct EditorView: View {
                         ) {
                             vm.selectStyle(style)
                         }
+                        .accessibilityIdentifier("editor.stylePill.\(style.rawValue)")
                     }
                 }
             }
