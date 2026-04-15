@@ -29,7 +29,7 @@ iOS app (Incognify) — detects faces in photos and applies privacy masks. iOS 1
 | Typography | SF, Body 17pt, Title 28pt Bold |
 
 ## Constraints
-- VisionKit does not work on Simulator — use device for face detection testing.
+- VisionKit does not find faces on Simulator, it just return empty array — use device for face detection testing.
 - Image processing must run on background threads.
 - After fixing a bug or implementing a feature, add or update the relevant test code.
 - Unit-test Domain logic and Data layer pipelines.
