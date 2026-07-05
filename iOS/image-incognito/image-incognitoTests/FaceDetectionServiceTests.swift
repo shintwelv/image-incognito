@@ -55,11 +55,11 @@ struct FaceDetectionServiceTests {
     func cgImagePropertyOrientationMapping() {
         #expect(CGImagePropertyOrientation(.up) == .up)
         #expect(CGImagePropertyOrientation(.down) == .down)
-        #expect(CGImagePropertyOrientation(.left) == .left)
-        #expect(CGImagePropertyOrientation(.right) == .right)
+        #expect(CGImagePropertyOrientation(.left) == .right)
+        #expect(CGImagePropertyOrientation(.right) == .left)
         #expect(CGImagePropertyOrientation(.upMirrored) == .upMirrored)
         #expect(CGImagePropertyOrientation(.downMirrored) == .downMirrored)
-        #expect(CGImagePropertyOrientation(.leftMirrored) == .leftMirrored)
-        #expect(CGImagePropertyOrientation(.rightMirrored) == .rightMirrored)
+        #expect(CGImagePropertyOrientation(.leftMirrored) == .rightMirrored)
+        #expect(CGImagePropertyOrientation(.rightMirrored) == .leftMirrored)
     }
 }

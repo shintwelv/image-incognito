@@ -60,12 +60,12 @@ extension CGImagePropertyOrientation {
         switch uiOrientation {
         case .up:            self = .up
         case .down:          self = .down
-        case .left:          self = .left
-        case .right:         self = .right
+        case .left:          self = .right
+        case .right:         self = .left
         case .upMirrored:    self = .upMirrored
         case .downMirrored:  self = .downMirrored
-        case .leftMirrored:  self = .leftMirrored
-        case .rightMirrored: self = .rightMirrored
+        case .leftMirrored:  self = .rightMirrored
+        case .rightMirrored: self = .leftMirrored
         @unknown default:    self = .up
         }
     }
