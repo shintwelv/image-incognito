@@ -52,21 +52,20 @@ final class FaceDetectionService: FaceDetectionRepositoryProtocol {
 // MARK: - UIImage.Orientation → CGImagePropertyOrientation
 
 /// Bridges `UIImage.Orientation` to the EXIF-based `CGImagePropertyOrientation`
-/// required by `VNImageRequestHandler`. Without this mapping, Vision processes
-/// every image as if it were unrotated (.up) and returns bounding boxes in the
-/// wrong coordinate space for portrait photos.
+/// required by `VNImageRequestHandler`.
 extension CGImagePropertyOrientation {
     init(_ uiOrientation: UIImage.Orientation) {
         switch uiOrientation {
         case .up:            self = .up
         case .down:          self = .down
-        case .left:          self = .right
-        case .right:         self = .left
+        case .left:          self = .left
+        case .right:         self = .right
         case .upMirrored:    self = .upMirrored
         case .downMirrored:  self = .downMirrored
-        case .leftMirrored:  self = .rightMirrored
-        case .rightMirrored: self = .leftMirrored
+        case .leftMirrored:  self = .leftMirrored
+        case .rightMirrored: self = .rightMirrored
         @unknown default:    self = .up
         }
     }
 }
+
