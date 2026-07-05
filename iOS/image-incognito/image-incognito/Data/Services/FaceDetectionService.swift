@@ -25,23 +25,18 @@ final class FaceDetectionService: FaceDetectionRepositoryProtocol {
 
     func detectFaces(in image: UIImage) async throws -> [FaceBox] {
         guard let cgImage = image.cgImage else { return [] }
-
-        let request = VNDetectFaceRectanglesRequest()
         let orientation = CGImagePropertyOrientation(image.imageOrientation)
-        let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
 
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            do {
-                try handler.perform([request])
-                continuation.resume()
-            } catch {
-                continuation.resume(throwing: error)
+        return try await Task.detached(priority: .userInitiated) {
+            let request = VNDetectFaceRectanglesRequest()
+            let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
+            
+            try handler.perform([request])
+            
+            return (request.results ?? []).map { observation in
+                FaceBox(rect: Self.topLeftBoundingBox(fromVisionBoundingBox: observation.boundingBox))
             }
-        }
-
-        return (request.results ?? []).map { observation in
-            FaceBox(rect: Self.topLeftBoundingBox(fromVisionBoundingBox: observation.boundingBox))
-        }
+        }.value
     }
 
     nonisolated static func topLeftBoundingBox(fromVisionBoundingBox boundingBox: CGRect) -> CGRect {

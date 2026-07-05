@@ -282,10 +282,20 @@ struct EditorView: View {
         AppHaptics.medium()
         isExporting = true
 
-        var results: [UIImage] = []
-        for vm in viewModels {
-            let image = await vm.renderImage()
-            results.append(image)
+        let results: [UIImage] = await withTaskGroup(of: (Int, UIImage).self) { group in
+            for (index, vm) in viewModels.enumerated() {
+                group.addTask {
+                    let image = await vm.renderImage()
+                    return (index, image)
+                }
+            }
+            
+            var unorderedResults: [(Int, UIImage)] = []
+            for await result in group {
+                unorderedResults.append(result)
+            }
+            
+            return unorderedResults.sorted { $0.0 < $1.0 }.map { $1 }
         }
 
         isExporting = false
