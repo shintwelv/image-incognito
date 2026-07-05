@@ -39,7 +39,8 @@ final class EditorViewUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["editor.cancelButton"].exists, "Cancel button should exist")
         XCTAssertTrue(app.buttons["editor.exportButton"].exists, "Export button should exist")
-        XCTAssertTrue(app.otherElements["editor.imageCarousel"].exists, "Image carousel should exist")
+        let carousel = app.descendants(matching: .any)["editor.imageCarousel"].firstMatch
+        XCTAssertTrue(carousel.exists, "Image carousel should exist")
     }
 
     // MARK: - Cancel
@@ -60,7 +61,7 @@ final class EditorViewUITests: XCTestCase {
 
         // On Simulator with a blank stub image, VisionKit won't detect faces.
         // Wait for detection to complete and show "no face found".
-        let noFaceView = app.otherElements["editor.noFaceFound"]
+        let noFaceView = app.descendants(matching: .any)["editor.noFaceFound"].firstMatch
         XCTAssertTrue(noFaceView.waitForExistence(timeout: UITestTimeout.long), "No-face-found view should appear for blank stub image on Simulator")
     }
 

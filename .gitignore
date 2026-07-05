@@ -64,3 +64,4 @@ Marketing*.md
 GoogleService-Info.plist
 refactor.md
 uitest-plan.md
+*.xcresult
