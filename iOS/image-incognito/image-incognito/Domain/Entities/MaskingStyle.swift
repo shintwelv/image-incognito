@@ -10,6 +10,7 @@ import Foundation
 nonisolated enum MaskingStyle: String, CaseIterable, Identifiable, Sendable {
     case blurredGlass
     case pixelArt
+    case crystalize
     case solidClean
 
     var id: String { rawValue }
@@ -18,6 +19,7 @@ nonisolated enum MaskingStyle: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .blurredGlass: return "Blurred Glass"
         case .pixelArt:     return "Pixel Art"
+        case .crystalize:   return "Crystalize"
         case .solidClean:   return "Solid Clean"
         }
     }
@@ -26,6 +28,7 @@ nonisolated enum MaskingStyle: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .blurredGlass: return "drop.halffull"
         case .pixelArt:     return "square.grid.3x3.fill"
+        case .crystalize:   return "diamond.fill"
         case .solidClean:   return "circle.fill"
         }
     }

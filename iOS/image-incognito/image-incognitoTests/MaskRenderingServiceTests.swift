@@ -91,6 +91,16 @@ struct MaskRenderingServiceTests {
         #expect(result.size == image.size)
     }
 
+    @Test("crystalize style does not throw")
+    func renderCrystalize() async throws {
+        let image = makeTestImage(size: CGSize(width: 300, height: 300))
+        let result = try await service.render(
+            image: image, faces: [makeFace(style: .crystalize)]
+        )
+
+        #expect(result.size == image.size)
+    }
+
     @Test("solidClean style does not throw")
     func renderSolidClean() async throws {
         let image = makeTestImage(size: CGSize(width: 300, height: 300))

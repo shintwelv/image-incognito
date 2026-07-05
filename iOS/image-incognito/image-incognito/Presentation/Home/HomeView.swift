@@ -28,10 +28,8 @@ struct HomeView: View {
                             .padding(.top, Spacing.xxLarge)
                             .padding(.horizontal, Spacing.large)
 
-                        if !viewModel.recentItems.isEmpty {
-                            recentSection
-                                .padding(.top, Spacing.xxLarge)
-                        }
+                        recentSection
+                            .padding(.top, Spacing.xxLarge)
 
                         Spacer(minLength: Spacing.xxxLarge)
                     }
@@ -116,54 +114,60 @@ struct HomeView: View {
     // MARK: - Hero Section
 
     private var heroSection: some View {
-        ZStack {
-            // Background gradient card
-            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.appPrimary.opacity(0.18),
-                            Color.appPrimary.opacity(0.06)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+        Button {
+            viewModel.selectPhotoTapped()
+        } label: {
+            ZStack {
+                // Background gradient card
+                RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.appPrimary.opacity(0.18),
+                                Color.appPrimary.opacity(0.06)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .frame(height: 300)
-                .padding(.horizontal, Spacing.large)
+                    .frame(height: 300)
+                    .padding(.horizontal, Spacing.large)
 
-            VStack(spacing: Spacing.large) {
-                // Placeholder illustration
-                ZStack {
-                    Circle()
-                        .fill(Color.appPrimary.opacity(0.12))
-                        .frame(width: 100, height: 100)
+                VStack(spacing: Spacing.large) {
+                    // Placeholder illustration
+                    ZStack {
+                        Circle()
+                            .fill(Color.appPrimary)
+                            .frame(width: 100, height: 100)
+                            .appShadow(.floating)
 
-                    Image(systemName: "person.crop.circle.badge.questionmark")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 54, height: 54)
-                        .foregroundStyle(Color.appPrimary)
-                }
+                        Image(systemName: "photo.on.rectangle.angled")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 44, height: 44)
+                            .foregroundStyle(.white)
+                    }
 
-                // Hero copy
-                VStack(spacing: Spacing.xSmall) {
-                    Text("프라이버시를 보호할")
-                        .font(.appTitle)
-                        .foregroundStyle(Color.appLabelPrimary)
-                    Text("사진을 선택하세요")
-                        .font(.appTitle)
-                        .foregroundStyle(Color.appPrimary)
-                }
-                .multilineTextAlignment(.center)
-
-                Text("AI가 자동으로 얼굴을 찾아 마스킹해드립니다.")
-                    .font(.appSubheadline)
-                    .foregroundStyle(Color.appLabelSecondary)
+                    // Hero copy
+                    VStack(spacing: Spacing.xSmall) {
+                        Text("프라이버시를 보호할")
+                            .font(.appTitle)
+                            .foregroundStyle(Color.appLabelPrimary)
+                        Text("사진 선택하기")
+                            .font(.appTitle)
+                            .foregroundStyle(Color.appPrimary)
+                    }
                     .multilineTextAlignment(.center)
+
+                    Text("AI가 자동으로 얼굴을 찾아 마스킹해드립니다.")
+                        .font(.appSubheadline)
+                        .foregroundStyle(Color.appLabelSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, Spacing.xxLarge)
             }
-            .padding(.horizontal, Spacing.xxLarge)
         }
+        .buttonStyle(.plain)
         .accessibilityIdentifier("home.heroCard")
     }
 
@@ -171,11 +175,6 @@ struct HomeView: View {
 
     private var actionSection: some View {
         VStack(spacing: Spacing.medium) {
-            PrimaryButton("사진 선택", icon: "photo.on.rectangle.angled") {
-                viewModel.selectPhotoTapped()
-            }
-            .accessibilityIdentifier("home.selectPhotosButton")
-
             SecondaryButton("카메라 촬영", icon: "camera") {
                 viewModel.cameraTapped()
             }
@@ -193,20 +192,39 @@ struct HomeView: View {
                     .foregroundStyle(Color.appLabelPrimary)
                     .accessibilityIdentifier("home.recentSectionTitle")
                 Spacer()
-                Button("모두 보기") {}
-                    .font(.appSubheadline)
-                    .foregroundStyle(Color.appPrimary)
-                    .accessibilityIdentifier("home.recentSeeAllButton")
+                if !viewModel.recentItems.isEmpty {
+                    Button("모두 보기") {}
+                        .font(.appSubheadline)
+                        .foregroundStyle(Color.appPrimary)
+                        .accessibilityIdentifier("home.recentSeeAllButton")
+                }
             }
             .padding(.horizontal, Spacing.large)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: Spacing.medium) {
-                    ForEach(viewModel.recentItems) { item in
-                        RecentItemThumbnail(item: item)
-                    }
+            if viewModel.recentItems.isEmpty {
+                VStack(spacing: Spacing.medium) {
+                    Image(systemName: "face.dashed")
+                        .font(.system(size: 40))
+                        .foregroundStyle(Color.appLabelTertiary)
+                    Text("최근 작업이 없습니다.\n위에서 사진을 선택해 시작해보세요.")
+                        .font(.appSubheadline)
+                        .foregroundStyle(Color.appLabelSecondary)
+                        .multilineTextAlignment(.center)
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, Spacing.xLarge)
+                .background(Color.appPrimary.opacity(0.04))
+                .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 .padding(.horizontal, Spacing.large)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.medium) {
+                        ForEach(viewModel.recentItems) { item in
+                            RecentItemThumbnail(item: item)
+                        }
+                    }
+                    .padding(.horizontal, Spacing.large)
+                }
             }
         }
     }

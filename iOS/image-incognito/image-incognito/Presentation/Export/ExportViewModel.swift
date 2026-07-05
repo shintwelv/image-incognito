@@ -15,13 +15,17 @@ final class ExportViewModel {
 
     // MARK: - Input
 
+    /// Original source images before masking.
+    let originalImages: [UIImage]
+
     /// All final masked images passed from the AI Editor.
     let maskedImages: [UIImage]
 
     /// The image currently shown in the preview pager.
     var currentPreviewIndex: Int = 0
 
-    var currentImage: UIImage { maskedImages[currentPreviewIndex] }
+    var currentMaskedImage: UIImage { maskedImages[currentPreviewIndex] }
+    var currentOriginalImage: UIImage { originalImages[currentPreviewIndex] }
 
     // MARK: - Settings
 
@@ -48,10 +52,12 @@ final class ExportViewModel {
     // MARK: - Init
 
     init(
+        originalImages: [UIImage],
         maskedImages: [UIImage],
         processExportUseCase: ProcessExportUseCase = ProcessExportUseCase(repository: ExportImageProcessingService()),
         saveToPhotosUseCase: SaveToPhotosUseCase = SaveToPhotosUseCase(repository: PhotoLibraryService())
     ) {
+        self.originalImages = originalImages
         self.maskedImages = maskedImages
         self.processExportUseCase = processExportUseCase
         self.saveToPhotosUseCase = saveToPhotosUseCase

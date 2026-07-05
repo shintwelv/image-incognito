@@ -66,6 +66,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
                 switch face.style {
                 case .blurredGlass: applyBlur(rect: rect, image: image, intensity: face.intensity)
                 case .pixelArt:     applyPixelArt(rect: rect, image: image, intensity: face.intensity)
+                case .crystalize:   applyCrystalize(rect: rect, image: image, intensity: face.intensity)
                 case .solidClean:   applySolid(rect: rect, intensity: face.intensity, color: solidCleanColor)
                 }
             }
@@ -177,6 +178,41 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         let minEdge = min(ci.extent.width, ci.extent.height)
         let maxScale = Float(minEdge * 0.08) // it is natural to set block's size between shorter edge's 5% ~ 8%
         filter.scale = 1.0 + (maxScale - 1.0) * Float(intensity)
+        filter.center = CGPoint(x: ci.extent.midX, y: ci.extent.midY)
+
+        guard let output = filter.outputImage,
+              let result = ciContext.createCGImage(output, from: ci.extent) else { return nil }
+        return UIImage(cgImage: result, scale: image.scale, orientation: .up)
+    }
+
+    // MARK: - Crystalize (crystalize)
+
+    nonisolated private func applyCrystalize(rect: CGRect, image: UIImage, intensity: Double) {
+        guard
+            let ctx = UIGraphicsGetCurrentContext(),
+            let crystalized = makeCrystalizeCrop(of: image, rect: rect, intensity: intensity)
+        else { return }
+
+        ctx.saveGState()
+        ctx.addPath(UIBezierPath(ovalIn: rect).cgPath)
+        ctx.clip()
+        crystalized.draw(in: rect)
+        ctx.restoreGState()
+    }
+
+    nonisolated private func makeCrystalizeCrop(of image: UIImage, rect: CGRect, intensity: Double) -> UIImage? {
+        guard let cgImage = image.cgImage else { return nil }
+        let bounds = pixelBounds(for: rect, scale: image.scale, cgImage: cgImage)
+        guard bounds.width > 0, bounds.height > 0,
+              let cropped = cgImage.cropping(to: bounds) else { return nil }
+
+        let ci = CIImage(cgImage: cropped)
+        let filter = CIFilter.crystallize()
+        filter.inputImage = ci
+        
+        let minEdge = min(ci.extent.width, ci.extent.height)
+        let maxRadius = Float(minEdge * 0.15)
+        filter.radius = 1.0 + (maxRadius - 1.0) * Float(intensity)
         filter.center = CGPoint(x: ci.extent.midX, y: ci.extent.midY)
 
         guard let output = filter.outputImage,

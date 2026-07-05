@@ -11,11 +11,12 @@ import SwiftUI
 struct ExportView: View {
 
     @State private var viewModel: ExportViewModel
+    @State private var isShowingOriginal: Bool = false
     @Environment(SettingsStore.self) private var settingsStore
     @Environment(\.dismiss) private var dismiss
 
-    init(maskedImages: [UIImage]) {
-        _viewModel = State(initialValue: ExportViewModel(maskedImages: maskedImages))
+    init(originalImages: [UIImage], maskedImages: [UIImage]) {
+        _viewModel = State(initialValue: ExportViewModel(originalImages: originalImages, maskedImages: maskedImages))
     }
 
     var body: some View {
@@ -47,7 +48,7 @@ struct ExportView: View {
         }
         // System share sheet
         .sheet(isPresented: $viewModel.isShowingShareSheet) {
-            ShareSheet(items: [viewModel.imageToShare ?? viewModel.currentImage])
+            ShareSheet(items: [viewModel.imageToShare ?? viewModel.currentMaskedImage])
                 .ignoresSafeArea()
         }
         // Save error alert
@@ -110,7 +111,7 @@ struct ExportView: View {
                         set: { viewModel.currentPreviewIndex = $0 }
                     )) {
                         ForEach(viewModel.maskedImages.indices, id: \.self) { index in
-                            Image(uiImage: viewModel.maskedImages[index])
+                            Image(uiImage: isShowingOriginal ? viewModel.originalImages[index] : viewModel.maskedImages[index])
                                 .resizable()
                                 .scaledToFit()
                                 .frame(maxWidth: .infinity)
@@ -131,7 +132,7 @@ struct ExportView: View {
                     )
                     .accessibilityIdentifier("export.previewImage")
                 } else {
-                    Image(uiImage: viewModel.currentImage)
+                    Image(uiImage: isShowingOriginal ? viewModel.currentOriginalImage : viewModel.currentMaskedImage)
                         .resizable()
                         .scaledToFit()
                         .frame(maxWidth: .infinity)
@@ -172,10 +173,15 @@ struct ExportView: View {
                 .padding(.vertical, Spacing.small)
             }
         }
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isShowingOriginal = true }
+                .onEnded { _ in isShowingOriginal = false }
+        )
     }
 
     private var imageSizeDescription: String {
-        let size = viewModel.currentImage.size
+        let size = viewModel.currentOriginalImage.size
         return "\(Int(size.width)) × \(Int(size.height))"
     }
 
@@ -223,14 +229,21 @@ struct ExportView: View {
 
     private var actionButtons: some View {
         VStack(spacing: Spacing.medium) {
-            // Primary: Save to Photos
+            // Primary: Share
+            PrimaryButton("공유하기", icon: "square.and.arrow.up") {
+                viewModel.shareImageTapped()
+            }
+            .disabled(viewModel.isSaving)
+            .accessibilityIdentifier("export.shareButton")
+
+            // Secondary: Save to Photos
             Button {
                 Task { await viewModel.saveToPhotos() }
             } label: {
                 HStack(spacing: Spacing.xSmall) {
                     if viewModel.isSaving {
                         ProgressView()
-                            .tint(.white)
+                            .tint(Color.appPrimary)
                             .scaleEffect(0.85)
                     } else {
                         Image(systemName: "square.and.arrow.down")
@@ -241,21 +254,14 @@ struct ExportView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.medium)
-                .background(Color.appPrimary)
-                .foregroundStyle(.white)
+                .background(Color.appPrimary.opacity(0.12))
+                .foregroundStyle(Color.appPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: Radius.button, style: .continuous))
             }
             .buttonStyle(.plain)
             .disabled(viewModel.isSaving)
             .animation(AppAnimation.snappy, value: viewModel.isSaving)
             .accessibilityIdentifier("export.saveButton")
-
-            // Secondary: Share to Instagram (system share sheet)
-            SecondaryButton("인스타그램 공유", icon: "square.and.arrow.up") {
-                viewModel.shareImageTapped()
-            }
-            .disabled(viewModel.isSaving)
-            .accessibilityIdentifier("export.shareButton")
         }
     }
 }
@@ -264,14 +270,14 @@ struct ExportView: View {
 
 #Preview("Export – Light") {
     NavigationStack {
-        ExportView(maskedImages: [previewMaskedImage(), previewMaskedImage()])
+        ExportView(originalImages: [previewMaskedImage(), previewMaskedImage()], maskedImages: [previewMaskedImage(), previewMaskedImage()])
     }
     .environment(SettingsStore())
 }
 
 #Preview("Export – Dark Mode") {
     NavigationStack {
-        ExportView(maskedImages: [previewMaskedImage()])
+        ExportView(originalImages: [previewMaskedImage()], maskedImages: [previewMaskedImage()])
     }
     .environment(SettingsStore())
     .preferredColorScheme(.dark)

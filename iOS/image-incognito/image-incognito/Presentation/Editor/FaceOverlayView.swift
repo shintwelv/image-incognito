@@ -20,9 +20,12 @@ struct FaceOverlayView: View {
         ZStack {
             if faceBox.isMasked {
                 maskLayer
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
             borderLayer
         }
+        .animation(AppAnimation.standard, value: faceBox.isMasked)
+        .animation(AppAnimation.standard, value: faceBox.style)
     }
 
     @ViewBuilder
@@ -39,6 +42,9 @@ struct FaceOverlayView: View {
 
         case .pixelArt:
             PixelArtMaskView(intensity: faceBox.intensity)
+
+        case .crystalize:
+            CrystalizeMaskView(intensity: faceBox.intensity)
 
         case .solidClean:
             Ellipse()
@@ -86,6 +92,35 @@ struct PixelArtMaskView: View {
                         Path(rect),
                         with: .color(palette[idx].opacity(intensity))
                     )
+                }
+            }
+        }
+        .clipShape(Ellipse())
+    }
+}
+
+// MARK: - Crystalize Mask View
+
+struct CrystalizeMaskView: View {
+    let intensity: Double
+    
+    var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            let step = max(size.width, size.height) / 6
+            Canvas { context, size in
+                for x in stride(from: 0, to: size.width, by: step) {
+                    for y in stride(from: 0, to: size.height, by: step) {
+                        var path = Path()
+                        path.move(to: CGPoint(x: x + step/2, y: y))
+                        path.addLine(to: CGPoint(x: x + step, y: y + step/2))
+                        path.addLine(to: CGPoint(x: x + step/2, y: y + step))
+                        path.addLine(to: CGPoint(x: x, y: y + step/2))
+                        path.closeSubpath()
+                        
+                        let alpha = 0.3 + (Double((Int(x+y) % 3)) * 0.2)
+                        context.fill(path, with: .color(Color(white: 0.8).opacity(alpha * intensity)))
+                    }
                 }
             }
         }

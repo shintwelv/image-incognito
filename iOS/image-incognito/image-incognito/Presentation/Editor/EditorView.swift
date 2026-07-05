@@ -45,6 +45,7 @@ struct EditorView: View {
                     .animation(AppAnimation.standard, value: currentVM.showAdjustmentSliders)
             }
         }
+        .preferredColorScheme(.dark)
         .toolbar(.hidden, for: .navigationBar)
         .task {
             await withTaskGroup(of: Void.self) { group in
@@ -60,7 +61,10 @@ struct EditorView: View {
             )
         ) {
             if let images = allRenderedImages {
-                ExportView(maskedImages: images)
+                ExportView(
+                    originalImages: viewModels.map { $0.sourceImage },
+                    maskedImages: images
+                )
             }
         }
     }

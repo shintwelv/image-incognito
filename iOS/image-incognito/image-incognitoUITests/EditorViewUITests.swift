@@ -49,7 +49,7 @@ final class EditorViewUITests: XCTestCase {
 
         app.buttons["editor.cancelButton"].tap()
 
-        let heroCard = app.otherElements["home.heroCard"]
+        let heroCard = app.buttons["home.heroCard"]
         XCTAssertTrue(heroCard.waitForExistence(timeout: UITestTimeout.standard), "Should return to HomeView after cancel")
     }
 
@@ -72,6 +72,7 @@ final class EditorViewUITests: XCTestCase {
         XCTAssertTrue(app.buttons["editor.stylePill.blurredGlass"].waitForExistence(timeout: UITestTimeout.standard), "Blurred Glass pill should exist")
         XCTAssertTrue(app.buttons["editor.stylePill.pixelArt"].exists, "Pixel Art pill should exist")
         XCTAssertTrue(app.buttons["editor.stylePill.solidClean"].exists, "Solid Clean pill should exist")
+        XCTAssertTrue(app.buttons["editor.stylePill.crystalize"].exists, "Crystalize pill should exist")
     }
 
     func testStylePillSelection() throws {

@@ -34,11 +34,8 @@ final class HomeViewUITests: XCTestCase {
             cancelButton.tap()
         }
 
-        let heroCard = app.otherElements["home.heroCard"]
+        let heroCard = app.buttons["home.heroCard"]
         XCTAssertTrue(heroCard.waitForExistence(timeout: UITestTimeout.standard), "Hero card should be visible")
-
-        let selectPhotosButton = app.buttons["home.selectPhotosButton"]
-        XCTAssertTrue(selectPhotosButton.exists, "Select Photos button should be visible")
 
         let cameraButton = app.buttons["home.cameraButton"]
         XCTAssertTrue(cameraButton.exists, "Camera button should be visible")
@@ -83,7 +80,7 @@ final class HomeViewUITests: XCTestCase {
         closeButton.tap()
 
         // Verify settings dismissed — hero card should be visible again
-        let heroCard = app.otherElements["home.heroCard"]
+        let heroCard = app.buttons["home.heroCard"]
         XCTAssertTrue(heroCard.waitForExistence(timeout: UITestTimeout.standard), "Should return to Home after closing Settings")
     }
 
@@ -97,9 +94,9 @@ final class HomeViewUITests: XCTestCase {
             cancelButton.tap()
         }
 
-        let selectPhotosButton = app.buttons["home.selectPhotosButton"]
-        XCTAssertTrue(selectPhotosButton.waitForExistence(timeout: UITestTimeout.standard))
-        selectPhotosButton.tap()
+        let heroCard = app.buttons["home.heroCard"]
+        XCTAssertTrue(heroCard.waitForExistence(timeout: UITestTimeout.standard))
+        heroCard.tap()
 
         // PHPicker presents a system navigation bar with "Cancel"
         let pickerCancel = app.buttons["Cancel"]

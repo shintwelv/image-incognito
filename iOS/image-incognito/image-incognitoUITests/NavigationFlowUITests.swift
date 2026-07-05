@@ -64,7 +64,7 @@ final class NavigationFlowUITests: XCTestCase {
         closeButton.tap()
 
         // Verify back on Home
-        let heroCard = app.otherElements["home.heroCard"]
+        let heroCard = app.buttons["home.heroCard"]
         XCTAssertTrue(heroCard.waitForExistence(timeout: UITestTimeout.standard), "Should be back on Home")
     }
 
@@ -112,7 +112,7 @@ final class NavigationFlowUITests: XCTestCase {
 
         // Editor → Home
         cancelButton.tap()
-        let heroCard = app.otherElements["home.heroCard"]
+        let heroCard = app.buttons["home.heroCard"]
         XCTAssertTrue(heroCard.waitForExistence(timeout: UITestTimeout.standard), "Should be back on Home after deep navigation")
     }
 }

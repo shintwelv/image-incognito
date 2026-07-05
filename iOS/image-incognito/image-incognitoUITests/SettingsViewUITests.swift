@@ -66,7 +66,7 @@ final class SettingsViewUITests: XCTestCase {
 
         app.buttons["settings.closeButton"].tap()
 
-        let heroCard = app.otherElements["home.heroCard"]
+        let heroCard = app.buttons["home.heroCard"]
         XCTAssertTrue(heroCard.waitForExistence(timeout: UITestTimeout.standard), "Should return to Home after closing Settings")
     }
 
