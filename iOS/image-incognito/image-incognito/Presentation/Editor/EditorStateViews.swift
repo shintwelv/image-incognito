@@ -16,7 +16,7 @@ struct DetectingSkeletonView: View {
             ProgressView()
                 .tint(Color.appPrimary)
                 .scaleEffect(1.2)
-            Text("인물 찾는 중...")
+            Text("editor.detecting")
                 .font(.appSubheadline)
                 .foregroundStyle(Color.appLabelSecondary)
         }
@@ -40,7 +40,7 @@ struct NoFaceFoundView: View {
                 .scaledToFit()
                 .frame(width: 40)
                 .foregroundStyle(Color.appLabelTertiary)
-            Text("감지된 얼굴이 없습니다")
+            Text("editor.noFaceFound")
                 .font(.appSubheadline)
                 .foregroundStyle(Color.appLabelSecondary)
         }

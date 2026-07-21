@@ -35,7 +35,7 @@ final class ExportViewModel {
 
     var isSaving: Bool = false
     var showSaveToast: Bool = false
-    var saveToastMessage: String = "저장 완료"
+    var saveToastMessage: String = String(localized: "export.saveSuccess")
     var saveError: String? = nil
 
     // MARK: - Share state
@@ -85,7 +85,7 @@ final class ExportViewModel {
         isSaving = false
         if savedCount > 0 {
             AppHaptics.success()
-            saveToastMessage = maskedImages.count > 1 ? "\(savedCount)장 저장 완료" : "저장 완료"
+            saveToastMessage = maskedImages.count > 1 ? String(format: String(localized: "export.saveSuccessPlural"), savedCount) : String(localized: "export.saveSuccess")
             withAnimation(AppAnimation.standard) {
                 showSaveToast = true
             }

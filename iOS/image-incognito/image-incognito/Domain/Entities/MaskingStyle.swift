@@ -17,10 +17,10 @@ nonisolated enum MaskingStyle: String, CaseIterable, Identifiable, Sendable {
 
     var label: String {
         switch self {
-        case .blurredGlass: return "Blurred Glass"
-        case .pixelArt:     return "Pixel Art"
-        case .crystalize:   return "Crystalize"
-        case .solidClean:   return "Solid Clean"
+        case .blurredGlass: return "style.blurredGlass"
+        case .pixelArt:     return "style.pixelArt"
+        case .crystalize:   return "style.crystalize"
+        case .solidClean:   return "style.solidClean"
         }
     }
 

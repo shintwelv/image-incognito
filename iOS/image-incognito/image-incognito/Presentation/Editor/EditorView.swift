@@ -81,7 +81,7 @@ struct EditorView: View {
                     Image(systemName: "chevron.left")
                         .imageScale(.medium)
                         .fontWeight(.semibold)
-                    Text("취소")
+                    Text("editor.cancel")
                         .font(.appBody)
                 }
                 .foregroundStyle(Color.appLabelSecondary)
@@ -95,7 +95,7 @@ struct EditorView: View {
                     ProgressView()
                         .tint(Color.appPrimary)
                         .scaleEffect(0.8)
-                    Text("인물 찾는 중...")
+                    Text("editor.detecting")
                         .font(.appFootnote)
                         .foregroundStyle(Color.appLabelSecondary)
                 }
@@ -129,7 +129,7 @@ struct EditorView: View {
                             .tint(.white)
                             .scaleEffect(0.75)
                     }
-                    Text(isExporting ? "준비 중..." : "내보내기")
+                    Text(isExporting ? "editor.preparing" : "editor.export")
                         .font(.appBodyEmphasized)
                         .foregroundStyle(.white)
                 }
@@ -206,18 +206,9 @@ struct EditorView: View {
                     .frame(width: frame.width, height: frame.height)
                     .contentShape(Ellipse())
                     .accessibilityIdentifier("editor.faceOverlay.\(face.id.uuidString)")
-                    .gesture(
-                        LongPressGesture(minimumDuration: 0.4)
-                            .exclusively(before: TapGesture())
-                            .onEnded { value in
-                                switch value {
-                                case .first(_):
-                                    vm.toggleMask(id: face.id)
-                                case .second(_):
-                                    vm.selectFace(id: face.id)
-                                }
-                            }
-                    )
+                    .onTapGesture {
+                        vm.didTapFace(id: face.id)
+                    }
                     .position(x: frame.midX, y: frame.midY)
                 }
 

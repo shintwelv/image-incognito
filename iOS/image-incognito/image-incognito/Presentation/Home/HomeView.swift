@@ -150,16 +150,16 @@ struct HomeView: View {
 
                     // Hero copy
                     VStack(spacing: Spacing.xSmall) {
-                        Text("프라이버시를 보호할")
+                        Text("home.hero.title1")
                             .font(.appTitle)
                             .foregroundStyle(Color.appLabelPrimary)
-                        Text("사진 선택하기")
+                        Text("home.hero.title2")
                             .font(.appTitle)
                             .foregroundStyle(Color.appPrimary)
                     }
                     .multilineTextAlignment(.center)
 
-                    Text("AI가 자동으로 얼굴을 찾아 마스킹해드립니다.")
+                    Text("home.hero.subtitle")
                         .font(.appSubheadline)
                         .foregroundStyle(Color.appLabelSecondary)
                         .multilineTextAlignment(.center)
@@ -175,7 +175,7 @@ struct HomeView: View {
 
     private var actionSection: some View {
         VStack(spacing: Spacing.medium) {
-            SecondaryButton("카메라 촬영", icon: "camera") {
+            SecondaryButton("home.camera.button", icon: "camera") {
                 viewModel.cameraTapped()
             }
             .accessibilityIdentifier("home.cameraButton")
@@ -187,13 +187,13 @@ struct HomeView: View {
     private var recentSection: some View {
         VStack(alignment: .leading, spacing: Spacing.medium) {
             HStack {
-                Text("최근 작업")
+                Text("home.recent.title")
                     .font(.appTitle3)
                     .foregroundStyle(Color.appLabelPrimary)
                     .accessibilityIdentifier("home.recentSectionTitle")
                 Spacer()
                 if !viewModel.recentItems.isEmpty {
-                    Button("모두 보기") {}
+                    Button("home.recent.seeAll") {}
                         .font(.appSubheadline)
                         .foregroundStyle(Color.appPrimary)
                         .accessibilityIdentifier("home.recentSeeAllButton")
@@ -206,7 +206,7 @@ struct HomeView: View {
                     Image(systemName: "face.dashed")
                         .font(.system(size: 40))
                         .foregroundStyle(Color.appLabelTertiary)
-                    Text("최근 작업이 없습니다.\n위에서 사진을 선택해 시작해보세요.")
+                    Text("home.recent.empty")
                         .font(.appSubheadline)
                         .foregroundStyle(Color.appLabelSecondary)
                         .multilineTextAlignment(.center)
@@ -274,7 +274,7 @@ private struct ImageLoadingOverlay: View {
                 ProgressView()
                     .tint(Color.appPrimary)
                     .scaleEffect(1.2)
-                Text("사진 불러오는 중...")
+                Text("home.loading")
                     .font(.appSubheadline)
                     .foregroundStyle(Color.appLabelSecondary)
             }

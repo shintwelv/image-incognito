@@ -31,11 +31,11 @@ struct SettingsView: View {
                     .padding(.bottom, Spacing.xxxLarge)
                 }
             }
-            .navigationTitle("설정")
+            .navigationTitle("settings.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("닫기") { dismiss() }
+                    Button("settings.close") { dismiss() }
                         .foregroundStyle(Color.appPrimary)
                         .accessibilityIdentifier("settings.closeButton")
                 }
@@ -49,14 +49,14 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: Spacing.small) {
             SectionHeader(
                 icon: "square.and.arrow.up",
-                title: "내보내기 기본 설정",
-                subtitle: "모든 내보내기에 기본으로 적용됩니다"
+                title: "settings.export.title",
+                subtitle: "settings.export.subtitle"
             )
 
             SectionCard {
                 ToggleCardRow(
                     icon: "location.slash.fill",
-                    title: "위치 정보 제거",
+                    title: "export.options.removeLocation",
                     isOn: store.exportSettings.removeLocation
                 )
                 .accessibilityIdentifier("settings.removeLocationToggle")
@@ -65,7 +65,7 @@ struct SettingsView: View {
 
                 ToggleCardRow(
                     icon: "info.circle.fill",
-                    title: "촬영 정보 제거",
+                    title: "export.options.removeExif",
                     isOn: store.exportSettings.removeExif
                 )
                 .accessibilityIdentifier("settings.removeExifToggle")
@@ -74,7 +74,7 @@ struct SettingsView: View {
 
                 ToggleCardRow(
                     icon: "photo.fill",
-                    title: "고해상도 유지",
+                    title: "export.options.keepResolution",
                     isOn: store.exportSettings.keepOriginalResolution
                 )
                 .accessibilityIdentifier("settings.keepResolutionToggle")
@@ -88,16 +88,16 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: Spacing.small) {
             SectionHeader(
                 icon: "info.circle",
-                title: "앱 정보",
+                title: "settings.info.title",
                 subtitle: nil
             )
 
             AppCard {
                 VStack(spacing: 0) {
-                    InfoRow(label: "버전", value: appVersion)
+                    InfoRow(label: "settings.info.version", value: appVersion)
                         .accessibilityIdentifier("settings.versionRow")
                     Divider().padding(.leading, Spacing.medium)
-                    InfoRow(label: "개발", value: "Elvin Heo")
+                    InfoRow(label: "settings.info.developer", value: "Elvin Heo")
                         .accessibilityIdentifier("settings.developerRow")
                 }
             }

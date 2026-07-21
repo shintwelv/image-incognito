@@ -19,14 +19,14 @@ struct AdjustmentSlidersView: View {
     var body: some View {
         VStack(spacing: Spacing.medium) {
             SliderRow(
-                title: "강도",
+                title: "editor.intensity",
                 value: $intensity,
                 range: 0...1,
                 displayValue: "\(Int(intensity * 100))%"
             )
             .accessibilityIdentifier("editor.intensitySlider")
             SliderRow(
-                title: "범위",
+                title: "editor.range",
                 value: $sizeMultiplier,
                 range: 0.5...2.0,
                 displayValue: "\(Int(sizeMultiplier * 100))%"
@@ -81,7 +81,7 @@ struct ColorPickerRow: View {
 
     var body: some View {
         HStack {
-            Text("색상")
+            Text("editor.color")
                 .font(.appFootnote)
                 .foregroundStyle(Color.appLabelSecondary)
             Spacer()

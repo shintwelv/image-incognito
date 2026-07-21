@@ -18,11 +18,11 @@ enum PhotoLibraryError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unauthorized:
-            return String(localized: "사진 접근 권한이 없습니다. 설정 앱에서 권한을 허용해주세요.")
+            return String(localized: "error.photoLibrary.unauthorized")
         case .failedToSave:
-            return String(localized: "이미지를 저장하는 데 실패했습니다.")
+            return String(localized: "error.photoLibrary.failedToSave")
         case .failedToGetOrCreateAlbum:
-            return String(localized: "앨범을 생성하거나 찾는 데 실패했습니다.")
+            return String(localized: "error.photoLibrary.failedToGetOrCreateAlbum")
         }
     }
 }

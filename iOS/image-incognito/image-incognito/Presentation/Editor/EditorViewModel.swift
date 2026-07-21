@@ -116,6 +116,29 @@ final class EditorViewModel {
         }
     }
 
+    /// Handles tapping a face. Toggles the mask state.
+    /// If masked, selects the face and displays adjustments.
+    /// If unmasked, deselects the face and hides adjustments.
+    func didTapFace(id: UUID) {
+        guard let index = faces.firstIndex(where: { $0.id == id }) else { return }
+        AppHaptics.medium()
+        faces[index].isMasked.toggle()
+        
+        if faces[index].isMasked {
+            selectedFaceID = id
+            withAnimation(AppAnimation.standard) {
+                showAdjustmentSliders = true
+            }
+        } else {
+            if selectedFaceID == id {
+                selectedFaceID = nil
+                withAnimation(AppAnimation.standard) {
+                    showAdjustmentSliders = false
+                }
+            }
+        }
+    }
+
     /// Select a style pill. Tapping the active style toggles the adjustment panel.
     func selectStyle(_ style: MaskingStyle) {
         if selectedStyle == style {

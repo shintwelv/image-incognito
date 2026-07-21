@@ -78,7 +78,7 @@ struct ExportView: View {
                     Image(systemName: "chevron.left")
                         .imageScale(.medium)
                         .fontWeight(.semibold)
-                    Text("편집기")
+                    Text("export.backButton")
                         .font(.appBody)
                 }
                 .foregroundStyle(Color.appLabelSecondary)
@@ -87,7 +87,7 @@ struct ExportView: View {
 
             Spacer()
 
-            Text("내보내기")
+            Text("export.title")
                 .font(.appBodyEmphasized)
                 .foregroundStyle(Color.appLabelPrimary)
                 .accessibilityIdentifier("export.title")
@@ -152,7 +152,7 @@ struct ExportView: View {
                     Image(systemName: "checkmark.shield.fill")
                         .imageScale(.small)
                         .foregroundStyle(Color.appSuccess)
-                    Text(viewModel.maskedImages.count > 1 ? "\(viewModel.maskedImages.count)장 마스킹 완료" : "마스킹 완료")
+                    Text(viewModel.maskedImages.count > 1 ? String(localized: "\(viewModel.maskedImages.count)장 마스킹 완료") : String(localized: "export.completionBadge"))
                         .font(.appFootnote)
                         .foregroundStyle(Color.appLabelSecondary)
                         .accessibilityIdentifier("export.completionBadge")
@@ -173,10 +173,13 @@ struct ExportView: View {
                 .padding(.vertical, Spacing.small)
             }
         }
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in isShowingOriginal = true }
-                .onEnded { _ in isShowingOriginal = false }
+        .onLongPressGesture(
+            minimumDuration: 0.2,
+            maximumDistance: 50,
+            perform: {},
+            onPressingChanged: { pressing in
+                isShowingOriginal = pressing
+            }
         )
     }
 
@@ -189,7 +192,7 @@ struct ExportView: View {
 
     private var settingsCard: some View {
         VStack(alignment: .leading, spacing: Spacing.small) {
-            Text("저장 옵션")
+            Text("export.options.title")
                 .font(.appTitle3)
                 .foregroundStyle(Color.appLabelPrimary)
                 .padding(.leading, Spacing.xxSmall)
@@ -197,7 +200,7 @@ struct ExportView: View {
             SectionCard {
                 ToggleCardRow(
                     icon: "location.slash.fill",
-                    title: "위치 정보 제거",
+                    title: "export.options.removeLocation",
                     isOn: $viewModel.settings.removeLocation
                 )
                 .accessibilityIdentifier("export.removeLocationToggle")
@@ -207,7 +210,7 @@ struct ExportView: View {
 
                 ToggleCardRow(
                     icon: "info.circle.fill",
-                    title: "촬영 정보 제거",
+                    title: "export.options.removeExif",
                     isOn: $viewModel.settings.removeExif
                 )
                 .accessibilityIdentifier("export.removeExifToggle")
@@ -217,7 +220,7 @@ struct ExportView: View {
 
                 ToggleCardRow(
                     icon: "photo.fill",
-                    title: "고해상도 유지",
+                    title: "export.options.keepResolution",
                     isOn: $viewModel.settings.keepOriginalResolution
                 )
                 .accessibilityIdentifier("export.keepResolutionToggle")
@@ -230,7 +233,7 @@ struct ExportView: View {
     private var actionButtons: some View {
         VStack(spacing: Spacing.medium) {
             // Primary: Share
-            PrimaryButton("공유하기", icon: "square.and.arrow.up") {
+            PrimaryButton("export.share", icon: "square.and.arrow.up") {
                 viewModel.shareImageTapped()
             }
             .disabled(viewModel.isSaving)
@@ -249,7 +252,7 @@ struct ExportView: View {
                         Image(systemName: "square.and.arrow.down")
                             .imageScale(.medium)
                     }
-                    Text(viewModel.isSaving ? "저장 중..." : (viewModel.maskedImages.count > 1 ? "전체 저장 (\(viewModel.maskedImages.count)장)" : "앨범에 저장"))
+                    Text(viewModel.isSaving ? String(localized: "export.saving") : (viewModel.maskedImages.count > 1 ? String(format: String(localized: "export.saveAll"), viewModel.maskedImages.count) : String(localized: "export.saveAlbum")))
                         .font(.appBodyEmphasized)
                 }
                 .frame(maxWidth: .infinity)

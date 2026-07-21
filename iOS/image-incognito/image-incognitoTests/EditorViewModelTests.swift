@@ -82,6 +82,69 @@ struct EditorViewModelTests {
         #expect(vm.faces[1].isMasked == true)
     }
 
+    // MARK: - didTapFace
+
+    @Test("didTapFace toggles mask and selects face when unmasked")
+    func didTapFaceUnmasked() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        let face = makeFace(isMasked: false)
+        vm.faces = [face]
+        vm.selectedFaceID = nil
+        vm.showAdjustmentSliders = false
+
+        vm.didTapFace(id: face.id)
+
+        #expect(vm.faces[0].isMasked == true)
+        #expect(vm.selectedFaceID == face.id)
+        #expect(vm.showAdjustmentSliders == true)
+    }
+
+    @Test("didTapFace toggles mask and deselects face when masked and selected")
+    func didTapFaceMaskedAndSelected() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        let face = makeFace(isMasked: true)
+        vm.faces = [face]
+        vm.selectedFaceID = face.id
+        vm.showAdjustmentSliders = true
+
+        vm.didTapFace(id: face.id)
+
+        #expect(vm.faces[0].isMasked == false)
+        #expect(vm.selectedFaceID == nil)
+        #expect(vm.showAdjustmentSliders == false)
+    }
+
+    @Test("didTapFace toggles mask but does not deselect other selected face")
+    func didTapFaceMaskedNotSelected() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        let face1 = makeFace(isMasked: true)
+        let face2 = makeFace(isMasked: true)
+        vm.faces = [face1, face2]
+        vm.selectedFaceID = face1.id
+        vm.showAdjustmentSliders = true
+
+        vm.didTapFace(id: face2.id) // toggle face2 (currently masked -> unmasks)
+
+        #expect(vm.faces[1].isMasked == false)
+        #expect(vm.selectedFaceID == face1.id) // remains face1
+        #expect(vm.showAdjustmentSliders == true)
+    }
+
+    @Test("didTapFace with unknown ID is a no-op")
+    func didTapFaceUnknownId() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        let face = makeFace(isMasked: true)
+        vm.faces = [face]
+        vm.selectedFaceID = face.id
+        vm.showAdjustmentSliders = true
+
+        vm.didTapFace(id: UUID())
+
+        #expect(vm.faces[0].isMasked == true)
+        #expect(vm.selectedFaceID == face.id)
+        #expect(vm.showAdjustmentSliders == true)
+    }
+
     @Test("face hit testing resolves the tapped face when multiple exist")
     func faceHitTestingResolvesCorrectFace() {
         let first = makeFace(x: 0.1, y: 0.2, width: 0.2, height: 0.2)

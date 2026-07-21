@@ -18,10 +18,10 @@ struct MaskingStyleTests {
 
     @Test("Labels map correctly")
     func labels() {
-        #expect(MaskingStyle.blurredGlass.label == "Blurred Glass")
-        #expect(MaskingStyle.pixelArt.label == "Pixel Art")
-        #expect(MaskingStyle.crystalize.label == "Crystalize")
-        #expect(MaskingStyle.solidClean.label == "Solid Clean")
+        #expect(MaskingStyle.blurredGlass.label == "style.blurredGlass")
+        #expect(MaskingStyle.pixelArt.label == "style.pixelArt")
+        #expect(MaskingStyle.crystalize.label == "style.crystalize")
+        #expect(MaskingStyle.solidClean.label == "style.solidClean")
     }
 
     @Test("Icons are the expected SF Symbol names")
