@@ -13,6 +13,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     if !ProcessInfo.processInfo.arguments.contains("--uitesting") {
         FirebaseApp.configure()
+    } else {
+        UIView.setAnimationsEnabled(false)
     }
 
     return true
