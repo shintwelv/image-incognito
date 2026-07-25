@@ -45,7 +45,6 @@ struct EditorView: View {
                     .animation(AppAnimation.standard, value: currentVM.showAdjustmentSliders)
             }
         }
-        .preferredColorScheme(.dark)
         .toolbar(.hidden, for: .navigationBar)
         .task {
             await withTaskGroup(of: Void.self) { group in
