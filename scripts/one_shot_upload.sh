@@ -39,36 +39,28 @@ xcodebuild -exportArchive \
   -quiet
 
 echo ""
+echo ""
 echo "================================================================="
-echo "✅ 4/4: One-Shot App Store Connect Validation & Upload Status"
+echo "🌐 4/5: Syncing Metadata to App Store Connect REST API..."
 echo "================================================================="
-if [ -f "${IPA_PATH}" ]; then
-  echo "SUCCESS: IPA Package Ready at -> ${IPA_PATH}"
-  echo "Metadata JSON Configs Ready at -> ${BUILD_DIR}/metadata_dist/"
-  echo ""
-  echo "To upload IPA using Apple ID credentials, execute:"
-  echo "  xcrun altool --upload-app -f \"${IPA_PATH}\" -t ios -u <APPLE_ID> -p <APP_SPECIFIC_PASSWORD>"
-  echo ""
+python3 "${PROJECT_DIR}/scripts/upload_metadata_api.py"
+
+echo ""
+echo "================================================================="
+echo "✅ 5/5: Uploading IPA Package to App Store Connect..."
+echo "================================================================="
 ENV_FILE="${PROJECT_DIR}/.keys/appstore_connect.env"
 if [ -f "${ENV_FILE}" ]; then
   source "${ENV_FILE}"
 fi
 
 if [ -n "${APPSTORE_KEY_ID}" ] && [ -n "${APPSTORE_ISSUER_ID}" ]; then
-  echo "App Store Connect API Key & Issuer ID Loaded:"
-  echo "  - Key ID: ${APPSTORE_KEY_ID}"
-  echo "  - Issuer ID: ${APPSTORE_ISSUER_ID}"
+  echo "Uploading with Key ID ${APPSTORE_KEY_ID} & Issuer ID ${APPSTORE_ISSUER_ID}..."
+  xcrun altool --upload-app -f "${IPA_PATH}" -t ios --apiKey "${APPSTORE_KEY_ID}" --apiIssuer "${APPSTORE_ISSUER_ID}"
   echo ""
-  echo "Run One-Shot Direct Upload to App Store Connect:"
-  echo "  xcrun altool --upload-app -f \"${IPA_PATH}\" -t ios --apiKey \"${APPSTORE_KEY_ID}\" --apiIssuer \"${APPSTORE_ISSUER_ID}\""
+  echo "🎉 One-Shot Binary & Metadata Upload Successfully Completed!"
 else
-  echo "To upload IPA with App Store Connect API Key, run:"
-  echo "  xcrun altool --upload-app -f \"${IPA_PATH}\" -t ios --apiKey XFW954Z6SB --apiIssuer <YOUR_ISSUER_ID>"
-fi
-  echo ""
-  echo "Or open Xcode Organizer directly:"
-  echo "  open \"${ARCHIVE_PATH}\""
-else
-  echo "❌ ERROR: IPA compilation failed."
-  exit 1
+  echo "SUCCESS: IPA Package Ready at -> ${IPA_PATH}"
+  echo "Metadata Configured at -> ${BUILD_DIR}/metadata_dist/"
+  echo "Run: xcrun altool --upload-app -f \"${IPA_PATH}\" -t ios --apiKey XFW954Z6SB --apiIssuer <ISSUER_ID>"
 fi
