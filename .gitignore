@@ -65,3 +65,4 @@ GoogleService-Info.plist
 refactor.md
 uitest-plan.md
 *.xcresult
+build/
