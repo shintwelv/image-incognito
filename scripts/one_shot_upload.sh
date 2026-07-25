@@ -49,11 +49,22 @@ if [ -f "${IPA_PATH}" ]; then
   echo "To upload IPA using Apple ID credentials, execute:"
   echo "  xcrun altool --upload-app -f \"${IPA_PATH}\" -t ios -u <APPLE_ID> -p <APP_SPECIFIC_PASSWORD>"
   echo ""
-  echo "App Store Connect API Key Detected -> Key ID: XFW954Z6SB"
-  echo "Key saved in: .keys/AuthKey_XFW954Z6SB.p8 (git-ignored) & ~/.appstoreconnect/private_keys/"
+ENV_FILE="${PROJECT_DIR}/.keys/appstore_connect.env"
+if [ -f "${ENV_FILE}" ]; then
+  source "${ENV_FILE}"
+fi
+
+if [ -n "${APPSTORE_KEY_ID}" ] && [ -n "${APPSTORE_ISSUER_ID}" ]; then
+  echo "App Store Connect API Key & Issuer ID Loaded:"
+  echo "  - Key ID: ${APPSTORE_KEY_ID}"
+  echo "  - Issuer ID: ${APPSTORE_ISSUER_ID}"
   echo ""
+  echo "Run One-Shot Direct Upload to App Store Connect:"
+  echo "  xcrun altool --upload-app -f \"${IPA_PATH}\" -t ios --apiKey \"${APPSTORE_KEY_ID}\" --apiIssuer \"${APPSTORE_ISSUER_ID}\""
+else
   echo "To upload IPA with App Store Connect API Key, run:"
   echo "  xcrun altool --upload-app -f \"${IPA_PATH}\" -t ios --apiKey XFW954Z6SB --apiIssuer <YOUR_ISSUER_ID>"
+fi
   echo ""
   echo "Or open Xcode Organizer directly:"
   echo "  open \"${ARCHIVE_PATH}\""
