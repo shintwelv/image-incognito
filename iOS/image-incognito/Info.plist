@@ -24,6 +24,19 @@
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Incognify</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.image-incognito</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>incognify</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -36,6 +49,9 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.image</string>
+				<string>public.jpeg</string>
+				<string>public.png</string>
+				<string>public.heic</string>
 			</array>
 		</dict>
 	</array>

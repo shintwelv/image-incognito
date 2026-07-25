@@ -39,21 +39,36 @@ struct image_incognitoApp: App {
                 .environment(settingsStore)
                 .environment(incomingImageStore)
                 .onOpenURL { url in
-                    Task {
-                        guard url.isFileURL else { return }
-                        // Photos hands us a file URL; access may be security-scoped.
-                        let accessed = url.startAccessingSecurityScopedResource()
-                        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-                        guard let data = try? Data(contentsOf: url),
-                              let image = UIImage(data: data) else { return }
-                        incomingImageStore.pendingImages = [image]
-                    }
+                    handleIncomingURL(url)
                 }
                 .onAppear {
                     if isUITesting {
                         injectUITestingState()
                     }
                 }
+        }
+    }
+
+    private func handleIncomingURL(_ url: URL) {
+        Task {
+            if url.isFileURL {
+                let accessed = url.startAccessingSecurityScopedResource()
+                defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+                guard let data = try? Data(contentsOf: url),
+                      let image = UIImage(data: data) else { return }
+                incomingImageStore.pendingImages = [image]
+            } else if url.scheme == "incognify" {
+                if let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
+                   let pathItem = components.queryItems?.first(where: { $0.name == "path" })?.value,
+                   let targetURL = URL(string: pathItem),
+                   targetURL.isFileURL {
+                    let accessed = targetURL.startAccessingSecurityScopedResource()
+                    defer { if accessed { targetURL.stopAccessingSecurityScopedResource() } }
+                    guard let data = try? Data(contentsOf: targetURL),
+                          let image = UIImage(data: data) else { return }
+                    incomingImageStore.pendingImages = [image]
+                }
+            }
         }
     }
 
