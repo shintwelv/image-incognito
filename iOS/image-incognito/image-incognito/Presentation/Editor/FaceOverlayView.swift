@@ -53,12 +53,24 @@ struct FaceOverlayView: View {
     }
 
     private var borderLayer: some View {
-        Ellipse()
-            .stroke(
-                isSelected ? Color.appPrimary : (faceBox.isMasked ? Color.white.opacity(0.85) : Color.white.opacity(0.45)),
-                lineWidth: isSelected ? 3 : (faceBox.isMasked ? 2 : 1.5)
-            )
-            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+        ZStack(alignment: .topTrailing) {
+            Ellipse()
+                .stroke(
+                    isSelected ? Color.appPrimary : (faceBox.isMasked ? Color.white.opacity(0.85) : Color.white.opacity(0.45)),
+                    lineWidth: isSelected ? 3 : (faceBox.isMasked ? 2 : 1.5)
+                )
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+
+            if isSelected || faceBox.category != .face {
+                Image(systemName: faceBox.category.iconName)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(4)
+                    .background(Circle().fill(Color.appPrimary))
+                    .shadow(radius: 2)
+                    .offset(x: 4, y: -4)
+            }
+        }
     }
 }
 

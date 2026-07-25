@@ -91,7 +91,7 @@ final class EditorViewModel {
         }
 
         let detected = try await detectFacesUseCase.execute(image: sourceImage)
-        faces = detected.map { FaceBox(id: $0.id, rect: $0.rect, isMasked: $0.isMasked, style: selectedStyle) }
+        faces = detected.map { FaceBox(id: $0.id, rect: $0.rect, isMasked: $0.isMasked, style: selectedStyle, category: $0.category) }
         selectedFaceID = faces.first?.id
     }
 

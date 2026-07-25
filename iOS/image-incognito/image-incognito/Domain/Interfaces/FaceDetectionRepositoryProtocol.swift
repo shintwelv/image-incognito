@@ -10,7 +10,13 @@
 import UIKit
 
 protocol FaceDetectionRepositoryProtocol: Sendable {
-    /// Detects faces in `image` and returns normalized FaceBox values
+    /// Detects faces and text/license plates in `image` and returns normalized FaceBox values
     /// (top-left origin, values 0–1 relative to the source image).
-    func detectFaces(in image: UIImage) async throws -> [FaceBox]
+    func detectFaces(in image: UIImage, includeText: Bool) async throws -> [FaceBox]
+}
+
+extension FaceDetectionRepositoryProtocol {
+    func detectFaces(in image: UIImage) async throws -> [FaceBox] {
+        try await detectFaces(in: image, includeText: true)
+    }
 }

@@ -20,7 +20,7 @@ struct DetectFacesUseCaseTests {
     private struct MockFaceDetectionRepository: FaceDetectionRepositoryProtocol {
         let facesToReturn: [FaceBox]
 
-        func detectFaces(in image: UIImage) async throws -> [FaceBox] {
+        func detectFaces(in image: UIImage, includeText: Bool) async throws -> [FaceBox] {
             facesToReturn
         }
     }
@@ -28,7 +28,7 @@ struct DetectFacesUseCaseTests {
     private struct ThrowingFaceDetectionRepository: FaceDetectionRepositoryProtocol {
         let error: Error
 
-        func detectFaces(in image: UIImage) async throws -> [FaceBox] {
+        func detectFaces(in image: UIImage, includeText: Bool) async throws -> [FaceBox] {
             throw error
         }
     }

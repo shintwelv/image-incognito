@@ -15,7 +15,7 @@ struct DetectFacesUseCase: Sendable {
         self.repository = repository
     }
 
-    nonisolated func execute(image: UIImage) async throws -> [FaceBox] {
-        try await repository.detectFaces(in: image)
+    nonisolated func execute(image: UIImage, includeText: Bool = true) async throws -> [FaceBox] {
+        try await repository.detectFaces(in: image, includeText: includeText)
     }
 }

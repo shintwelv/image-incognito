@@ -62,4 +62,12 @@ struct FaceDetectionServiceTests {
         #expect(CGImagePropertyOrientation(.leftMirrored) == .leftMirrored)
         #expect(CGImagePropertyOrientation(.rightMirrored) == .rightMirrored)
     }
+
+    @Test("classifyText accurately distinguishes license plate patterns from general text")
+    func classifyTextHeuristic() {
+        #expect(FaceDetectionService.classifyText("7ABC123") == .licensePlate)
+        #expect(FaceDetectionService.classifyText("12가 3456") == .licensePlate)
+        #expect(FaceDetectionService.classifyText("ABC-1234") == .licensePlate)
+        #expect(FaceDetectionService.classifyText("This is a long document paragraph.") == .text)
+    }
 }
