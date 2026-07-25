@@ -66,3 +66,5 @@ refactor.md
 uitest-plan.md
 *.xcresult
 build/
+*.p8
+.keys/
