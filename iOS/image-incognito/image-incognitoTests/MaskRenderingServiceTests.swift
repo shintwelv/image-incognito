@@ -24,14 +24,16 @@ struct MaskRenderingServiceTests {
         style: MaskingStyle = .solidClean,
         isMasked: Bool = true,
         intensity: Double = 0.75,
-        sizeMultiplier: Double = 1.0
+        sizeMultiplier: Double = 1.0,
+        category: DetectedCategory = .face
     ) -> FaceBox {
         FaceBox(
             rect: CGRect(x: x, y: y, width: width, height: height),
             isMasked: isMasked,
             style: style,
             intensity: intensity,
-            sizeMultiplier: sizeMultiplier
+            sizeMultiplier: sizeMultiplier,
+            category: category
         )
     }
 
@@ -153,6 +155,19 @@ struct MaskRenderingServiceTests {
         )
 
         #expect(result.size == image.size)
+    }
+
+    @Test("License plate category rendering at 100% intensity does not throw")
+    func renderLicensePlateMaxIntensity() async throws {
+        let image = makeTestImage(size: CGSize(width: 300, height: 300))
+        let styles: [MaskingStyle] = [.blurredGlass, .pixelArt, .crystalize, .solidClean]
+        for style in styles {
+            let result = try await service.render(
+                image: image,
+                faces: [makeFace(style: style, intensity: 1.0, category: .licensePlate)]
+            )
+            #expect(result.size == image.size)
+        }
     }
 
     // MARK: - Multi-face rendering

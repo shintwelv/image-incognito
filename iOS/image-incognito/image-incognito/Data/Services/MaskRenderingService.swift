@@ -64,10 +64,10 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
                 guard rect.width > 1, rect.height > 1 else { continue }
 
                 switch face.style {
-                case .blurredGlass: applyBlur(rect: rect, image: image, intensity: face.intensity)
-                case .pixelArt:     applyPixelArt(rect: rect, image: image, intensity: face.intensity)
-                case .crystalize:   applyCrystalize(rect: rect, image: image, intensity: face.intensity)
-                case .solidClean:   applySolid(rect: rect, intensity: face.intensity, color: solidCleanColor)
+                case .blurredGlass: applyBlur(rect: rect, face: face, image: image)
+                case .pixelArt:     applyPixelArt(rect: rect, face: face, image: image)
+                case .crystalize:   applyCrystalize(rect: rect, face: face, image: image)
+                case .solidClean:   applySolid(rect: rect, face: face, color: solidCleanColor)
                 }
             }
         }
@@ -117,16 +117,25 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
             .intersection(CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
     }
 
+    /// Returns the clipping path for a mask rect based on detected category.
+    nonisolated private func clipPath(for rect: CGRect, category: DetectedCategory) -> UIBezierPath {
+        if category == .face {
+            return UIBezierPath(ovalIn: rect)
+        } else {
+            return UIBezierPath(roundedRect: rect, cornerRadius: 4)
+        }
+    }
+
     // MARK: - Blur (blurredGlass)
 
-    nonisolated private func applyBlur(rect: CGRect, image: UIImage, intensity: Double) {
+    nonisolated private func applyBlur(rect: CGRect, face: FaceBox, image: UIImage) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
-            let blurred = makeBlurredCrop(of: image, rect: rect, intensity: intensity)
+            let blurred = makeBlurredCrop(of: image, rect: rect, intensity: face.intensity)
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(UIBezierPath(ovalIn: rect).cgPath)
+        ctx.addPath(clipPath(for: rect, category: face.category).cgPath)
         ctx.clip()
         blurred.draw(in: rect)
         ctx.restoreGState()
@@ -142,7 +151,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         let filter = CIFilter.gaussianBlur()
         filter.inputImage = ci
         let minEdge = CGFloat(cropped.width)
-        let maxRadius: CGFloat = minEdge * 0.1
+        let maxRadius: CGFloat = minEdge * 0.35
         filter.radius = Float(maxRadius * intensity)
 
         guard let output = filter.outputImage,
@@ -152,14 +161,14 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Pixelate (pixelArt)
 
-    nonisolated private func applyPixelArt(rect: CGRect, image: UIImage, intensity: Double) {
+    nonisolated private func applyPixelArt(rect: CGRect, face: FaceBox, image: UIImage) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
-            let pixelated = makePixelateCrop(of: image, rect: rect, intensity: intensity)
+            let pixelated = makePixelateCrop(of: image, rect: rect, intensity: face.intensity)
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(UIBezierPath(ovalIn: rect).cgPath)
+        ctx.addPath(clipPath(for: rect, category: face.category).cgPath)
         ctx.clip()
         pixelated.draw(in: rect)
         ctx.restoreGState()
@@ -176,7 +185,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         filter.inputImage = ci
         
         let minEdge = min(ci.extent.width, ci.extent.height)
-        let maxScale = Float(minEdge * 0.08) // it is natural to set block's size between shorter edge's 5% ~ 8%
+        let maxScale = Float(minEdge * 0.25)
         filter.scale = 1.0 + (maxScale - 1.0) * Float(intensity)
         filter.center = CGPoint(x: ci.extent.midX, y: ci.extent.midY)
 
@@ -187,14 +196,14 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Crystalize (crystalize)
 
-    nonisolated private func applyCrystalize(rect: CGRect, image: UIImage, intensity: Double) {
+    nonisolated private func applyCrystalize(rect: CGRect, face: FaceBox, image: UIImage) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
-            let crystalized = makeCrystalizeCrop(of: image, rect: rect, intensity: intensity)
+            let crystalized = makeCrystalizeCrop(of: image, rect: rect, intensity: face.intensity)
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(UIBezierPath(ovalIn: rect).cgPath)
+        ctx.addPath(clipPath(for: rect, category: face.category).cgPath)
         ctx.clip()
         crystalized.draw(in: rect)
         ctx.restoreGState()
@@ -211,7 +220,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         filter.inputImage = ci
         
         let minEdge = min(ci.extent.width, ci.extent.height)
-        let maxRadius = Float(minEdge * 0.15)
+        let maxRadius = Float(minEdge * 0.3)
         filter.radius = 1.0 + (maxRadius - 1.0) * Float(intensity)
         filter.center = CGPoint(x: ci.extent.midX, y: ci.extent.midY)
 
@@ -222,8 +231,8 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Solid fill (solidClean)
 
-    nonisolated private func applySolid(rect: CGRect, intensity: Double, color: UIColor) {
-        color.withAlphaComponent(intensity).setFill()
-        UIBezierPath(ovalIn: rect).fill()
+    nonisolated private func applySolid(rect: CGRect, face: FaceBox, color: UIColor) {
+        color.withAlphaComponent(face.intensity).setFill()
+        clipPath(for: rect, category: face.category).fill()
     }
 }
