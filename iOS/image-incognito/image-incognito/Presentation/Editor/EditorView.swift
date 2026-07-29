@@ -246,7 +246,8 @@ struct EditorView: View {
                     intensity: $vm.intensity,
                     sizeMultiplier: $vm.sizeMultiplier,
                     selectedStyle: vm.selectedStyle,
-                    solidCleanColor: $vm.solidCleanColor
+                    solidCleanColor: $vm.solidCleanColor,
+                    selectedEmoji: $vm.selectedEmoji
                 )
                 .padding(.horizontal, Spacing.large)
                 .transition(.move(edge: .bottom).combined(with: .opacity))

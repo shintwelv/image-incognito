@@ -202,4 +202,29 @@ struct MaskRenderingServiceTests {
 
         #expect(result.size == image.size)
     }
+
+    @Test("Rendering face with emojiOverlay style produces valid image output")
+    func renderEmojiOverlayStyle() async throws {
+        let image = makeTestImage(size: CGSize(width: 250, height: 250))
+        let face = makeFace(x: 0.2, y: 0.2, width: 0.4, height: 0.4, style: .emojiOverlay)
+
+        let result = try await service.render(
+            image: image, faces: [face]
+        )
+
+        #expect(result.size == image.size)
+    }
+
+    @Test("Rendering face with custom emoji in emojiOverlay style produces valid image output")
+    func renderCustomEmojiOverlayStyle() async throws {
+        let image = makeTestImage(size: CGSize(width: 250, height: 250))
+        var face = makeFace(x: 0.1, y: 0.1, width: 0.3, height: 0.3, style: .emojiOverlay)
+        face.selectedEmoji = "🐱"
+
+        let result = try await service.render(
+            image: image, faces: [face]
+        )
+
+        #expect(result.size == image.size)
+    }
 }

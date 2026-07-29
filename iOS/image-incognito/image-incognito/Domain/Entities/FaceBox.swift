@@ -44,6 +44,8 @@ nonisolated struct FaceBox: Identifiable, Sendable {
     var sizeMultiplier: Double
     /// Category of detected region (face, license plate, text).
     var category: DetectedCategory
+    /// Selected emoji when style is .emojiOverlay.
+    var selectedEmoji: String
 
     init(
         id: UUID = UUID(),
@@ -52,7 +54,8 @@ nonisolated struct FaceBox: Identifiable, Sendable {
         style: MaskingStyle = .blurredGlass,
         intensity: Double = 0.75,
         sizeMultiplier: Double = 1.0,
-        category: DetectedCategory = .face
+        category: DetectedCategory = .face,
+        selectedEmoji: String = "😎"
     ) {
         self.id = id
         self.rect = rect
@@ -61,5 +64,6 @@ nonisolated struct FaceBox: Identifiable, Sendable {
         self.intensity = intensity
         self.sizeMultiplier = sizeMultiplier
         self.category = category
+        self.selectedEmoji = selectedEmoji
     }
 }

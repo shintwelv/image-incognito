@@ -77,4 +77,44 @@ struct SettingsStoreTests {
         let store2 = SettingsStore()
         #expect(store2.exportSettings.removeLocation == true)
     }
+
+    @Test("Default emojiPresets returns standard preset list")
+    func defaultEmojiPresets() {
+        let store = SettingsStore()
+        store.resetEmojiPresets()
+
+        #expect(store.emojiPresets == SettingsStore.defaultEmojiPresets)
+        #expect(store.emojiPresets.contains("😎"))
+    }
+
+    @Test("addEmojiPreset appends valid new emoji and prevents duplicates")
+    func addEmojiPresetTest() {
+        let store = SettingsStore()
+        store.resetEmojiPresets()
+        let countBefore = store.emojiPresets.count
+
+        store.addEmojiPreset("🦊")
+        #expect(store.emojiPresets.count == countBefore + 1)
+        #expect(store.emojiPresets.last == "🦊")
+
+        // Duplicate addition should be ignored
+        store.addEmojiPreset("🦊")
+        #expect(store.emojiPresets.count == countBefore + 1)
+    }
+
+    @Test("removeEmojiPreset removes specified emoji and falls back to default if empty")
+    func removeEmojiPresetTest() {
+        let store = SettingsStore()
+        store.resetEmojiPresets()
+
+        store.removeEmojiPreset("😎")
+        #expect(!store.emojiPresets.contains("😎"))
+
+        // Clear all emojis
+        for emoji in store.emojiPresets {
+            store.removeEmojiPreset(emoji)
+        }
+        // Should fall back to default list when empty
+        #expect(store.emojiPresets == SettingsStore.defaultEmojiPresets)
+    }
 }
