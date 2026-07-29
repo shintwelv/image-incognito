@@ -49,6 +49,9 @@ struct FaceOverlayView: View {
         case .solidClean:
             maskShape
                 .fill(solidCleanColor.opacity(faceBox.intensity))
+
+        case .emojiOverlay:
+            EmojiMaskView(emoji: faceBox.selectedEmoji, intensity: faceBox.intensity)
         }
     }
 
@@ -157,5 +160,24 @@ struct CrystalizeMaskView: View {
             }
         }
         .clipShape(category == .face ? AnyShape(Ellipse()) : AnyShape(RoundedRectangle(cornerRadius: 4)))
+    }
+}
+
+// MARK: - Emoji Mask View
+
+struct EmojiMaskView: View {
+    let emoji: String
+    let intensity: Double
+
+    var body: some View {
+        GeometryReader { proxy in
+            let side = min(proxy.size.width, proxy.size.height)
+            Text(emoji.isEmpty ? "😎" : emoji)
+                .font(.system(size: max(8, side * 0.85)))
+                .minimumScaleFactor(0.1)
+                .lineLimit(1)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .opacity(intensity)
+        }
     }
 }

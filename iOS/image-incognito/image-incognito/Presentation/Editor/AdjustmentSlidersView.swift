@@ -11,10 +11,15 @@ import SwiftUI
 // MARK: - Adjustment Sliders View
 
 struct AdjustmentSlidersView: View {
+    @Environment(SettingsStore.self) private var settingsStore
     @Binding var intensity: Double
     @Binding var sizeMultiplier: Double
     let selectedStyle: MaskingStyle
     @Binding var solidCleanColor: Color
+    @Binding var selectedEmoji: String
+
+    @State private var showAddEmojiAlert = false
+    @State private var newEmojiText = ""
 
     var body: some View {
         VStack(spacing: Spacing.medium) {
@@ -37,12 +42,37 @@ struct AdjustmentSlidersView: View {
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                     .accessibilityIdentifier("editor.colorPicker")
             }
+            if selectedStyle == .emojiOverlay {
+                EmojiPickerRow(
+                    selectedEmoji: $selectedEmoji,
+                    emojiPresets: settingsStore.emojiPresets,
+                    onAddEmoji: { showAddEmojiAlert = true },
+                    onDeleteEmoji: { emoji in settingsStore.removeEmojiPreset(emoji) }
+                )
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                .accessibilityIdentifier("editor.emojiPicker")
+            }
         }
         .padding(Spacing.medium)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .appShadow(.card)
         .animation(AppAnimation.standard, value: selectedStyle)
+        .alert(String(localized: "editor.addEmojiTitle"), isPresented: $showAddEmojiAlert) {
+            TextField("😎", text: $newEmojiText)
+            Button(String(localized: "common.add")) {
+                settingsStore.addEmojiPreset(newEmojiText)
+                if !newEmojiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    selectedEmoji = newEmojiText.trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+                newEmojiText = ""
+            }
+            Button(String(localized: "common.cancel"), role: .cancel) {
+                newEmojiText = ""
+            }
+        } message: {
+            Text(String(localized: "editor.addEmojiMessage"))
+        }
     }
 }
 
@@ -88,6 +118,67 @@ struct ColorPickerRow: View {
             ColorPicker("", selection: $color, supportsOpacity: false)
                 .labelsHidden()
                 .onChange(of: color) { _, _ in AppHaptics.selection() }
+        }
+    }
+}
+
+// MARK: - Emoji Picker Row
+
+struct EmojiPickerRow: View {
+    @Binding var selectedEmoji: String
+    let emojiPresets: [String]
+    let onAddEmoji: () -> Void
+    let onDeleteEmoji: (String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.xxSmall) {
+            Text("editor.emoji")
+                .font(.appFootnote)
+                .foregroundStyle(Color.appLabelSecondary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: Spacing.small) {
+                    ForEach(emojiPresets, id: \.self) { emoji in
+                        Button {
+                            AppHaptics.selection()
+                            selectedEmoji = emoji
+                        } label: {
+                            Text(emoji)
+                                .font(.system(size: 22))
+                                .padding(Spacing.xxSmall + 2)
+                                .background(
+                                    Circle()
+                                        .fill(selectedEmoji == emoji ? Color.appPrimary.opacity(0.2) : Color.clear)
+                                )
+                                .overlay(
+                                    Circle()
+                                        .stroke(selectedEmoji == emoji ? Color.appPrimary : Color.clear, lineWidth: 2)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                onDeleteEmoji(emoji)
+                            } label: {
+                                Label("common.delete", systemImage: "trash")
+                            }
+                        }
+                    }
+
+                    Button {
+                        AppHaptics.medium()
+                        onAddEmoji()
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.appPrimary)
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(Color.appPrimary.opacity(0.12)))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.vertical, 2)
+            }
         }
     }
 }

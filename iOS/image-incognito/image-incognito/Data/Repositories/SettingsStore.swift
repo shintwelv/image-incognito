@@ -14,11 +14,19 @@ import Foundation
 final class SettingsStore {
 
     private static let userDefaultsKey = "com.image-incognito.exportSettings"
+    private static let emojiPresetsKey = "com.image-incognito.emojiPresets"
+
+    static let defaultEmojiPresets: [String] = ["😎", "🐱", "🙈", "🎭", "⭐️", "💩", "🤡", "🎃", "🐶"]
 
     /// Default export options applied whenever a new export session starts.
     /// Any change is immediately written to UserDefaults.
     var exportSettings: ExportSettings {
-        didSet { persist() }
+        didSet { persistSettings() }
+    }
+
+    /// User-managed list of available emoji presets for masking.
+    var emojiPresets: [String] {
+        didSet { persistEmojis() }
     }
 
     init() {
@@ -28,12 +36,42 @@ final class SettingsStore {
         } else {
             exportSettings = ExportSettings()
         }
+
+        if let savedPresets = UserDefaults.standard.stringArray(forKey: Self.emojiPresetsKey),
+           !savedPresets.isEmpty {
+            emojiPresets = savedPresets
+        } else {
+            emojiPresets = Self.defaultEmojiPresets
+        }
+    }
+
+    // MARK: - Emoji Management
+
+    func addEmojiPreset(_ rawEmoji: String) {
+        let trimmed = rawEmoji.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !emojiPresets.contains(trimmed) else { return }
+        emojiPresets.append(trimmed)
+    }
+
+    func removeEmojiPreset(_ emoji: String) {
+        emojiPresets.removeAll { $0 == emoji }
+        if emojiPresets.isEmpty {
+            emojiPresets = Self.defaultEmojiPresets
+        }
+    }
+
+    func resetEmojiPresets() {
+        emojiPresets = Self.defaultEmojiPresets
     }
 
     // MARK: - Private
 
-    private func persist() {
+    private func persistSettings() {
         guard let data = try? JSONEncoder().encode(exportSettings) else { return }
         UserDefaults.standard.set(data, forKey: Self.userDefaultsKey)
+    }
+
+    private func persistEmojis() {
+        UserDefaults.standard.set(emojiPresets, forKey: Self.emojiPresetsKey)
     }
 }

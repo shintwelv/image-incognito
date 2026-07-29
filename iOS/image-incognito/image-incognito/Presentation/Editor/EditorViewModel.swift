@@ -54,6 +54,21 @@ final class EditorViewModel {
         }
     }
 
+    var selectedEmoji: String {
+        get {
+            guard let id = selectedFaceID, let face = faces.first(where: { $0.id == id }) else { return "😎" }
+            return face.selectedEmoji
+        }
+        set {
+            guard let id = selectedFaceID, let index = faces.firstIndex(where: { $0.id == id }) else { return }
+            faces[index].selectedEmoji = newValue
+        }
+    }
+
+    func setEmojiForSelectedFace(_ emoji: String) {
+        selectedEmoji = emoji
+    }
+
     var showAdjustmentSliders: Bool = false
 
     // MARK: - Export state

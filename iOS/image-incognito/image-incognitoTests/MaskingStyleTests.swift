@@ -11,9 +11,9 @@ import Testing
 @Suite("MaskingStyle")
 struct MaskingStyleTests {
 
-    @Test("Has exactly 4 cases")
+    @Test("Has exactly 5 cases")
     func caseCount() {
-        #expect(MaskingStyle.allCases.count == 4)
+        #expect(MaskingStyle.allCases.count == 5)
     }
 
     @Test("Labels map correctly")
@@ -22,6 +22,7 @@ struct MaskingStyleTests {
         #expect(MaskingStyle.pixelArt.label == "style.pixelArt")
         #expect(MaskingStyle.crystalize.label == "style.crystalize")
         #expect(MaskingStyle.solidClean.label == "style.solidClean")
+        #expect(MaskingStyle.emojiOverlay.label == "style.emojiOverlay")
     }
 
     @Test("Icons are the expected SF Symbol names")
@@ -30,6 +31,7 @@ struct MaskingStyleTests {
         #expect(MaskingStyle.pixelArt.icon == "square.grid.3x3.fill")
         #expect(MaskingStyle.crystalize.icon == "diamond.fill")
         #expect(MaskingStyle.solidClean.icon == "circle.fill")
+        #expect(MaskingStyle.emojiOverlay.icon == "face.smiling")
     }
 
     @Test("id equals rawValue for all cases")

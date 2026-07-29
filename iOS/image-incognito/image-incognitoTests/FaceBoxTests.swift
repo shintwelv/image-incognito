@@ -98,4 +98,16 @@ struct FaceBoxTests {
         #expect(textBox.category.iconName == "text.quote")
         #expect(textBox.category.localizedLabelKey == "category.text")
     }
+
+    @Test("selectedEmoji defaults to 😎 and can be mutated")
+    func selectedEmojiTest() {
+        var face = FaceBox(rect: .zero)
+        #expect(face.selectedEmoji == "😎")
+
+        face.selectedEmoji = "🐱"
+        #expect(face.selectedEmoji == "🐱")
+
+        let customEmojiBox = FaceBox(rect: .zero, selectedEmoji: "🎭")
+        #expect(customEmojiBox.selectedEmoji == "🎭")
+    }
 }

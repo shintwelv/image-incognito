@@ -359,4 +359,22 @@ struct EditorViewModelTests {
         #expect(flipped.width == visionRect.width)
         #expect(flipped.height == visionRect.height)
     }
+
+    @Test("selectedEmoji proxies to the currently selected face")
+    func selectedEmojiProxy() {
+        let vm = EditorViewModel(sourceImage: makeTestImage())
+        let face1 = makeFace()
+        let face2 = makeFace()
+        vm.faces = [face1, face2]
+
+        vm.selectedFaceID = face1.id
+        #expect(vm.selectedEmoji == "😎")
+
+        vm.selectedEmoji = "🐱"
+        #expect(vm.faces[0].selectedEmoji == "🐱")
+
+        vm.selectedFaceID = face2.id
+        vm.setEmojiForSelectedFace("🎭")
+        #expect(vm.faces[1].selectedEmoji == "🎭")
+    }
 }

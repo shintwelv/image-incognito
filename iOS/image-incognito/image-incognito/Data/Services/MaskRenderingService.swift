@@ -68,6 +68,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
                 case .pixelArt:     applyPixelArt(rect: rect, face: face, image: image)
                 case .crystalize:   applyCrystalize(rect: rect, face: face, image: image)
                 case .solidClean:   applySolid(rect: rect, face: face, color: solidCleanColor)
+                case .emojiOverlay: applyEmojiOverlay(rect: rect, face: face)
                 }
             }
         }
@@ -234,5 +235,40 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
     nonisolated private func applySolid(rect: CGRect, face: FaceBox, color: UIColor) {
         color.withAlphaComponent(face.intensity).setFill()
         clipPath(for: rect, category: face.category).fill()
+    }
+
+    // MARK: - Emoji Overlay (emojiOverlay)
+
+    nonisolated private func applyEmojiOverlay(rect: CGRect, face: FaceBox) {
+        guard let ctx = UIGraphicsGetCurrentContext() else { return }
+        ctx.saveGState()
+
+        let emoji = face.selectedEmoji.isEmpty ? "😎" : face.selectedEmoji
+        let side = min(rect.width, rect.height)
+        let fontSize = max(8.0, side * 0.85)
+        let font = UIFont.systemFont(ofSize: fontSize)
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .paragraphStyle: paragraphStyle
+        ]
+
+        let string = NSString(string: emoji)
+        let textSize = string.size(withAttributes: attributes)
+
+        let drawRect = CGRect(
+            x: rect.midX - textSize.width / 2,
+            y: rect.midY - textSize.height / 2,
+            width: textSize.width,
+            height: textSize.height
+        )
+
+        ctx.setAlpha(CGFloat(face.intensity))
+        string.draw(in: drawRect, withAttributes: attributes)
+
+        ctx.restoreGState()
     }
 }
