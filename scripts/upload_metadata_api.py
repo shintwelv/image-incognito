@@ -180,14 +180,16 @@ def sync_app_store_metadata(version_string="1.5"):
     for ver in versions_data.get("data", []):
         v_str = ver["attributes"]["versionString"]
         v_state = ver["attributes"]["appStoreState"]
-        if v_str == version_string:
+        if v_str == version_string and v_state not in ["READY_FOR_SALE", "DEVELOPER_REMOVED_FROM_SALE"]:
             version_id = ver["id"]
-            print(f"ℹ️ Found existing App Store Version {version_string} (ID: {version_id}, State: {v_state})")
+            print(f"ℹ️ Found editable App Store Version {version_string} (ID: {version_id}, State: {v_state})")
             break
+        elif v_str == version_string:
+            print(f"ℹ️ Found existing version {version_string} in state '{v_state}' (non-editable). Will create new editable version...")
 
-    # 2. Create version if it does not exist
+    # 2. Create version if it does not exist or previous is not editable
     if not version_id:
-        print(f"✨ Version {version_string} not found. Creating new App Store Version {version_string}...")
+        print(f"✨ Version {version_string} not editable or not found. Creating new App Store Version {version_string}...")
         create_payload = {
             "data": {
                 "type": "appStoreVersions",
@@ -261,4 +263,4 @@ def sync_app_store_metadata(version_string="1.5"):
     print(f"\n🎉 All 5 localizations successfully updated on App Store Connect for Version {version_string}!")
 
 if __name__ == "__main__":
-    sync_app_store_metadata("1.5")
+    sync_app_store_metadata("1.7")

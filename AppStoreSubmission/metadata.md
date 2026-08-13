@@ -1,6 +1,6 @@
-# App Store Submission Materials (Version 1.5)
+# App Store Submission Materials (Version 1.7)
 
-This file contains the metadata and submission details required for App Store Connect when publishing version 1.5 (Build 5) of Incognify.
+This file contains the metadata and submission details required for App Store Connect when publishing version 1.7 (Build 7) of Incognify.
 
 ---
 
@@ -24,16 +24,15 @@ This file contains the metadata and submission details required for App Store Co
 Auto Face Privacy for Photos
 
 ### Promotional Text
-Protect portrait rights without sacrificing aesthetics. Faces blurred, style intact.
+Protect portrait rights without sacrificing aesthetics. Faces masked, style intact.
 
 ### Keywords
-face blur, privacy photo, photoprivacy, mask face, blur face, incognito, pixelate, crystalize, no tracking, edit photo, anonymize, license plate, text redact
+face blur, privacy photo, emoji mask, sticker face, mask face, blur face, incognito, pixelate, crystalize, no tracking, edit photo, anonymize, license plate, text redact
 
-### What's New in Version 1.5
-- Added on-device License Plate & Sensitive Text Redaction alongside face detection.
-- Added iOS System Share & Action Handoff ("Mask with Incognify") directly from Photos and Files.
-- Added category badges for detected faces, license plates, and sensitive text regions.
-- Performance enhancements and complete localization support for all 5 languages.
+### What's New in Version 1.7
+- Improved **Blur Intensity Control**: 100% intensity now delivers complete, rock-solid face anonymization with direct 1:1 scaling.
+- Fixed edge clamping artifacts on blurred crops for cleaner, artifact-free exports.
+- Enhanced UI preview fidelity and build performance.
 
 ### Description
 Protect portrait rights without sacrificing aesthetics. Share freely on Instagram and beyond — faces masked, style intact.
@@ -42,7 +41,8 @@ Incognify uses Apple's advanced Vision framework to automatically detect faces i
 
 Key Features:
 - **Automatic Face Detection**: Detects multiple faces in background crowds or chaotic settings instantly.
-- **Aesthetic Masks**: Choose from Blur, Pixelation, and the brand-new Crystalize style. Every mask feels like an artistic design, not an ugly patch.
+- **Aesthetic Masks**: Choose from Blur, Pixelation, Crystalize, and the all-new Emoji & Graphic Sticker Overlay style. Every mask feels like an artistic design, not an ugly patch.
+- **Customizable Emoji Presets**: Express yourself by picking from default emoji presets or adding your own favorite custom emojis.
 - **100% On-Device Processing**: Your photos never leave your device. Zero cloud uploads, zero tracking.
 - **High-Resolution Export**: Save and share lossless high-quality photos perfect for social networks.
 - **Dark Mode Support**: Beautifully matches the iOS ecosystem.
@@ -58,13 +58,12 @@ Key Features:
 사진의 아름다움을 해치지 않고 초상권을 보호하세요. 얼굴은 가리고 스타일은 유지됩니다.
 
 ### Keywords
-얼굴 블러, 프라이버시 사진, 사진 모자이크, 얼굴 마스크, 얼굴 가리기, 익명 사진, 픽셀화, 크리스탈라이즈, 온디바이스, 사진 편집
+얼굴 블러, 프라이버시 사진, 이모지 마스크, 얼굴 스티커, 사진 모자이크, 얼굴 가리기, 익명 사진, 픽셀화, 크리스탈라이즈, 온디바이스, 사진 편집
 
-### What's New in Version 1.5
-- 얼굴 감지와 함께 자동차 번호판 및 민감한 텍스트 온디바이스 자동 감지 및 블러 기능이 추가되었습니다.
-- 사진 앱 및 파일 앱에서 'Incognify로 마스킹' 직접 실행을 위한 iOS 시스템 공유 연동 기능이 추가되었습니다.
-- 감지된 얼굴, 번호판, 텍스트 영역을 구분하는 카테고리 배지 아이콘이 적용되었습니다.
-- 성능 최적화 및 5개 언어 전체 현지화 지원이 반영되었습니다.
+### What's New in Version 1.7
+- **블러 강도 조절 대폭 개선**: 100% 강도 설정 시 얼굴이 완벽하고 확실하게 가려지는 1:1 직관적 매핑 적용.
+- 블러 영역 테두리의 검은색 번짐(Clamping) 현상을 해결하여 한층 깔끔해진 고화질 내보내기 제공.
+- 편집 화면 프리뷰 가독성 및 전반적인 안정성을 향상했습니다.
 
 ### Description
 사진의 아름다움을 해치지 않으면서 초상권을 보호하세요. 인스타그램이나 다른 SNS에 얼굴은 마스킹하되 스타일은 그대로 유지한 채 자유롭게 공유하세요.
@@ -73,7 +72,8 @@ Incognify는 Apple의 최첨단 Vision 프레임워크를 사용하여 사진 �
 
 주요 기능:
 - **자동 얼굴 감지**: 복잡한 배경이나 군중 속에서도 여러 개의 얼굴을 순식간에 감지합니다.
-- **미적 감각의 마스크**: 블러, 픽셀화, 그리고 새롭게 추가된 크리스탈라이즈(Crystalize) 스타일 중에서 선택할 수 있습니다. 마스킹이 어색한 땜질이 아니라 하나의 예술 작품처럼 느껴집니다.
+- **미적 감각의 마스크**: 블러, 픽셀화, 크리스탈라이즈(Crystalize), 그리고 새롭게 추가된 이모지 & 스티커 오버레이 스타일 중에서 선택할 수 있습니다.
+- **커스텀 이모지 프리셋**: 기본 제공 이모지뿐만 아니라 원하는 이모지를 직접 추가하여 개성 있게 얼굴을 가릴 수 있습니다.
 - **100% 온디바이스 처리**: 사진은 기기 밖으로 절대 전송되지 않습니다. 클라우드 업로드 및 추적이 전혀 없습니다.
 - **고해상도 내보내기**: SNS 업로드에 완벽한 무손실 고화질 사진을 저장하고 공유할 수 있습니다.
 - **다크 모드 지원**: iOS 생태계에 완벽하게 어우러지는 미려한 UI를 제공합니다.
@@ -89,13 +89,12 @@ Incognify는 Apple의 최첨단 Vision 프레임워크를 사용하여 사진 �
 写真の美しさを損なうことなく、肖像権を保護します。顔をマスクしつつ、スタイルはそのまま。
 
 ### Keywords
-顔ぼかし, プライバシー写真, 写真モザイク, 顔マスク, 顔隠し, 匿名写真, ピクセル化, クリスタライズ, 写真編集, オンデバイス
+顔ぼかし, プライバシー写真, 絵文字マスク, ステッカー顔, 写真モザイク, 顔隠し, 匿名写真, ピクセル化, クリスタライズ, 写真編集, オンデバイス
 
-### What's New in Version 1.5
-- 顔検出とともに、車のナンバープレートや機密テキストのオンデバイス自動検出・モザイク機能を追加しました。
-- 写真アプリやファイルアプリから直接実行できるiOSシステム共有（「Incognifyでマスク」）連携機能を導入しました。
-- 検出された顔、ナンバープレート、テキスト領域を区別するカテゴリバッジアイコンを適用しました。
-- パフォーマンスの最適化と5つの言語すべてのローカライズ対応を完了しました。
+### What's New in Version 1.7
+- **ぼかし強度の調整を大幅改善**：100%設定時に顔を完璧かつ確実に匿名化する直感的な1:1マッピングを適用。
+- ぼかし領域の端の黒ずみ現象を解決し、よりクリアで高品質な書き出しに対応しました。
+- 編集画面のプレビュー視認性と全体的な安定性を向上させました。
 
 ### Description
 写真の美しさを損なうことなく、肖像権を保護します。顔をマスクしつつ、スタイルはそのまま維持して、Instagramやその他のSNSに自由に共有しましょう。
@@ -104,7 +103,8 @@ Incognifyは、Appleの先進的なVisionフレームワークを使用して、
 
 主な機能：
 - **自動顔検出**：混雑した背景や人混みの中でも、複数の顔を瞬時に検出します。
-- **美学的なマスク**：ぼかし（Blur）、モザイク（Pixelation）、そして新登場のクリスタライズ（Crystalize）スタイルから選択できます。単なるモザイクではなく、デザインの一部であるかのように美しく仕上がります。
+- **美学的なマスク**：ぼかし（Blur）、モザイク（Pixelation）、クリスタライズ（Crystalize）、顔隠し用絵文字＆ステッカーオーバーレイから選択できます。
+- **カスタム絵文字プリセット**：お気に入りの絵文字を追加して、自分らしく個性的に顔を隠せます。
 - **100%オンデバイス処理**：写真はデバイス外に送信されません。クラウドへのアップロードや追跡は一切ありません。
 - **高解像度書き出し**：SNSへの投稿に最適な無損失・高品質な写真を保存して共有できます。
 - **ダークモード対応**：iOSエコシステムに美しく調和する洗練されたインターフェース。
@@ -120,13 +120,12 @@ Privacidad automática de rostros
 Protege los derechos de imagen sin sacrificar la estética. Rostros enmascarados, estilo intacto.
 
 ### Keywords
-desenfoque cara, privacidad foto, mosaico foto, mascara cara, ocultar cara, foto anonima, pixelar, crystalize, editar foto, local
+desenfoque cara, privacidad foto, emoji mascara, sticker cara, ocultar cara, foto anonima, pixelar, crystalize, editar foto, local
 
-### What's New in Version 1.5
-- Se añadió la detección y enmascaramiento automático en el dispositivo para matrículas de vehículos y texto confidencial junto con la detección de rostros.
-- Se agregó la integración para compartir en el sistema iOS ("Enmascarar con Incognify") directamente desde Fotos y Archivos.
-- Se agregaron insignias de categoría para identificar rostros, matrículas y regiones de texto detectadas.
-- Optimizaciones de rendimiento y soporte completo de localización para los 5 idiomas.
+### What's New in Version 1.7
+- **Control de intensidad de difuminado mejorado**: El 100% de intensidad ofrece un anonimizado facial completo y directo.
+- Corrección de bordes oscuros en las zonas difuminadas para exportaciones más limpias.
+- Mayor fidelidad de vista previa en el editor y estabilidad del sistema.
 
 ### Description
 Protege los derechos de imagen sin sacrificar la estética. Comparte libremente en Instagram y más allá: rostros enmascarados, estilo intacto.
@@ -135,7 +134,8 @@ Incognify utiliza el avanzado framework Vision de Apple para detectar automátic
 
 Características clave:
 - **Detección automática de rostros**: Detecta múltiples rostros en multitudes o entornos caóticos al instante.
-- **Máscaras estéticas**: Elige entre Difuminado, Pixelado y el nuevo estilo Crystalize. Cada máscara se siente como una elección de diseño deliberada, no como un parche feo.
+- **Máscaras estéticas**: Elige entre Difuminado, Pixelado, Crystalize y el nuevo estilo de Superposición de Emojis y Stickers.
+- **Ajustes preestablecidos de emoji personalizables**: Expresa tu estilo añadiendo tus emojis favoritos.
 - **Procesamiento 100% en el dispositivo**: Tus fotos nunca salen de tu dispositivo. Cero subidas a la nube, cero rastreo.
 - **Exportación en alta resolución**: Guarda y comparte fotos sin pérdidas de alta calidad, ideales para redes sociales.
 - **Soporte de modo oscuro**: Se adapta maravillosamente al ecosistema de iOS.
@@ -151,13 +151,12 @@ Características clave:
 在不牺牲画面美感的前提下，完美保护肖像权。面部做美学打码，艺术风格依然在线。
 
 ### Keywords
-人脸打码, 隐私保护, 照片打码, 人脸模糊, 遮罩人脸, 匿名照片, 像素化, 水晶化, 本地处理, 照片编辑
+人脸打码, 隐私保护, 表情打码, 贴纸打码, 遮罩人脸, 匿名照片, 像素化, 水晶化, 本地处理, 照片编辑
 
-### What's New in Version 1.5
-- 新增车牌及敏感文本的本地设备自动检测与打码功能。
-- 新增 iOS 系统分享与快捷集成（支持直接从“照片”及“文件”应用一键使用 Incognify 打码）。
-- 为检测到的面部、车牌及文本区域添加了分类图标标识。
-- 进一步优化了性能，并对全部 5 种语言完成了完整的本地化支持。
+### What's New in Version 1.7
+- **模糊强度控制大幅提升**：100%强度设置下提供直观、彻底的人脸遮挡与完全匿名化效果。
+- 修复了模糊边缘黑边渗漏问题，导出图像更为清爽干净。
+- 提升了编辑界面的预览效果与系统稳定性。
 
 ### Description
 在不牺牲画面美感的前提下，完美保护肖像权。自由分享至社交平台：面部做美学打码，艺术风格依然在线。
@@ -166,7 +165,7 @@ Incognify 依托 Apple 先进的 Vision 框架，可自动、精准检测照片�
 
 核心功能：
 - **自动人脸检测**：即使在喧闹拥挤的人群或复杂背景中，也能在毫秒间精准锁定每张面孔。
-- **美学打码遮罩**：提供模糊、像素化以及全新的“水晶化 (Crystalize)”几何艺术风格。每一次打码都更像是精心的创意设计，而不是突兀的隐私补丁。
+- **美学打码遮罩**：提供模糊、像素化、“水晶化 (Crystalize)”以及表情符号与贴纸艺术打码风格。
+- **自定义 Emoji 预设**：可自定义添加您最爱的表情符号，个性化遮挡面部。
 - **100% 本地设备处理**：所有的照片检测与修改均在您的 iPhone 内部完成，绝不上传至任何云端，零数据跟踪。
-- **超清分辨率导出**：无损保存并分享原画质照片，完美适配各社交平台画质要求。
 - **完美支持深色模式**：极致视觉美学，完美融入 iOS 系统生态。

@@ -47,7 +47,7 @@ def parse_metadata():
         subtitle = extract_field(section, "Subtitle")
         promo_text = extract_field(section, "Promotional Text")
         keywords = extract_field(section, "Keywords")
-        whats_new = extract_field(section, "What's New in Version 1.4")
+        whats_new = extract_whats_new(section)
         description = extract_field(section, "Description")
 
         data = {
@@ -67,6 +67,13 @@ def parse_metadata():
         parsed_count += 1
 
     print(f"🎉 Generated {parsed_count} metadata configurations in {OUTPUT_DIR}")
+
+def extract_whats_new(section):
+    pattern = r"### What's New.*?\n(.*?)(?=\n### |\n---|\Z)"
+    match = re.search(pattern, section, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return ""
 
 def extract_field(section, field_name):
     pattern = rf"### {re.escape(field_name)}\n(.*?)(?=\n### |\n---|\Z)"
