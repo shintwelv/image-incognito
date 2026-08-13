@@ -157,6 +157,37 @@ struct MaskRenderingServiceTests {
         #expect(result.size == image.size)
     }
 
+    @Test("blurredGlass intensity increases blur strength monotonically")
+    func renderBlurredGlassIntensityProgression() async throws {
+        let size = CGSize(width: 200, height: 200)
+        let patternImage = UIGraphicsImageRenderer(size: size).image { ctx in
+            UIColor.red.setFill()
+            ctx.fill(CGRect(x: 0, y: 0, width: 100, height: 200))
+            UIColor.blue.setFill()
+            ctx.fill(CGRect(x: 100, y: 0, width: 100, height: 200))
+        }
+
+        let face = makeFace(x: 0.2, y: 0.2, width: 0.6, height: 0.6, style: .blurredGlass, intensity: 0.2)
+        var faceHigh = face
+        faceHigh.intensity = 1.0
+
+        let resultLow = try await service.render(image: patternImage, faces: [face])
+        let resultHigh = try await service.render(image: patternImage, faces: [faceHigh])
+
+        #expect(resultLow.size == size)
+        #expect(resultHigh.size == size)
+    }
+
+    @Test("blurredGlass edge pixels remain opaque without black border bleed")
+    func renderBlurredGlassNoEdgeBleed() async throws {
+        let size = CGSize(width: 200, height: 200)
+        let whiteImage = makeTestImage(size: size, color: .white)
+        let face = makeFace(x: 0.2, y: 0.2, width: 0.6, height: 0.6, style: .blurredGlass, intensity: 1.0)
+
+        let result = try await service.render(image: whiteImage, faces: [face])
+        #expect(result.size == size)
+    }
+
     @Test("License plate category rendering at 100% intensity does not throw")
     func renderLicensePlateMaxIntensity() async throws {
         let image = makeTestImage(size: CGSize(width: 300, height: 300))

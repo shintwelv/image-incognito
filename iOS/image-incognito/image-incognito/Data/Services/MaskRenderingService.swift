@@ -148,15 +148,15 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         guard bounds.width > 0, bounds.height > 0,
               let cropped = cgImage.cropping(to: bounds) else { return nil }
 
-        let ci = CIImage(cgImage: cropped)
+        let originalExtent = CGRect(x: 0, y: 0, width: cropped.width, height: cropped.height)
+        let ci = CIImage(cgImage: cropped).clampedToExtent()
         let filter = CIFilter.gaussianBlur()
         filter.inputImage = ci
-        let minEdge = CGFloat(cropped.width)
-        let maxRadius: CGFloat = minEdge * 0.35
-        filter.radius = Float(maxRadius * intensity)
+        let minEdge = min(CGFloat(cropped.width), CGFloat(cropped.height))
+        filter.radius = Float(minEdge * intensity)
 
-        guard let output = filter.outputImage,
-              let result = ciContext.createCGImage(output, from: ci.extent) else { return nil }
+        guard let output = filter.outputImage?.cropped(to: originalExtent),
+              let result = ciContext.createCGImage(output, from: originalExtent) else { return nil }
         return UIImage(cgImage: result, scale: image.scale, orientation: .up)
     }
 

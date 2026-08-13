@@ -33,7 +33,7 @@ struct FaceOverlayView: View {
         switch faceBox.style {
         case .blurredGlass:
             maskShape
-                .fill(.ultraThinMaterial)
+                .fill(.thickMaterial)
                 .overlay {
                     maskShape
                         .fill(Color.white.opacity(0.15 * faceBox.intensity))
