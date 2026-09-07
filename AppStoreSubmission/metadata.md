@@ -1,6 +1,6 @@
-# App Store Submission Materials (Version 1.7)
+# App Store Submission Materials (Version 1.7.1)
 
-This file contains the metadata and submission details required for App Store Connect when publishing version 1.7 (Build 7) of Incognify.
+This file contains the metadata and submission details required for App Store Connect when publishing version 1.7.1 (Build 8) of Incognify.
 
 ---
 
@@ -29,10 +29,9 @@ Protect portrait rights without sacrificing aesthetics. Faces masked, style inta
 ### Keywords
 face blur, privacy photo, emoji mask, sticker face, mask face, blur face, incognito, pixelate, crystalize, no tracking, edit photo, anonymize
 
-### What's New in Version 1.7
-- Improved **Blur Intensity Control**: 100% intensity now delivers complete, rock-solid face anonymization with direct 1:1 scaling.
-- Fixed edge clamping artifacts on blurred crops for cleaner, artifact-free exports.
-- Enhanced UI preview fidelity and build performance.
+### What's New in Version 1.7.1
+- Automatic detection now focuses exclusively on faces, preventing ordinary text such as signs, dates, and prices from being incorrectly masked.
+- Removed analytics and crash-reporting SDKs. Photo processing remains entirely on-device, with no tracking.
 
 ### Description
 Protect portrait rights without sacrificing aesthetics. Share freely on Instagram and beyond — faces masked, style intact.
@@ -60,10 +59,9 @@ Key Features:
 ### Keywords
 얼굴 블러, 프라이버시 사진, 이모지 마스크, 얼굴 스티커, 사진 모자이크, 얼굴 가리기, 익명 사진, 픽셀화, 크리스탈라이즈, 온디바이스, 사진 편집
 
-### What's New in Version 1.7
-- **블러 강도 조절 대폭 개선**: 100% 강도 설정 시 얼굴이 완벽하고 확실하게 가려지는 1:1 직관적 매핑 적용.
-- 블러 영역 테두리의 검은색 번짐(Clamping) 현상을 해결하여 한층 깔끔해진 고화질 내보내기 제공.
-- 편집 화면 프리뷰 가독성 및 전반적인 안정성을 향상했습니다.
+### What's New in Version 1.7.1
+- 자동 감지가 얼굴에만 집중하도록 개선하여 간판, 날짜, 가격 등 일반 텍스트가 잘못 가려지지 않도록 했습니다.
+- 분석 및 비정상 종료 보고 SDK를 제거했습니다. 사진 처리는 계속 기기 내에서만 이루어지며 추적하지 않습니다.
 
 ### Description
 사진의 아름다움을 해치지 않으면서 초상권을 보호하세요. 인스타그램이나 다른 SNS에 얼굴은 마스킹하되 스타일은 그대로 유지한 채 자유롭게 공유하세요.
@@ -91,10 +89,9 @@ Incognify는 Apple의 최첨단 Vision 프레임워크를 사용하여 사진 �
 ### Keywords
 顔ぼかし, プライバシー写真, 絵文字マスク, ステッカー顔, 写真モザイク, 顔隠し, 匿名写真, ピクセル化, クリスタライズ, 写真編集, オンデバイス
 
-### What's New in Version 1.7
-- **ぼかし強度の調整を大幅改善**：100%設定時に顔を完璧かつ確実に匿名化する直感的な1:1マッピングを適用。
-- ぼかし領域の端の黒ずみ現象を解決し、よりクリアで高品質な書き出しに対応しました。
-- 編集画面のプレビュー視認性と全体的な安定性を向上させました。
+### What's New in Version 1.7.1
+- 自動検出を顔のみに絞り、看板、日付、価格などの一般的な文字が誤ってマスクされないよう改善しました。
+- 分析・クラッシュレポートSDKを削除しました。写真処理は引き続きすべてデバイス上で行われ、トラッキングはしません。
 
 ### Description
 写真の美しさを損なうことなく、肖像権を保護します。顔をマスクしつつ、スタイルはそのまま維持して、Instagramやその他のSNSに自由に共有しましょう。
@@ -122,10 +119,9 @@ Protege los derechos de imagen sin sacrificar la estética. Rostros enmascarados
 ### Keywords
 desenfoque cara, privacidad foto, emoji mascara, sticker cara, ocultar cara, foto anonima, pixelar, crystalize, editar foto, local
 
-### What's New in Version 1.7
-- **Control de intensidad de difuminado mejorado**: El 100% de intensidad ofrece un anonimizado facial completo y directo.
-- Corrección de bordes oscuros en las zonas difuminadas para exportaciones más limpias.
-- Mayor fidelidad de vista previa en el editor y estabilidad del sistema.
+### What's New in Version 1.7.1
+- La detección automática ahora se centra solo en rostros, para evitar ocultar por error texto común como carteles, fechas y precios.
+- Eliminamos los SDK de análisis y reportes de fallos. El procesamiento continúa realizándose totalmente en el dispositivo, sin seguimiento.
 
 ### Description
 Protege los derechos de imagen sin sacrificar la estética. Comparte libremente en Instagram y más allá: rostros enmascarados, estilo intacto.
@@ -153,10 +149,9 @@ Características clave:
 ### Keywords
 人脸打码, 隐私保护, 表情打码, 贴纸打码, 遮罩人脸, 匿名照片, 像素化, 水晶化, 本地处理, 照片编辑
 
-### What's New in Version 1.7
-- **模糊强度控制大幅提升**：100%强度设置下提供直观、彻底的人脸遮挡与完全匿名化效果。
-- 修复了模糊边缘黑边渗漏问题，导出图像更为清爽干净。
-- 提升了编辑界面的预览效果与系统稳定性。
+### What's New in Version 1.7.1
+- 自动检测现仅聚焦人脸，避免将招牌、日期、价格等普通文字误判并遮挡。
+- 已移除分析和崩溃报告 SDK。照片处理仍完全在设备本地完成，不会进行跟踪。
 
 ### Description
 在不牺牲画面美感的前提下，完美保护肖像权。自由分享至社交平台：面部做美学打码，艺术风格依然在线。

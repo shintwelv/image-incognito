@@ -41,17 +41,6 @@
                ReferencedContainer = "container:image-incognito.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E5F558D72F765AA9007C9201"
-               BuildableName = "image-incognitoUITests.xctest"
-               BlueprintName = "image-incognitoUITests"
-               ReferencedContainer = "container:image-incognito.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

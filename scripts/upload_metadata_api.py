@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Automatic App Store Connect Metadata Uploader
-Reads parsed metadata from AppStoreSubmission/metadata.md and directly creates/updates 
-the App Store version (1.5) and all 5 localizations via App Store Connect REST API.
+Reads parsed metadata from AppStoreSubmission/metadata.md and directly creates/updates
+the requested App Store version and all 5 localizations via App Store Connect REST API.
 """
 
 import os
@@ -268,4 +268,4 @@ def sync_app_store_metadata(version_string="1.5"):
     print(f"\n🎉 All 5 localizations successfully updated on App Store Connect for Version {version_string}!")
 
 if __name__ == "__main__":
-    sync_app_store_metadata("1.7")
+    sync_app_store_metadata("1.7.1")

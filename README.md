@@ -176,7 +176,7 @@ xcodebuild test \
 3. Select a simulator or connected device running iOS 17+
 4. Press `⌘R` to build and run
 
-Swift Package Manager dependencies resolve automatically when you open the project in Xcode. The app also includes Firebase packages for analytics and crash reporting.
+The project has no external package dependencies. Open it in Xcode to build and run it.
 
 ---
 
