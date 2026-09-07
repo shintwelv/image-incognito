@@ -9,6 +9,7 @@
 import ImageIO
 import Testing
 import UIKit
+import Vision
 @testable import image_incognito
 
 @Suite("FaceDetectionService")
@@ -63,23 +64,36 @@ struct FaceDetectionServiceTests {
         #expect(CGImagePropertyOrientation(.rightMirrored) == .rightMirrored)
     }
 
-    @Test("classifyText accurately distinguishes license plate patterns from general text")
-    func classifyTextHeuristic() {
-        #expect(FaceDetectionService.classifyText("7ABC123") == .licensePlate)
-        #expect(FaceDetectionService.classifyText("12가 3456") == .licensePlate)
-        #expect(FaceDetectionService.classifyText("ABC-1234") == .licensePlate)
-        #expect(FaceDetectionService.classifyText("This is a long document paragraph.") == .text)
+    @Test("automatic masking uses only the face detection Vision request")
+    func automaticMaskingUsesOnlyFaceDetectionRequest() {
+        let requests = FaceDetectionService.faceDetectionRequests()
+
+        #expect(requests.count == 1)
+        #expect(requests.first is VNDetectFaceRectanglesRequest)
+        #expect(requests.allSatisfy { !($0 is VNRecognizeTextRequest) })
     }
 
-    @Test("detectFaces returns cleanly on simulator without throwing")
-    func detectFacesSyntheticImage() async throws {
-        let image = makeTestImage(size: CGSize(width: 300, height: 300))
-        do {
-            let facesNoText = try await service.detectFaces(in: image, includeText: false)
-            #expect(facesNoText.isEmpty || !facesNoText.isEmpty)
-        } catch {
-            // Vision processing may fail or return empty on Simulator without VisionKit hardware acceleration
-            #expect(true)
+    #if !targetEnvironment(simulator)
+    @Test("device Vision leaves text-only images without automatic masks")
+    func deviceVisionLeavesTextOnlyImageUnmasked() async throws {
+        let size = CGSize(width: 600, height: 300)
+        let image = UIGraphicsImageRenderer(size: size).image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.monospacedSystemFont(ofSize: 88, weight: .bold),
+                .foregroundColor: UIColor.black
+            ]
+            ("ABC 1234" as NSString).draw(
+                in: CGRect(x: 60, y: 100, width: 480, height: 100),
+                withAttributes: attributes
+            )
         }
+
+        let detectedFaces = try await service.detectFaces(in: image)
+
+        #expect(detectedFaces.isEmpty)
     }
+    #endif
 }

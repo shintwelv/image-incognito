@@ -78,27 +78,6 @@ struct FaceBoxTests {
         #expect(face.style == .pixelArt)
     }
 
-    @Test("Default category is face")
-    func defaultCategory() {
-        let face = FaceBox(rect: .zero)
-        #expect(face.category == .face)
-        #expect(face.category.iconName == "person.fill")
-        #expect(face.category.localizedLabelKey == "category.face")
-    }
-
-    @Test("Custom category initializes properly")
-    func customCategory() {
-        let plateBox = FaceBox(rect: .zero, category: .licensePlate)
-        #expect(plateBox.category == .licensePlate)
-        #expect(plateBox.category.iconName == "car.fill")
-        #expect(plateBox.category.localizedLabelKey == "category.licensePlate")
-
-        let textBox = FaceBox(rect: .zero, category: .text)
-        #expect(textBox.category == .text)
-        #expect(textBox.category.iconName == "text.quote")
-        #expect(textBox.category.localizedLabelKey == "category.text")
-    }
-
     @Test("selectedEmoji defaults to 😎 and can be mutated")
     func selectedEmojiTest() {
         var face = FaceBox(rect: .zero)

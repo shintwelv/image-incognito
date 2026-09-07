@@ -8,28 +8,6 @@
 
 import Foundation
 
-nonisolated enum DetectedCategory: String, CaseIterable, Codable, Sendable {
-    case face
-    case licensePlate
-    case text
-
-    var iconName: String {
-        switch self {
-        case .face:         return "person.fill"
-        case .licensePlate: return "car.fill"
-        case .text:         return "text.quote"
-        }
-    }
-
-    var localizedLabelKey: String {
-        switch self {
-        case .face:         return "category.face"
-        case .licensePlate: return "category.licensePlate"
-        case .text:         return "category.text"
-        }
-    }
-}
-
 nonisolated struct FaceBox: Identifiable, Sendable {
     let id: UUID
     /// Normalized bounding box (top-left origin, values 0–1).
@@ -42,8 +20,6 @@ nonisolated struct FaceBox: Identifiable, Sendable {
     var intensity: Double
     /// Bounding-box size multiplier: 0.5 (tighter) → 2.0 (larger).
     var sizeMultiplier: Double
-    /// Category of detected region (face, license plate, text).
-    var category: DetectedCategory
     /// Selected emoji when style is .emojiOverlay.
     var selectedEmoji: String
 
@@ -54,7 +30,6 @@ nonisolated struct FaceBox: Identifiable, Sendable {
         style: MaskingStyle = .blurredGlass,
         intensity: Double = 0.75,
         sizeMultiplier: Double = 1.0,
-        category: DetectedCategory = .face,
         selectedEmoji: String = "😎"
     ) {
         self.id = id
@@ -63,7 +38,6 @@ nonisolated struct FaceBox: Identifiable, Sendable {
         self.style = style
         self.intensity = intensity
         self.sizeMultiplier = sizeMultiplier
-        self.category = category
         self.selectedEmoji = selectedEmoji
     }
 }

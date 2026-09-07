@@ -16,6 +16,48 @@ struct EditorViewModelTests {
 
     // MARK: - Helpers
 
+    /// Records which repository entry point the editor flow uses.  The
+    /// two-argument overload is the legacy OCR-capable path; the one-argument
+    /// overload is the face-only contract introduced by this regression.
+    private final class DetectionCallRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var faceOnlyCalls = 0
+        private var includeTextArguments: [Bool] = []
+
+        func recordFaceOnlyCall() {
+            lock.lock()
+            defer { lock.unlock() }
+            faceOnlyCalls += 1
+        }
+
+        func recordIncludeTextCall(_ includeText: Bool) {
+            lock.lock()
+            defer { lock.unlock() }
+            includeTextArguments.append(includeText)
+        }
+
+        func snapshot() -> (faceOnlyCalls: Int, includeTextArguments: [Bool]) {
+            lock.lock()
+            defer { lock.unlock() }
+            return (faceOnlyCalls, includeTextArguments)
+        }
+    }
+
+    private struct RecordingFaceDetectionRepository: FaceDetectionRepositoryProtocol {
+        let recorder: DetectionCallRecorder
+        let detectedFaces: [FaceBox]
+
+        func detectFaces(in image: UIImage, includeText: Bool) async throws -> [FaceBox] {
+            recorder.recordIncludeTextCall(includeText)
+            return detectedFaces
+        }
+
+        func detectFaces(in image: UIImage) async throws -> [FaceBox] {
+            recorder.recordFaceOnlyCall()
+            return detectedFaces
+        }
+    }
+
     private func makeFace(
         x: CGFloat = 0.1, y: CGFloat = 0.1,
         width: CGFloat = 0.3, height: CGFloat = 0.3,
@@ -41,6 +83,30 @@ struct EditorViewModelTests {
         #expect(vm.showAdjustmentSliders == false)
         #expect(vm.isRendering == false)
         #expect(vm.renderedImage == nil)
+    }
+
+    @Test("editor detection uses the face-only repository path")
+    func editorDetectionUsesFaceOnlyRepositoryPath() async throws {
+        let expectedFace = makeFace()
+        let recorder = DetectionCallRecorder()
+        let useCase = DetectFacesUseCase(
+            repository: RecordingFaceDetectionRepository(
+                recorder: recorder,
+                detectedFaces: [expectedFace]
+            )
+        )
+        let vm = EditorViewModel(
+            sourceImage: makeTestImage(),
+            detectFacesUseCase: useCase
+        )
+
+        try await vm.detectFaces()
+
+        let calls = recorder.snapshot()
+        #expect(calls.faceOnlyCalls == 1)
+        #expect(calls.includeTextArguments.isEmpty)
+        #expect(vm.faces.map(\.id) == [expectedFace.id])
+        #expect(vm.detectionCompleted)
     }
 
     // MARK: - toggleMask

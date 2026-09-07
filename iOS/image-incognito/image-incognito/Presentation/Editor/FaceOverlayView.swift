@@ -41,10 +41,10 @@ struct FaceOverlayView: View {
                 .opacity(faceBox.intensity)
 
         case .pixelArt:
-            PixelArtMaskView(intensity: faceBox.intensity, category: faceBox.category)
+            PixelArtMaskView(intensity: faceBox.intensity)
 
         case .crystalize:
-            CrystalizeMaskView(intensity: faceBox.intensity, category: faceBox.category)
+            CrystalizeMaskView(intensity: faceBox.intensity)
 
         case .solidClean:
             maskShape
@@ -56,11 +56,7 @@ struct FaceOverlayView: View {
     }
 
     private var maskShape: AnyShape {
-        if faceBox.category == .face {
-            AnyShape(Ellipse())
-        } else {
-            AnyShape(RoundedRectangle(cornerRadius: 4))
-        }
+        AnyShape(Ellipse())
     }
 
     private var borderLayer: some View {
@@ -72,8 +68,8 @@ struct FaceOverlayView: View {
                 )
                 .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
 
-            if isSelected || faceBox.category != .face {
-                Image(systemName: faceBox.category.iconName)
+            if isSelected {
+                Image(systemName: "person.fill")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(.white)
                     .padding(4)
@@ -89,13 +85,7 @@ struct FaceOverlayView: View {
 
 struct PixelArtMaskView: View {
     let intensity: Double
-    let category: DetectedCategory
     private let gridCount = 8
-
-    init(intensity: Double, category: DetectedCategory = .face) {
-        self.intensity = intensity
-        self.category = category
-    }
 
     var body: some View {
         Canvas { context, size in
@@ -124,7 +114,7 @@ struct PixelArtMaskView: View {
                 }
             }
         }
-        .clipShape(category == .face ? AnyShape(Ellipse()) : AnyShape(RoundedRectangle(cornerRadius: 4)))
+        .clipShape(Ellipse())
     }
 }
 
@@ -132,12 +122,6 @@ struct PixelArtMaskView: View {
 
 struct CrystalizeMaskView: View {
     let intensity: Double
-    let category: DetectedCategory
-
-    init(intensity: Double, category: DetectedCategory = .face) {
-        self.intensity = intensity
-        self.category = category
-    }
 
     var body: some View {
         GeometryReader { proxy in
@@ -159,7 +143,7 @@ struct CrystalizeMaskView: View {
                 }
             }
         }
-        .clipShape(category == .face ? AnyShape(Ellipse()) : AnyShape(RoundedRectangle(cornerRadius: 4)))
+        .clipShape(Ellipse())
     }
 }
 

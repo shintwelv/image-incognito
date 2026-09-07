@@ -27,7 +27,7 @@ Auto Face Privacy for Photos
 Protect portrait rights without sacrificing aesthetics. Faces masked, style intact.
 
 ### Keywords
-face blur, privacy photo, emoji mask, sticker face, mask face, blur face, incognito, pixelate, crystalize, no tracking, edit photo, anonymize, license plate, text redact
+face blur, privacy photo, emoji mask, sticker face, mask face, blur face, incognito, pixelate, crystalize, no tracking, edit photo, anonymize
 
 ### What's New in Version 1.7
 - Improved **Blur Intensity Control**: 100% intensity now delivers complete, rock-solid face anonymization with direct 1:1 scaling.

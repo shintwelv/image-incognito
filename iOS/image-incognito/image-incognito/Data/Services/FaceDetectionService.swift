@@ -23,60 +23,29 @@ final class FaceDetectionService: FaceDetectionRepositoryProtocol {
 
     // MARK: - FaceDetectionRepositoryProtocol
 
-    func detectFaces(in image: UIImage, includeText: Bool) async throws -> [FaceBox] {
+    func detectFaces(in image: UIImage) async throws -> [FaceBox] {
         guard let cgImage = image.cgImage else { return [] }
         let orientation = CGImagePropertyOrientation(image.imageOrientation)
 
         return try await Task.detached(priority: .userInitiated) {
-            var requests: [VNRequest] = []
-            let faceRequest = VNDetectFaceRectanglesRequest()
-            requests.append(faceRequest)
-
-            var textRequest: VNRecognizeTextRequest?
-            if includeText {
-                let req = VNRecognizeTextRequest()
-                req.recognitionLevel = .accurate
-                req.usesLanguageCorrection = false
-                textRequest = req
-                requests.append(req)
+            let requests = Self.faceDetectionRequests()
+            guard let faceRequest = requests.first as? VNDetectFaceRectanglesRequest else {
+                return []
             }
 
             let handler = VNImageRequestHandler(cgImage: cgImage, orientation: orientation, options: [:])
             try handler.perform(requests)
 
-            var results: [FaceBox] = []
-
-            if let faceObservations = faceRequest.results {
-                for observation in faceObservations {
-                    let rect = Self.topLeftBoundingBox(fromVisionBoundingBox: observation.boundingBox)
-                    results.append(FaceBox(rect: rect, category: .face))
-                }
-            }
-
-            if let textObservations = textRequest?.results {
-                for observation in textObservations {
-                    let topCandidate = observation.topCandidates(1).first?.string ?? ""
-                    let category = Self.classifyText(topCandidate)
-                    let rect = Self.topLeftBoundingBox(fromVisionBoundingBox: observation.boundingBox)
-                    results.append(FaceBox(rect: rect, category: category))
-                }
-            }
-
-            return results
+            return faceRequest.results?.map { observation in
+                FaceBox(rect: Self.topLeftBoundingBox(fromVisionBoundingBox: observation.boundingBox))
+            } ?? []
         }.value
     }
 
-    nonisolated static func classifyText(_ string: String) -> DetectedCategory {
-        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
-        let alphanumericOnly = trimmed.components(separatedBy: CharacterSet.alphanumerics.inverted).joined()
-        let hasLetters = trimmed.rangeOfCharacter(from: .letters) != nil
-        let hasDigits = trimmed.rangeOfCharacter(from: .decimalDigits) != nil
-
-        // License plate heuristic: short alphanumeric string containing digits or combination of letters & digits
-        if (hasDigits && (hasLetters || alphanumericOnly.count <= 8)) && alphanumericOnly.count >= 2 && alphanumericOnly.count <= 10 {
-            return .licensePlate
-        }
-        return .text
+    /// The complete Vision request plan for automatic masking. Keeping this
+    /// face-only makes generic OCR impossible to re-enable through callers.
+    nonisolated static func faceDetectionRequests() -> [VNRequest] {
+        [VNDetectFaceRectanglesRequest()]
     }
 
     nonisolated static func topLeftBoundingBox(fromVisionBoundingBox boundingBox: CGRect) -> CGRect {
@@ -108,4 +77,3 @@ extension CGImagePropertyOrientation {
         }
     }
 }
-

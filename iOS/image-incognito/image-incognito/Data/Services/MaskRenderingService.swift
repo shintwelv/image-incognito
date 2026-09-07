@@ -118,13 +118,9 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
             .intersection(CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
     }
 
-    /// Returns the clipping path for a mask rect based on detected category.
-    nonisolated private func clipPath(for rect: CGRect, category: DetectedCategory) -> UIBezierPath {
-        if category == .face {
-            return UIBezierPath(ovalIn: rect)
-        } else {
-            return UIBezierPath(roundedRect: rect, cornerRadius: 4)
-        }
+    /// Returns the elliptical clipping path used for a detected face mask.
+    nonisolated private func clipPath(for rect: CGRect) -> UIBezierPath {
+        UIBezierPath(ovalIn: rect)
     }
 
     // MARK: - Blur (blurredGlass)
@@ -136,7 +132,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(clipPath(for: rect, category: face.category).cgPath)
+        ctx.addPath(clipPath(for: rect).cgPath)
         ctx.clip()
         blurred.draw(in: rect)
         ctx.restoreGState()
@@ -169,7 +165,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(clipPath(for: rect, category: face.category).cgPath)
+        ctx.addPath(clipPath(for: rect).cgPath)
         ctx.clip()
         pixelated.draw(in: rect)
         ctx.restoreGState()
@@ -204,7 +200,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(clipPath(for: rect, category: face.category).cgPath)
+        ctx.addPath(clipPath(for: rect).cgPath)
         ctx.clip()
         crystalized.draw(in: rect)
         ctx.restoreGState()
@@ -234,7 +230,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     nonisolated private func applySolid(rect: CGRect, face: FaceBox, color: UIColor) {
         color.withAlphaComponent(face.intensity).setFill()
-        clipPath(for: rect, category: face.category).fill()
+        clipPath(for: rect).fill()
     }
 
     // MARK: - Emoji Overlay (emojiOverlay)
