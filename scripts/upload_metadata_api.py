@@ -16,6 +16,7 @@ import urllib.request
 import urllib.error
 
 APP_ID = "6761360065"
+APP_NAME = "Incognify"
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KEY_PATH = os.path.join(PROJECT_DIR, ".keys", "AuthKey_XFW954Z6SB.p8")
 ENV_PATH = os.path.join(PROJECT_DIR, ".keys", "appstore_connect.env")
@@ -174,9 +175,68 @@ def truncate_keywords(keywords_str, max_len=100):
             break
     return ", ".join(result)
 
+def sync_app_info_localizations(locales_meta):
+    app_infos_res = api_request(f"https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/appInfos")
+    app_info = next((item for item in app_infos_res.get("data", []) if item.get("id")), None)
+    if not app_info:
+        raise RuntimeError(f"No App Info resource found for app {APP_ID}")
+
+    app_info_id = app_info["id"]
+    app_info_locs_res = api_request(
+        f"https://api.appstoreconnect.apple.com/v1/appInfos/{app_info_id}/appInfoLocalizations"
+    )
+    existing_locs = {
+        item["attributes"]["locale"]: item["id"]
+        for item in app_info_locs_res.get("data", [])
+    }
+
+    for locale_code, meta in locales_meta.items():
+        attributes = {"subtitle": meta["subtitle"]}
+
+        if locale_code in existing_locs:
+            localization_id = existing_locs[locale_code]
+            print(f"📝 Updating [{locale_code}] App Info subtitle (ID: {localization_id})...")
+            api_request(
+                f"https://api.appstoreconnect.apple.com/v1/appInfoLocalizations/{localization_id}",
+                method="PATCH",
+                body={
+                    "data": {
+                        "type": "appInfoLocalizations",
+                        "id": localization_id,
+                        "attributes": attributes,
+                    }
+                },
+            )
+        else:
+            print(f"➕ Creating [{locale_code}] App Info localization...")
+            api_request(
+                "https://api.appstoreconnect.apple.com/v1/appInfoLocalizations",
+                method="POST",
+                body={
+                    "data": {
+                        "type": "appInfoLocalizations",
+                        "attributes": {
+                            "locale": locale_code,
+                            "name": APP_NAME,
+                            **attributes,
+                        },
+                        "relationships": {
+                            "appInfo": {
+                                "data": {
+                                    "type": "appInfos",
+                                    "id": app_info_id,
+                                }
+                            }
+                        },
+                    }
+                },
+            )
+
 def sync_app_store_metadata(version_string="1.5"):
     print(f"🔄 Authenticating with App Store Connect API...")
     locales_meta = parse_metadata()
+
+    sync_app_info_localizations(locales_meta)
 
     # 1. Fetch versions for app
     versions_data = api_request(f"https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/appStoreVersions")
@@ -265,7 +325,7 @@ def sync_app_store_metadata(version_string="1.5"):
             api_request("https://api.appstoreconnect.apple.com/v1/appStoreVersionLocalizations", method="POST", body=post_payload)
             print(f"✅ [{locale_code}] version localization created!")
 
-    print(f"\n🎉 All 5 localizations successfully updated on App Store Connect for Version {version_string}!")
+    print(f"\n🎉 All 5 App Info and version localizations successfully updated on App Store Connect for Version {version_string}!")
 
 if __name__ == "__main__":
     sync_app_store_metadata("1.7.1")
