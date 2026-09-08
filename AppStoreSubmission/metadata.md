@@ -27,7 +27,7 @@ Auto Face Privacy for Photos
 Protect portrait rights without sacrificing aesthetics. Faces masked, style intact.
 
 ### Keywords
-face blur, privacy photo, emoji mask, sticker face, mask face, blur face, incognito, pixelate, crystalize, no tracking, edit photo, anonymize
+face blur, privacy photo, emoji mask, sticker face, mask face, blur face, incognito, pixelate
 
 ### What's New in Version 1.7.1
 - Automatic detection now focuses exclusively on faces, preventing ordinary text such as signs, dates, and prices from being incorrectly masked.
@@ -117,7 +117,7 @@ Privacidad automática de rostros
 Protege los derechos de imagen sin sacrificar la estética. Rostros enmascarados, estilo intacto.
 
 ### Keywords
-desenfoque cara, privacidad foto, emoji mascara, sticker cara, ocultar cara, foto anonima, pixelar, crystalize, editar foto, local
+desenfoque cara, privacidad foto, emoji mascara, sticker cara, ocultar cara, foto anonima, pixelar
 
 ### What's New in Version 1.7.1
 - La detección automática ahora se centra solo en rostros, para evitar ocultar por error texto común como carteles, fechas y precios.
