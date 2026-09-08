@@ -34,6 +34,8 @@ LOCALE_MAP = {
     "zh-Hans": "zh-Hans"
 }
 
+DRAFT_APP_STORE_STATE = "PREPARE_FOR_SUBMISSION"
+
 def load_credentials():
     key_id = "XFW954Z6SB"
     issuer_id = "dcc1c94a-71ee-402f-b14f-031f47dee9ed"
@@ -175,11 +177,108 @@ def truncate_keywords(keywords_str, max_len=100):
             break
     return ", ".join(result)
 
-def sync_app_info_localizations(locales_meta):
-    app_infos_res = api_request(f"https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/appInfos")
-    app_info = next((item for item in app_infos_res.get("data", []) if item.get("id")), None)
-    if not app_info:
-        raise RuntimeError(f"No App Info resource found for app {APP_ID}")
+def state_values(resource):
+    if not isinstance(resource, dict):
+        return []
+    attributes = resource.get("attributes", {})
+    if not isinstance(attributes, dict):
+        return []
+    return [
+        attributes[field]
+        for field in ("appStoreState", "state")
+        if attributes.get(field) is not None
+    ]
+
+
+def is_draft_resource(resource):
+    states = state_values(resource)
+    return bool(states) and all(state == DRAFT_APP_STORE_STATE for state in states)
+
+
+def require_draft_resource(resource, resource_label):
+    if not isinstance(resource, dict) or not resource.get("id"):
+        raise RuntimeError(f"{resource_label} selected for metadata sync must include an id")
+
+    states = state_values(resource)
+    if not states or any(state != DRAFT_APP_STORE_STATE for state in states):
+        observed = ", ".join(str(state) for state in states) or "no state"
+        raise RuntimeError(
+            f"{resource_label} must be in {DRAFT_APP_STORE_STATE} with no conflicting state values; "
+            f"found {observed}"
+        )
+    return resource["id"]
+
+
+def require_draft_version(version, version_string):
+    version_id = require_draft_resource(version, f"App Store Version {version_string}")
+    attributes = version.get("attributes", {})
+    if attributes.get("versionString") != version_string:
+        raise RuntimeError(
+            f"App Store Version selected for {version_string} must report the same versionString"
+        )
+    return version_id
+
+
+def fetch_all_pages(first_url, collection_label):
+    """Fetch a collection completely before making a uniqueness decision."""
+    data = []
+    next_url = first_url
+    visited_urls = set()
+
+    while next_url is not None:
+        if not isinstance(next_url, str) or not next_url:
+            raise RuntimeError(f"{collection_label} pagination returned an invalid next link")
+        if next_url in visited_urls:
+            raise RuntimeError(f"{collection_label} pagination returned a repeated next link")
+        visited_urls.add(next_url)
+
+        page = api_request(next_url)
+        page_data = page.get("data") if isinstance(page, dict) else None
+        if not isinstance(page_data, list):
+            raise RuntimeError(f"{collection_label} pagination response must contain a data list")
+        data.extend(page_data)
+
+        links = page.get("links", {})
+        if links is None:
+            next_url = None
+        elif not isinstance(links, dict):
+            raise RuntimeError(f"{collection_label} pagination response must contain a links object")
+        else:
+            next_url = links.get("next")
+
+    return data
+
+
+def select_unique_draft_app_info(app_infos):
+    """Return the one App Info resource that belongs to the editable draft.
+
+    App Store Connect exposes App Info separately from App Store Versions, so
+    there is no direct version-id relationship to follow. The draft lifecycle
+    state is the public seam available here; requiring exactly one candidate
+    prevents a metadata sync from falling back to the live product page.
+    """
+    candidates = [
+        app_info
+        for app_info in app_infos
+        if is_draft_resource(app_info)
+    ]
+    if len(candidates) != 1:
+        raise RuntimeError(
+            "Expected exactly one App Info in "
+            f"{DRAFT_APP_STORE_STATE} for metadata sync; found {len(candidates)}"
+        )
+    app_info = candidates[0]
+    require_draft_resource(app_info, f"The {DRAFT_APP_STORE_STATE} App Info")
+    return app_info
+
+
+def sync_app_info_localizations(locales_meta, target_version, version_string):
+    require_draft_version(target_version, version_string)
+
+    app_infos = fetch_all_pages(
+        f"https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/appInfos", "App Info"
+    )
+    app_info = select_unique_draft_app_info(app_infos)
 
     app_info_id = app_info["id"]
     app_info_locs_res = api_request(
@@ -236,25 +335,34 @@ def sync_app_store_metadata(version_string="1.5"):
     print(f"🔄 Authenticating with App Store Connect API...")
     locales_meta = parse_metadata()
 
-    sync_app_info_localizations(locales_meta)
-
     # 1. Fetch versions for app
-    versions_data = api_request(f"https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/appStoreVersions")
+    versions_data = fetch_all_pages(
+        f"https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/appStoreVersions",
+        "App Store Version",
+    )
+    matching_versions = [
+        version
+        for version in versions_data
+        if version.get("attributes", {}).get("versionString") == version_string
+    ]
+    if len(matching_versions) > 1:
+        raise RuntimeError(
+            f"Expected at most one App Store Version {version_string}; found {len(matching_versions)}"
+        )
+
     version_id = None
+    target_version = None
+    if matching_versions:
+        target_version = matching_versions[0]
+        version_id = require_draft_version(target_version, version_string)
+        print(
+            f"ℹ️ Found editable App Store Version {version_string} "
+            f"(ID: {version_id}, State: {DRAFT_APP_STORE_STATE})"
+        )
 
-    for ver in versions_data.get("data", []):
-        v_str = ver["attributes"]["versionString"]
-        v_state = ver["attributes"]["appStoreState"]
-        if v_str == version_string and v_state not in ["READY_FOR_SALE", "DEVELOPER_REMOVED_FROM_SALE"]:
-            version_id = ver["id"]
-            print(f"ℹ️ Found editable App Store Version {version_string} (ID: {version_id}, State: {v_state})")
-            break
-        elif v_str == version_string:
-            print(f"ℹ️ Found existing version {version_string} in state '{v_state}' (non-editable). Will create new editable version...")
-
-    # 2. Create version if it does not exist or previous is not editable
+    # 2. Create a version only when the requested version does not exist.
     if not version_id:
-        print(f"✨ Version {version_string} not editable or not found. Creating new App Store Version {version_string}...")
+        print(f"✨ Version {version_string} not found. Creating new App Store Version {version_string}...")
         create_payload = {
             "data": {
                 "type": "appStoreVersions",
@@ -273,8 +381,13 @@ def sync_app_store_metadata(version_string="1.5"):
             }
         }
         res = api_request("https://api.appstoreconnect.apple.com/v1/appStoreVersions", method="POST", body=create_payload)
-        version_id = res["data"]["id"]
+        target_version = res.get("data") if isinstance(res, dict) else None
+        version_id = require_draft_version(target_version, version_string)
         print(f"✅ Created Version {version_string} (ID: {version_id})")
+
+    # App Info has no direct App Store Version relationship in the API. Match
+    # the intended draft through its lifecycle state and fail closed otherwise.
+    sync_app_info_localizations(locales_meta, target_version, version_string)
 
     # 3. Fetch existing localizations for this version
     locs_res = api_request(f"https://api.appstoreconnect.apple.com/v1/appStoreVersions/{version_id}/appStoreVersionLocalizations")
