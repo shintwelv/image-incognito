@@ -111,7 +111,7 @@ Incognifyは、Appleの先進的なVisionフレームワークを使用して、
 ## 5. Localization: Spanish (es)
 
 ### Subtitle
-Privacidad automática de rostros
+Privacidad facial automática
 
 ### Promotional Text
 Protege los derechos de imagen sin sacrificar la estética. Rostros enmascarados, estilo intacto.
