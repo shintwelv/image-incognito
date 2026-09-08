@@ -8,6 +8,10 @@
 import Foundation
 import Testing
 
+#if targetEnvironment(simulator) || os(macOS)
+// These checks deliberately inspect files in the repository using `#filePath`.
+// A physical-device test bundle cannot access that host filesystem, so retain
+// this release-audit suite on Simulator and macOS test hosts only.
 @Suite("Release Configuration")
 struct ReleaseConfigurationTests {
 
@@ -89,3 +93,4 @@ struct ReleaseConfigurationTests {
         source.components(separatedBy: value).count - 1
     }
 }
+#endif
