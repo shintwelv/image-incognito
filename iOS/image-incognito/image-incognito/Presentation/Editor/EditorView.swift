@@ -30,6 +30,12 @@ struct EditorView: View {
         _viewModels = State(initialValue: images.map { EditorViewModel(sourceImage: $0) })
     }
 
+    /// Test/composition injection: use prebuilt view models (phases, regions,
+    /// and selection preserved).
+    init(viewModels: [EditorViewModel]) {
+        _viewModels = State(initialValue: viewModels)
+    }
+
     // MARK: - Derived state
 
     private var currentVM: EditorViewModel { viewModels[currentIndex] }
