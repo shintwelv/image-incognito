@@ -33,10 +33,16 @@ struct RegionOverlayView: View {
             let size = proxy.size
 
             ZStack {
-                // Hit area: keeps excluded regions tappable.
+                // Shape-specific hit target: taps/drags start only inside the
+                // visible rectangle/ellipse. Handles and the badge live outside
+                // an oval but remain independent child hit targets.
                 maskShape
                     .fill(Color.white.opacity(0.001))
                     .contentShape(maskShape)
+                    .onTapGesture {
+                        onToggleInclusion?()
+                    }
+                    .gesture(moveGesture())
 
                 if region.isIncluded {
                     maskLayer
@@ -54,11 +60,6 @@ struct RegionOverlayView: View {
                 inclusionBadge
                     .offset(x: Spacing.xSmall, y: -Spacing.xSmall)
             }
-            .contentShape(maskShape)
-            .onTapGesture {
-                onToggleInclusion?()
-            }
-            .gesture(moveGesture())
         }
         .animation(reduceMotion ? nil : AppAnimation.snappy, value: region.isIncluded)
         .animation(reduceMotion ? nil : AppAnimation.standard, value: region.shape)
@@ -170,6 +171,9 @@ struct RegionOverlayView: View {
                 .frame(width: 12, height: 12)
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
+                .onTapGesture {
+                    // Consume taps so handle taps never toggle inclusion.
+                }
                 .highPriorityGesture(resizeGesture(corner: corner))
                 .position(x: point.x, y: point.y)
                 .accessibilityLabel("editor.region.resizeHandle")

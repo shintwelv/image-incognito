@@ -125,6 +125,24 @@ struct RegionHitTesterTests {
         )
     }
 
+    @Test("Ellipse body excludes resize-handle corners so handles own those taps")
+    func ellipseHandleCornersAreOutsideBody() {
+        let imageRect = CGRect(x: 0, y: 0, width: 100, height: 100)
+        let ellipse = makeRegion(shape: .ellipse, x: 0.2, y: 0.2, width: 0.4, height: 0.4)
+        let corners = [
+            CGPoint(x: 20, y: 20),
+            CGPoint(x: 80, y: 20),
+            CGPoint(x: 20, y: 80),
+            CGPoint(x: 80, y: 80)
+        ]
+
+        for corner in corners {
+            #expect(
+                RegionHitTester.regionID(at: corner, regions: [ellipse], imageRect: imageRect) == nil
+            )
+        }
+    }
+
     @Test("regionID respects sizeMultiplier for detected faces")
     func regionIDRespectsSizeMultiplier() {
         let base = makeRegion(source: .detectedFace, shape: .ellipse, x: 0.4, y: 0.4, width: 0.1, height: 0.1)
