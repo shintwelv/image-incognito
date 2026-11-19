@@ -110,6 +110,11 @@ struct EditorView: View {
             alertContent(for: alert)
         }
         .appToast(isPresented: $showToast, message: toastMessage)
+        .background(
+            InteractivePopGestureController(isEnabled: !hasDrafts)
+                .frame(width: 0, height: 0)
+                .accessibilityHidden(true)
+        )
     }
 
     // MARK: - Top bar

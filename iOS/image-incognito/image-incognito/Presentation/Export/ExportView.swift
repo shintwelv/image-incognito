@@ -56,11 +56,11 @@ struct ExportView: View {
                 .ignoresSafeArea()
         }
         // Save error alert
-        .alert("저장 실패", isPresented: Binding(
+        .alert("export.saveFailed", isPresented: Binding(
             get: { viewModel.saveError != nil },
             set: { if !$0 { viewModel.dismissError() } }
         )) {
-            Button("확인", role: .cancel) { viewModel.dismissError() }
+            Button("common.ok", role: .cancel) { viewModel.dismissError() }
         } message: {
             if let error = viewModel.saveError {
                 Text(error)
@@ -175,6 +175,14 @@ struct ExportView: View {
                 }
                 .padding(.horizontal, Spacing.medium)
                 .padding(.vertical, Spacing.small)
+
+                Text("export.compareHint")
+                    .font(.appCaption)
+                    .foregroundStyle(Color.appLabelTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Spacing.medium)
+                    .padding(.bottom, Spacing.small)
+                    .accessibilityIdentifier("export.compareHint")
             }
         }
         .onLongPressGesture(

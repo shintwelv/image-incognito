@@ -163,6 +163,12 @@ struct HomeView: View {
                         .font(.appSubheadline)
                         .foregroundStyle(Color.appLabelSecondary)
                         .multilineTextAlignment(.center)
+
+                    Text("home.hero.steps")
+                        .font(.appCaption)
+                        .foregroundStyle(Color.appLabelSecondary)
+                        .multilineTextAlignment(.center)
+                        .accessibilityIdentifier("home.heroSteps")
                 }
                 .padding(.horizontal, Spacing.xxLarge)
             }
