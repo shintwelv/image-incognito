@@ -85,6 +85,32 @@ struct ReleaseConfigurationTests {
         #expect(!scheme.contains("image-incognitoUITests.xctest"))
     }
 
+    @Test("App source and store metadata contain no OCR or license-plate remnants")
+    func appSourceContainsNoTextDetectionRemnants() throws {
+        let appSourceRoot = repositoryRoot.appending(path: "iOS/image-incognito/image-incognito")
+        let swiftFiles = try FileManager.default
+            .subpathsOfDirectory(atPath: appSourceRoot.path)
+            .filter { $0.hasSuffix(".swift") }
+            .sorted()
+
+        #expect(!swiftFiles.isEmpty)
+
+        let bannedTokens = ["VNRecognizeTextRequest", "includeText", "licensePlate", "textRedact"]
+        for relativePath in swiftFiles {
+            let source = try sourceContents("iOS/image-incognito/image-incognito/\(relativePath)")
+            for token in bannedTokens {
+                #expect(
+                    !source.contains(token),
+                    "App source \(relativePath) contains banned OCR token \(token)"
+                )
+            }
+        }
+
+        let metadata = try sourceContents("AppStoreSubmission/metadata.md").lowercased()
+        #expect(!metadata.contains("license plate"))
+        #expect(!metadata.contains("text redact"))
+    }
+
     private func sourceContents(_ relativePath: String) throws -> String {
         try String(contentsOf: repositoryRoot.appending(path: relativePath), encoding: .utf8)
     }

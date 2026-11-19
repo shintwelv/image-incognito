@@ -12,6 +12,7 @@ import Testing
 import UIKit
 @testable import image_incognito
 
+@MainActor
 @Suite("ProcessExportUseCase")
 struct ProcessExportUseCaseTests {
 

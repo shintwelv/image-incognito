@@ -16,13 +16,10 @@ struct EditorViewModelTests {
 
     // MARK: - Helpers
 
-    /// Records which repository entry point the editor flow uses.  The
-    /// two-argument overload is the legacy OCR-capable path; the one-argument
-    /// overload is the face-only contract introduced by this regression.
+    /// Records how many times the face-only repository entry point is called.
     private final class DetectionCallRecorder: @unchecked Sendable {
         private let lock = NSLock()
         private var faceOnlyCalls = 0
-        private var includeTextArguments: [Bool] = []
 
         func recordFaceOnlyCall() {
             lock.lock()
@@ -30,27 +27,16 @@ struct EditorViewModelTests {
             faceOnlyCalls += 1
         }
 
-        func recordIncludeTextCall(_ includeText: Bool) {
+        func faceOnlyCallCount() -> Int {
             lock.lock()
             defer { lock.unlock() }
-            includeTextArguments.append(includeText)
-        }
-
-        func snapshot() -> (faceOnlyCalls: Int, includeTextArguments: [Bool]) {
-            lock.lock()
-            defer { lock.unlock() }
-            return (faceOnlyCalls, includeTextArguments)
+            return faceOnlyCalls
         }
     }
 
     private struct RecordingFaceDetectionRepository: FaceDetectionRepositoryProtocol {
         let recorder: DetectionCallRecorder
         let detectedFaces: [FaceBox]
-
-        func detectFaces(in image: UIImage, includeText: Bool) async throws -> [FaceBox] {
-            recorder.recordIncludeTextCall(includeText)
-            return detectedFaces
-        }
 
         func detectFaces(in image: UIImage) async throws -> [FaceBox] {
             recorder.recordFaceOnlyCall()
@@ -102,9 +88,7 @@ struct EditorViewModelTests {
 
         try await vm.detectFaces()
 
-        let calls = recorder.snapshot()
-        #expect(calls.faceOnlyCalls == 1)
-        #expect(calls.includeTextArguments.isEmpty)
+        #expect(recorder.faceOnlyCallCount() == 1)
         #expect(vm.faces.map(\.id) == [expectedFace.id])
         #expect(vm.detectionCompleted)
     }

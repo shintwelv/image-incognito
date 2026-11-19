@@ -2,7 +2,7 @@
 //  RenderMaskUseCase.swift
 //  image-incognito
 //
-//  Domain Use Case – Composites active face masks onto an image via the
+//  Domain Use Case – Composites included mask regions onto an image via the
 //  injected repository. Runs on a background executor inside the repository.
 //
 
@@ -15,6 +15,20 @@ struct RenderMaskUseCase: Sendable {
         self.repository = repository
     }
 
+    nonisolated func execute(
+        image: UIImage,
+        regions: [MaskRegion],
+        solidCleanColor: UIColor
+    ) async throws -> UIImage {
+        try await repository.render(
+            image: image,
+            regions: regions,
+            solidCleanColor: solidCleanColor
+        )
+    }
+
+    /// Compatibility adapter for the face-only editor flow. The mapping to
+    /// `.detectedFace` regions happens in the repository protocol extension.
     nonisolated func execute(
         image: UIImage,
         faces: [FaceBox],

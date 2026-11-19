@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 @testable import image_incognito
 
+@MainActor
 @Suite("RecentMaskingItem")
 struct RecentMaskingItemTests {
 

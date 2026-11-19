@@ -12,6 +12,7 @@ import UIKit
 import Vision
 @testable import image_incognito
 
+@MainActor
 @Suite("FaceDetectionService")
 struct FaceDetectionServiceTests {
 

@@ -2,9 +2,9 @@
 //  MaskRenderingService.swift
 //  image-incognito
 //
-//  Data Service – Composites face masks onto the source UIImage using Core Image.
-//  Conforms to MaskRenderingRepositoryProtocol; CPU-bound rendering runs on a
-//  background executor via Task.detached.
+//  Data Service – Composites included mask regions onto the source UIImage
+//  using Core Image. Conforms to MaskRenderingRepositoryProtocol; CPU-bound
+//  rendering runs on a background executor via Task.detached.
 //
 
 @preconcurrency import UIKit
@@ -17,17 +17,17 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - MaskRenderingRepositoryProtocol
 
-    /// Composites all active masks onto `image` on a background thread.
+    /// Composites all included regions onto `image` on a background thread.
     nonisolated func render(
         image: UIImage,
-        faces: [FaceBox],
-        solidCleanColor: UIColor = UIColor(red: 94/255, green: 92/255, blue: 230/255, alpha: 1)
+        regions: [MaskRegion],
+        solidCleanColor: UIColor = UIColor(red: 94 / 255, green: 92 / 255, blue: 230 / 255, alpha: 1)
     ) async throws -> UIImage {
         // Capture self weakly to allow deallocation during long renders.
         let result = try await Task.detached(priority: .userInitiated) { [self] in
             try self.renderSync(
                 image: image,
-                faces: faces,
+                regions: regions,
                 solidCleanColor: solidCleanColor
             )
         }.value
@@ -38,7 +38,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     nonisolated private func renderSync(
         image: UIImage,
-        faces: [FaceBox],
+        regions: [MaskRegion],
         solidCleanColor: UIColor
     ) throws -> UIImage {
         // Normalize to .up before any CGImage operations.
@@ -55,20 +55,16 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         return UIGraphicsImageRenderer(size: size, format: format).image { _ in
             image.draw(at: .zero)
 
-            for face in faces where face.isMasked {
-                let rect = pointRect(
-                    normalizedRect: face.rect,
-                    imageSize: size,
-                    sizeMultiplier: face.sizeMultiplier
-                )
+            for region in regions where region.isIncluded {
+                let rect = pointRect(for: region, imageSize: size)
                 guard rect.width > 1, rect.height > 1 else { continue }
 
-                switch face.style {
-                case .blurredGlass: applyBlur(rect: rect, face: face, image: image)
-                case .pixelArt:     applyPixelArt(rect: rect, face: face, image: image)
-                case .crystalize:   applyCrystalize(rect: rect, face: face, image: image)
-                case .solidClean:   applySolid(rect: rect, face: face, color: solidCleanColor)
-                case .emojiOverlay: applyEmojiOverlay(rect: rect, face: face)
+                switch region.style {
+                case .blurredGlass: applyBlur(rect: rect, region: region, image: image)
+                case .pixelArt:     applyPixelArt(rect: rect, region: region, image: image)
+                case .crystalize:   applyCrystalize(rect: rect, region: region, image: image)
+                case .solidClean:   applySolid(rect: rect, region: region, color: solidCleanColor)
+                case .emojiOverlay: applyEmojiOverlay(rect: rect, region: region)
                 }
             }
         }
@@ -91,24 +87,31 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Rect mapping
 
-    /// Converts a normalized (0–1, top-left origin) rect to point coordinates,
-    /// expanded by `sizeMultiplier` and clamped to the image bounds.
-    nonisolated private func pointRect(normalizedRect: CGRect, imageSize: CGSize, sizeMultiplier: Double) -> CGRect {
+    /// Converts a region's normalized rect to point coordinates. Faces are
+    /// expanded by `sizeMultiplier`; manual regions keep their drawn rect.
+    /// The result is clamped to the image bounds.
+    nonisolated private func pointRect(for region: MaskRegion, imageSize: CGSize) -> CGRect {
+        let normalized = RegionGeometry.convert(region.rect, to: region.shape)
         let base = CGRect(
-            x: normalizedRect.minX * imageSize.width,
-            y: normalizedRect.minY * imageSize.height,
-            width: normalizedRect.width * imageSize.width,
-            height: normalizedRect.height * imageSize.height
+            x: normalized.minX * imageSize.width,
+            y: normalized.minY * imageSize.height,
+            width: normalized.width * imageSize.width,
+            height: normalized.height * imageSize.height
         )
-        let w = base.width * sizeMultiplier
-        let h = base.height * sizeMultiplier
+
+        let multiplier = region.source == .detectedFace ? region.sizeMultiplier : 1.0
+        let w = base.width * multiplier
+        let h = base.height * multiplier
         let expanded = CGRect(
             x: base.midX - w / 2,
             y: base.midY - h / 2,
             width: w,
             height: h
         )
-        return expanded.intersection(CGRect(origin: .zero, size: imageSize))
+
+        let bounds = CGRect(origin: .zero, size: imageSize)
+        let clamped = expanded.intersection(bounds)
+        return clamped.isNull ? .zero : clamped
     }
 
     /// Converts a point rect to CGImage pixel coords, clamped to the image bounds.
@@ -118,21 +121,27 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
             .intersection(CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
     }
 
-    /// Returns the elliptical clipping path used for a detected face mask.
-    nonisolated private func clipPath(for rect: CGRect) -> UIBezierPath {
-        UIBezierPath(ovalIn: rect)
+    /// Returns the clipping path for a region shape. Circles use a square rect,
+    /// so an oval clip renders a circle.
+    nonisolated private func clipPath(for shape: MaskRegion.Shape, rect: CGRect) -> UIBezierPath {
+        switch shape {
+        case .rectangle:
+            return UIBezierPath(rect: rect)
+        case .ellipse, .circle:
+            return UIBezierPath(ovalIn: rect)
+        }
     }
 
     // MARK: - Blur (blurredGlass)
 
-    nonisolated private func applyBlur(rect: CGRect, face: FaceBox, image: UIImage) {
+    nonisolated private func applyBlur(rect: CGRect, region: MaskRegion, image: UIImage) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
-            let blurred = makeBlurredCrop(of: image, rect: rect, intensity: face.intensity)
+            let blurred = makeBlurredCrop(of: image, rect: rect, intensity: region.intensity)
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(clipPath(for: rect).cgPath)
+        ctx.addPath(clipPath(for: region.shape, rect: rect).cgPath)
         ctx.clip()
         blurred.draw(in: rect)
         ctx.restoreGState()
@@ -158,14 +167,14 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Pixelate (pixelArt)
 
-    nonisolated private func applyPixelArt(rect: CGRect, face: FaceBox, image: UIImage) {
+    nonisolated private func applyPixelArt(rect: CGRect, region: MaskRegion, image: UIImage) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
-            let pixelated = makePixelateCrop(of: image, rect: rect, intensity: face.intensity)
+            let pixelated = makePixelateCrop(of: image, rect: rect, intensity: region.intensity)
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(clipPath(for: rect).cgPath)
+        ctx.addPath(clipPath(for: region.shape, rect: rect).cgPath)
         ctx.clip()
         pixelated.draw(in: rect)
         ctx.restoreGState()
@@ -180,7 +189,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         let ci = CIImage(cgImage: cropped)
         let filter = CIFilter.pixellate()
         filter.inputImage = ci
-        
+
         let minEdge = min(ci.extent.width, ci.extent.height)
         let maxScale = Float(minEdge * 0.25)
         filter.scale = 1.0 + (maxScale - 1.0) * Float(intensity)
@@ -193,14 +202,14 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Crystalize (crystalize)
 
-    nonisolated private func applyCrystalize(rect: CGRect, face: FaceBox, image: UIImage) {
+    nonisolated private func applyCrystalize(rect: CGRect, region: MaskRegion, image: UIImage) {
         guard
             let ctx = UIGraphicsGetCurrentContext(),
-            let crystalized = makeCrystalizeCrop(of: image, rect: rect, intensity: face.intensity)
+            let crystalized = makeCrystalizeCrop(of: image, rect: rect, intensity: region.intensity)
         else { return }
 
         ctx.saveGState()
-        ctx.addPath(clipPath(for: rect).cgPath)
+        ctx.addPath(clipPath(for: region.shape, rect: rect).cgPath)
         ctx.clip()
         crystalized.draw(in: rect)
         ctx.restoreGState()
@@ -215,7 +224,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
         let ci = CIImage(cgImage: cropped)
         let filter = CIFilter.crystallize()
         filter.inputImage = ci
-        
+
         let minEdge = min(ci.extent.width, ci.extent.height)
         let maxRadius = Float(minEdge * 0.3)
         filter.radius = 1.0 + (maxRadius - 1.0) * Float(intensity)
@@ -228,18 +237,18 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
 
     // MARK: - Solid fill (solidClean)
 
-    nonisolated private func applySolid(rect: CGRect, face: FaceBox, color: UIColor) {
-        color.withAlphaComponent(face.intensity).setFill()
-        clipPath(for: rect).fill()
+    nonisolated private func applySolid(rect: CGRect, region: MaskRegion, color: UIColor) {
+        color.withAlphaComponent(region.intensity).setFill()
+        clipPath(for: region.shape, rect: rect).fill()
     }
 
     // MARK: - Emoji Overlay (emojiOverlay)
 
-    nonisolated private func applyEmojiOverlay(rect: CGRect, face: FaceBox) {
+    nonisolated private func applyEmojiOverlay(rect: CGRect, region: MaskRegion) {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
         ctx.saveGState()
 
-        let emoji = face.selectedEmoji.isEmpty ? "😎" : face.selectedEmoji
+        let emoji = region.selectedEmoji.isEmpty ? "😎" : region.selectedEmoji
         let side = min(rect.width, rect.height)
         let fontSize = max(8.0, side * 0.85)
         let font = UIFont.systemFont(ofSize: fontSize)
@@ -262,7 +271,7 @@ final class MaskRenderingService: MaskRenderingRepositoryProtocol {
             height: textSize.height
         )
 
-        ctx.setAlpha(CGFloat(face.intensity))
+        ctx.setAlpha(CGFloat(region.intensity))
         string.draw(in: drawRect, withAttributes: attributes)
 
         ctx.restoreGState()
