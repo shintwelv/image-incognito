@@ -85,7 +85,7 @@ struct ReleaseConfigurationTests {
         #expect(!scheme.contains("image-incognitoUITests.xctest"))
     }
 
-    @Test("App source and store metadata contain no OCR or license-plate remnants")
+    @Test("App source and store keywords contain no OCR or license-plate remnants")
     func appSourceContainsNoTextDetectionRemnants() throws {
         let appSourceRoot = repositoryRoot.appending(path: "iOS/image-incognito/image-incognito")
         let swiftFiles = try FileManager.default
@@ -106,9 +106,45 @@ struct ReleaseConfigurationTests {
             }
         }
 
-        let metadata = try sourceContents("AppStoreSubmission/metadata.md").lowercased()
-        #expect(!metadata.contains("license plate"))
-        #expect(!metadata.contains("text redact"))
+        // Only the App Store keyword blocks must avoid advertising OCR features.
+        // Release notes may legitimately mention that plate/text detection was removed.
+        let metadata = try sourceContents("AppStoreSubmission/metadata.md")
+        let keywordBlocks = keywordBlocks(in: metadata)
+        #expect(keywordBlocks.count == 5, "Expected one Keywords block per locale")
+        #expect(keywordBlocks.allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
+
+        let keywords = keywordBlocks.joined(separator: "\n").lowercased()
+        #expect(!keywords.contains("license plate"))
+        #expect(!keywords.contains("text redact"))
+    }
+
+    /// Returns the body of each `### Keywords` section in a Markdown document.
+    private func keywordBlocks(in markdown: String) -> [String] {
+        var blocks: [String] = []
+        var current: [String] = []
+        var isCollecting = false
+
+        func finishBlock() {
+            if isCollecting {
+                blocks.append(current.joined(separator: "\n"))
+                current = []
+                isCollecting = false
+            }
+        }
+
+        for line in markdown.components(separatedBy: .newlines) {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed == "### Keywords" {
+                finishBlock()
+                isCollecting = true
+            } else if isCollecting && (trimmed.hasPrefix("### ") || trimmed == "---") {
+                finishBlock()
+            } else if isCollecting {
+                current.append(line)
+            }
+        }
+        finishBlock()
+        return blocks
     }
 
     private func sourceContents(_ relativePath: String) throws -> String {
