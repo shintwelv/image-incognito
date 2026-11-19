@@ -164,3 +164,25 @@ Incognify 依托 Apple 先进的 Vision 框架，可自动、精准检测照片�
 - **自定义 Emoji 预设**：可自定义添加您最爱的表情符号，个性化遮挡面部。
 - **100% 本地设备处理**：所有的照片检测与修改均在您的 iPhone 内部完成，绝不上传至任何云端，零数据跟踪。
 - **完美支持深色模式**：极致视觉美学，完美融入 iOS 系统生态。
+
+---
+
+## 7. Next Release Draft — Manual Masking (Version 1.8)
+
+> **Draft only.** These notes target a future 1.8 submission. All version 1.7.1 sections above, including their version and build numbers, remain unchanged.
+
+### English (en-US) — What's New (Draft)
+- Manual masking is here: draw a rectangle, circle, or ellipse over license plates, documents, tags, or any face AI missed.
+- AI now suggests faces instead of masking automatically. Review the suggestions, include or exclude them, and confirm before anything renders.
+- Removed automatic plate and text detection, so numbers and signs are no longer masked by mistake.
+
+### Korean (ko) — What's New (Draft)
+- 직접 가리기 기능이 추가되었습니다. 번호판, 문서, 태그, 놓친 얼굴 위에 사각형·원·타원을 그려 가릴 수 있습니다.
+- AI가 얼굴을 자동으로 가리는 대신 제안합니다. 제안을 확인하고 포함/제외한 뒤 확정해야만 렌더링됩니다.
+- 번호판·텍스트 자동 감지를 제거하여 숫자나 간판이 실수로 가려지지 않습니다.
+
+### Description update guidance (ja / es / zh-Hans)
+- **Japanese:** Add a line such as 「AIは顔を提案し、隠す場所はあなたが決めます。四角形・円・楕円で番号板や書類も隠せます。」
+- **Spanish:** Añade una línea como «La IA sugiere rostros y tú decides qué ocultar. Dibuja rectángulos, círculos o elipses sobre matrículas, documentos o caras no detectadas.»
+- **Simplified Chinese:** 添加一句“AI 建议人脸，由你决定遮挡哪里。可用矩形、圆形或椭圆遮挡车牌、文件或漏检的人脸。”
+- Keep the existing feature list and append these sentences to the first description paragraph; no other metadata changes are required for this draft.

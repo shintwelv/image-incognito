@@ -1,16 +1,29 @@
 # Incognify
 
-> Automatically detect faces in photos and apply aesthetic masking to protect privacy — without sacrificing photo quality for SNS sharing.
+> AI finds and suggests faces; you review, adjust, and confirm. Manual rectangle, circle, and ellipse masks cover anything else — nothing renders until you confirm.
 
 ---
 
 ## Overview
 
-**Incognify** is an iOS application that uses on-device face detection to instantly find every face in a photo and apply beautiful privacy masks (Blur, Pixelation, and more). Designed for SNS users who care about both portrait rights and aesthetics.
+**Incognify** is an iOS application that uses on-device face detection to suggest the faces in your photos, then hands control to you. Review the suggestions, include or exclude them, add your own manual masks (Blur, Pixelation, and more), and confirm only when the result looks right. Designed for SNS users who care about both portrait rights and aesthetics.
 
 - **No cloud. No account.** All processing runs entirely on-device.
-- **Automatic.** No manual cropping or tapping required.
+- **Review-first.** AI suggests faces; you decide what stays visible and what gets masked.
+- **Manual anywhere.** Draw a rectangle, circle, or ellipse over plates, tags, documents, or any missed face.
+- **Nothing renders until confirm.** Edits stay as suggestions until you approve them.
 - **Aesthetic-first.** Masks look like creative choices, not censorship patches.
+
+---
+
+## User flow
+
+1. **Home** — pick photos from the library or camera.
+2. **1/2 Review** — check AI face suggestions, include/exclude them, and draw manual rectangle/circle/ellipse regions.
+3. **Confirm** — bake the masks. Empty selections or partial photos show a confirmation first.
+4. **2/2 Preview & save** — compare with the original, adjust export options, then save or share.
+
+The interface and review flow are localized in English, Korean, Japanese, Spanish, and Simplified Chinese.
 
 ---
 
@@ -33,9 +46,12 @@ iOS/image-incognito/image-incognito/
 ├── Domain/                  # Pure business logic — no frameworks
 │   ├── Entities/
 │   │   ├── ExportSettings.swift
-│   │   ├── FaceBox.swift        # Detected face region model
+│   │   ├── FaceBox.swift        # Detected face suggestion model
+│   │   ├── MaskRegion.swift     # Face/manual region + shape, inclusion, style
 │   │   ├── MaskingStyle.swift   # Blur, Pixelation, etc.
 │   │   └── RecentMaskingItem.swift
+│   ├── Geometry/
+│   │   └── RegionGeometry.swift # Normalized rects, translation, resizing
 │   ├── Interfaces/
 │   │   ├── ExportProcessingRepositoryProtocol.swift
 │   │   ├── FaceDetectionRepositoryProtocol.swift
@@ -63,11 +79,14 @@ iOS/image-incognito/image-incognito/
 │   │   └── RecentMaskingItem+UIImage.swift
 │   ├── Editor/
 │   │   ├── AdjustmentSlidersView.swift
+│   │   ├── DrawRegionOverlay.swift
 │   │   ├── EditorStateViews.swift
 │   │   ├── EditorView.swift
 │   │   ├── EditorViewModel.swift
-│   │   ├── FaceOverlayView.swift
-│   │   └── FaceSelectionHitTester.swift
+│   │   ├── InteractivePopGestureController.swift
+│   │   ├── RegionHitTester.swift
+│   │   ├── RegionListView.swift
+│   │   └── RegionOverlayView.swift
 │   ├── Export/
 │   │   ├── ExportView.swift
 │   │   └── ExportViewModel.swift
@@ -144,13 +163,18 @@ image-incognitoTests/
 ├── ExportViewModelTests.swift
 ├── FaceBoxTests.swift
 ├── FaceDetectionServiceTests.swift
-├── FaceSelectionHitTesterTests.swift
 ├── HomeViewModelTests.swift
+├── InteractivePopGestureControllerTests.swift
+├── LocalizationCoverageTests.swift
+├── MaskRegionRenderingTests.swift
+├── MaskRegionTests.swift
 ├── MaskRenderingServiceTests.swift
 ├── MaskingStyleTests.swift
 ├── PhotoPickerCoordinatorTests.swift
 ├── ProcessExportUseCaseTests.swift
 ├── RecentMaskingItemTests.swift
+├── RegionGeometryTests.swift
+├── RegionHitTesterTests.swift
 ├── RenderMaskUseCaseTests.swift
 ├── SaveToPhotosUseCaseTests.swift
 ├── SettingsStoreTests.swift
@@ -164,7 +188,7 @@ Run tests in Xcode with `⌘U` or via:
 xcodebuild test \
   -project iOS/image-incognito/image-incognito.xcodeproj \
   -scheme image-incognito \
-  -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.4'
+  -destination 'platform=iOS Simulator,name=iPhone 17,OS=27.0'
 ```
 
 ---
