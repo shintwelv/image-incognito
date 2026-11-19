@@ -26,18 +26,4 @@ struct RenderMaskUseCase: Sendable {
             solidCleanColor: solidCleanColor
         )
     }
-
-    /// Compatibility adapter for the face-only editor flow. The mapping to
-    /// `.detectedFace` regions happens in the repository protocol extension.
-    nonisolated func execute(
-        image: UIImage,
-        faces: [FaceBox],
-        solidCleanColor: UIColor
-    ) async throws -> UIImage {
-        try await repository.render(
-            image: image,
-            faces: faces,
-            solidCleanColor: solidCleanColor
-        )
-    }
 }

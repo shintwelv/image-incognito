@@ -15,7 +15,11 @@ struct ExportView: View {
     @Environment(SettingsStore.self) private var settingsStore
     @Environment(\.dismiss) private var dismiss
 
-    init(originalImages: [UIImage], maskedImages: [UIImage]) {
+    /// Included mask-region counts, parallel to `maskedImages`.
+    private let regionCounts: [Int]
+
+    init(originalImages: [UIImage], maskedImages: [UIImage], regionCounts: [Int] = []) {
+        self.regionCounts = regionCounts
         _viewModel = State(initialValue: ExportViewModel(originalImages: originalImages, maskedImages: maskedImages))
     }
 
@@ -152,7 +156,7 @@ struct ExportView: View {
                     Image(systemName: "checkmark.shield.fill")
                         .imageScale(.small)
                         .foregroundStyle(Color.appSuccess)
-                    Text(viewModel.maskedImages.count > 1 ? String(localized: "\(viewModel.maskedImages.count)장 마스킹 완료") : String(localized: "export.completionBadge"))
+                    Text(maskedAreaBadgeText)
                         .font(.appFootnote)
                         .foregroundStyle(Color.appLabelSecondary)
                         .accessibilityIdentifier("export.completionBadge")
@@ -186,6 +190,18 @@ struct ExportView: View {
     private var imageSizeDescription: String {
         let size = viewModel.currentOriginalImage.size
         return "\(Int(size.width)) × \(Int(size.height))"
+    }
+
+    private var maskedAreaBadgeText: String {
+        let index = viewModel.currentPreviewIndex
+        let count = regionCounts.indices.contains(index) ? regionCounts[index] : 0
+        if count == 0 {
+            return NSLocalizedString("export.maskedAreas.zero", comment: "")
+        }
+        return String(
+            format: NSLocalizedString("export.maskedAreas", comment: ""),
+            count
+        )
     }
 
     // MARK: - Settings Card

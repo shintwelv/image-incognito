@@ -2,11 +2,13 @@
 //  EditorViewModelTests.swift
 //  image-incognitoTests
 //
-//  Unit tests for EditorViewModel: face toggling, style selection, export, and
-//  the Vision coordinate-flip conversion (bottom-left → top-left origin).
+//  Unit tests for the review-state EditorViewModel: detection proposals,
+//  inclusion, manual regions, direct manipulation, styles, and the explicit
+//  confirm/render contract (including no silent fallback).
 //
 
 import Testing
+import SwiftUI
 import UIKit
 @testable import image_incognito
 
@@ -14,417 +16,748 @@ import UIKit
 @Suite("EditorViewModel")
 struct EditorViewModelTests {
 
-    // MARK: - Helpers
+    // MARK: - Mocks
 
-    /// Records how many times the face-only repository entry point is called.
-    private final class DetectionCallRecorder: @unchecked Sendable {
-        private let lock = NSLock()
-        private var faceOnlyCalls = 0
+    private struct StubDetectionRepository: FaceDetectionRepositoryProtocol {
+        let faces: [FaceBox]
+        let error: Error?
 
-        func recordFaceOnlyCall() {
-            lock.lock()
-            defer { lock.unlock() }
-            faceOnlyCalls += 1
+        init(faces: [FaceBox] = [], error: Error? = nil) {
+            self.faces = faces
+            self.error = error
         }
-
-        func faceOnlyCallCount() -> Int {
-            lock.lock()
-            defer { lock.unlock() }
-            return faceOnlyCalls
-        }
-    }
-
-    private struct RecordingFaceDetectionRepository: FaceDetectionRepositoryProtocol {
-        let recorder: DetectionCallRecorder
-        let detectedFaces: [FaceBox]
 
         func detectFaces(in image: UIImage) async throws -> [FaceBox] {
-            recorder.recordFaceOnlyCall()
-            return detectedFaces
+            if let error { throw error }
+            return faces
         }
     }
 
+    private final class RenderSpy: MaskRenderingRepositoryProtocol {
+        private(set) var callCount = 0
+        private(set) var capturedRegions: [MaskRegion] = []
+        private(set) var capturedColor: UIColor?
+        let result: UIImage
+        let error: Error?
+
+        init(result: UIImage = makeTestImage(), error: Error? = nil) {
+            self.result = result
+            self.error = error
+        }
+
+        func render(
+            image: UIImage,
+            regions: [MaskRegion],
+            solidCleanColor: UIColor
+        ) async throws -> UIImage {
+            callCount += 1
+            capturedRegions = regions
+            capturedColor = solidCleanColor
+            if let error { throw error }
+            return result
+        }
+    }
+
+    private struct RenderFailure: Error {}
+
+    // MARK: - Helpers
+
     private func makeFace(
-        x: CGFloat = 0.1, y: CGFloat = 0.1,
-        width: CGFloat = 0.3, height: CGFloat = 0.3,
-        isMasked: Bool = true,
-        style: MaskingStyle = .blurredGlass
+        x: CGFloat = 0.1,
+        y: CGFloat = 0.1,
+        width: CGFloat = 0.3,
+        height: CGFloat = 0.3
     ) -> FaceBox {
-        FaceBox(
-            rect: CGRect(x: x, y: y, width: width, height: height),
-            isMasked: isMasked,
-            style: style
+        FaceBox(rect: CGRect(x: x, y: y, width: width, height: height))
+    }
+
+    private func makeViewModel(
+        image: UIImage = makeTestImage(),
+        faces: [FaceBox] = [],
+        detectionError: Error? = nil,
+        renderError: Error? = nil,
+        renderResult: UIImage? = nil
+    ) -> (EditorViewModel, RenderSpy) {
+        let detection = DetectFacesUseCase(
+            repository: StubDetectionRepository(faces: faces, error: detectionError)
         )
+        let spy = RenderSpy(result: renderResult ?? makeTestImage(), error: renderError)
+        let viewModel = EditorViewModel(
+            sourceImage: image,
+            detectFacesUseCase: detection,
+            renderMaskUseCase: RenderMaskUseCase(repository: spy)
+        )
+        return (viewModel, spy)
+    }
+
+    /// Creates a VM that has finished detection with no faces.
+    private func makeReviewedViewModel(
+        renderError: Error? = nil
+    ) -> (EditorViewModel, RenderSpy) {
+        let (viewModel, spy) = makeViewModel(renderError: renderError)
+        viewModel.phase = .reviewing
+        return (viewModel, spy)
+    }
+
+    private func addManual(
+        _ viewModel: EditorViewModel,
+        rect: CGRect = CGRect(x: 0.1, y: 0.1, width: 0.3, height: 0.3),
+        shape: MaskRegion.Shape = .rectangle
+    ) {
+        viewModel.phase = .reviewing
+        let result = viewModel.addManualRegion(normalizedRect: rect, shape: shape)
+        #expect(result == .added)
     }
 
     // MARK: - Initial state
 
-    @Test("Initial state is correct")
+    @Test("Initial state is analyzing with no regions")
     func initialState() {
         let vm = EditorViewModel(sourceImage: makeTestImage())
 
-        #expect(vm.faces.isEmpty)
-        #expect(vm.isDetecting == false)
-        #expect(vm.selectedStyle == .blurredGlass)
-        #expect(vm.showAdjustmentSliders == false)
-        #expect(vm.isRendering == false)
+        #expect(vm.regions.isEmpty)
+        #expect(vm.selectedRegionID == nil)
+        #expect(vm.phase == .analyzing)
+        #expect(vm.isDetecting)
+        #expect(vm.detectionCompleted == false)
+        #expect(vm.detectionFailed == false)
+        #expect(vm.isAdjustmentPanelVisible == false)
+        #expect(vm.defaultStyle == .blurredGlass)
+        #expect(vm.defaultShape == .rectangle)
+        #expect(vm.draftRevision == 0)
+        #expect(vm.renderedRevision == nil)
         #expect(vm.renderedImage == nil)
+        #expect(vm.hasDrafts == false)
     }
 
-    @Test("editor detection uses the face-only repository path")
-    func editorDetectionUsesFaceOnlyRepositoryPath() async throws {
-        let expectedFace = makeFace()
-        let recorder = DetectionCallRecorder()
-        let useCase = DetectFacesUseCase(
-            repository: RecordingFaceDetectionRepository(
-                recorder: recorder,
-                detectedFaces: [expectedFace]
-            )
-        )
-        let vm = EditorViewModel(
-            sourceImage: makeTestImage(),
-            detectFacesUseCase: useCase
-        )
+    // MARK: - Detection
 
-        try await vm.detectFaces()
+    @Test("Detection maps faces to included ellipse proposals")
+    func detectionMapsProposals() async {
+        let face = makeFace(x: 0.2, y: 0.3, width: 0.25, height: 0.35)
+        let (vm, _) = makeViewModel(faces: [face])
+        vm.defaultStyle = .pixelArt
 
-        #expect(recorder.faceOnlyCallCount() == 1)
-        #expect(vm.faces.map(\.id) == [expectedFace.id])
+        await vm.detectFaces()
+
+        #expect(vm.regions.count == 1)
+        let region = vm.regions[0]
+        #expect(region.id == face.id)
+        #expect(region.source == .detectedFace)
+        #expect(region.shape == .ellipse)
+        #expect(rectsAreEqual(region.rect, face.rect))
+        #expect(region.isIncluded)
+        #expect(region.style == .pixelArt)
+        #expect(region.linkedFaceID == face.id)
+        #expect(vm.selectedRegionID == face.id)
+        #expect(vm.phase == .reviewing)
+        #expect(vm.detectionCompleted)
+        #expect(vm.detectionFailed == false)
+        // Detection is a proposal, not a draft edit.
+        #expect(vm.draftRevision == 0)
+        #expect(vm.hasDrafts == false)
+    }
+
+    @Test("Detection runs only once and never overwrites regions")
+    func detectionReentryGuard() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+        #expect(vm.regions.count == 1)
+
+        // Simulate the user deleting every region, then returning to the screen.
+        vm.regions = []
+        await vm.detectFaces()
+
+        #expect(vm.regions.isEmpty)
+    }
+
+    @Test("Detection failure falls back to review with manual recovery")
+    func detectionFailure() async {
+        let (vm, _) = makeViewModel(detectionError: RenderFailure())
+
+        await vm.detectFaces()
+
+        #expect(vm.detectionFailed)
+        #expect(vm.phase == .reviewing)
+        #expect(vm.regions.isEmpty)
+        #expect(vm.selectedRegionID == nil)
         #expect(vm.detectionCompleted)
     }
 
-    // MARK: - toggleMask
+    @Test("Detection with zero faces enters review, not a dead end")
+    func detectionZeroFaces() async {
+        let (vm, _) = makeViewModel(faces: [])
 
-    @Test("toggleMask flips isMasked for the matching face")
-    func toggleMask() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face = makeFace()
-        vm.faces = [face]
+        await vm.detectFaces()
 
-        vm.toggleMask(id: face.id)
-        #expect(vm.faces[0].isMasked == false)
-
-        vm.toggleMask(id: face.id)
-        #expect(vm.faces[0].isMasked == true)
+        #expect(vm.regions.isEmpty)
+        #expect(vm.phase == .reviewing)
+        #expect(vm.detectionFailed == false)
+        #expect(vm.detectionCompleted)
     }
 
-    @Test("toggleMask with an unknown id is a no-op")
-    func toggleMaskUnknownId() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face = makeFace()
-        vm.faces = [face]
+    // MARK: - Inclusion / selection
 
-        vm.toggleMask(id: UUID())
+    @Test("toggleInclusion selects, opens the panel, and bumps the draft")
+    func toggleInclusion() async {
+        let (vm, _) = makeViewModel(faces: [makeFace(), makeFace(x: 0.6)])
+        await vm.detectFaces()
+        let id = vm.regions[0].id
 
-        #expect(vm.faces[0].isMasked == true)
+        vm.toggleInclusion(id: id)
+
+        #expect(vm.regions[0].isIncluded == false)
+        #expect(vm.regions[1].isIncluded == true)
+        #expect(vm.selectedRegionID == id)
+        #expect(vm.isAdjustmentPanelVisible)
+        #expect(vm.phase == .regionSelected)
+        #expect(vm.draftRevision == 1)
     }
 
-    @Test("toggleMask only affects the targeted face when multiple exist")
-    func toggleMaskTargetsCorrectFace() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let first = makeFace(x: 0.1)
-        let second = makeFace(x: 0.6)
-        vm.faces = [first, second]
+    @Test("toggleInclusion on an unknown id is a no-op")
+    func toggleInclusionUnknownID() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
 
-        vm.toggleMask(id: first.id)
+        vm.toggleInclusion(id: UUID())
 
-        #expect(vm.faces[0].isMasked == false)
-        #expect(vm.faces[1].isMasked == true)
+        #expect(vm.regions[0].isIncluded)
+        #expect(vm.draftRevision == 0)
     }
 
-    // MARK: - didTapFace
+    @Test("selectRegion selects without toggling inclusion")
+    func selectRegion() async {
+        let (vm, _) = makeViewModel(faces: [makeFace(), makeFace(x: 0.6)])
+        await vm.detectFaces()
+        let second = vm.regions[1].id
 
-    @Test("didTapFace toggles mask and selects face when unmasked")
-    func didTapFaceUnmasked() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face = makeFace(isMasked: false)
-        vm.faces = [face]
-        vm.selectedFaceID = nil
-        vm.showAdjustmentSliders = false
+        vm.selectRegion(id: second)
 
-        vm.didTapFace(id: face.id)
-
-        #expect(vm.faces[0].isMasked == true)
-        #expect(vm.selectedFaceID == face.id)
-        #expect(vm.showAdjustmentSliders == true)
+        #expect(vm.selectedRegionID == second)
+        #expect(vm.phase == .regionSelected)
+        #expect(vm.isAdjustmentPanelVisible)
+        #expect(vm.regions[1].isIncluded)
+        #expect(vm.draftRevision == 0)
     }
 
-    @Test("didTapFace toggles mask and deselects face when masked and selected")
-    func didTapFaceMaskedAndSelected() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face = makeFace(isMasked: true)
-        vm.faces = [face]
-        vm.selectedFaceID = face.id
-        vm.showAdjustmentSliders = true
+    @Test("selectRegion(nil) deselects, hides the panel, and returns to review")
+    func selectRegionNil() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+        vm.selectRegion(id: vm.regions[0].id)
 
-        vm.didTapFace(id: face.id)
+        vm.selectRegion(id: nil)
 
-        #expect(vm.faces[0].isMasked == false)
-        #expect(vm.selectedFaceID == nil)
-        #expect(vm.showAdjustmentSliders == false)
+        #expect(vm.selectedRegionID == nil)
+        #expect(vm.isAdjustmentPanelVisible == false)
+        #expect(vm.phase == .reviewing)
     }
 
-    @Test("didTapFace toggles mask but does not deselect other selected face")
-    func didTapFaceMaskedNotSelected() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face1 = makeFace(isMasked: true)
-        let face2 = makeFace(isMasked: true)
-        vm.faces = [face1, face2]
-        vm.selectedFaceID = face1.id
-        vm.showAdjustmentSliders = true
+    // MARK: - Manual regions
 
-        vm.didTapFace(id: face2.id) // toggle face2 (currently masked -> unmasks)
+    @Test("addManualRegion appends an included manual region and selects it")
+    func addManualRegion() {
+        let (vm, _) = makeReviewedViewModel()
+        vm.defaultStyle = .pixelArt
 
-        #expect(vm.faces[1].isMasked == false)
-        #expect(vm.selectedFaceID == face1.id) // remains face1
-        #expect(vm.showAdjustmentSliders == true)
+        let added = vm.addManualRegion(
+            normalizedRect: CGRect(x: 0.1, y: 0.2, width: 0.3, height: 0.2),
+            shape: .rectangle
+        )
+
+        #expect(added == .added)
+        #expect(vm.regions.count == 1)
+        let region = vm.regions[0]
+        #expect(region.isManual)
+        #expect(region.shape == .rectangle)
+        #expect(rectsAreEqual(region.rect, CGRect(x: 0.1, y: 0.2, width: 0.3, height: 0.2)))
+        #expect(region.isIncluded)
+        #expect(region.style == .pixelArt)
+        #expect(region.sizeMultiplier == 1.0)
+        #expect(vm.selectedRegionID == region.id)
+        #expect(vm.defaultShape == .rectangle)
+        #expect(vm.isAdjustmentPanelVisible)
+        #expect(vm.phase == .regionSelected)
+        #expect(vm.draftRevision == 1)
     }
 
-    @Test("didTapFace with unknown ID is a no-op")
-    func didTapFaceUnknownId() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face = makeFace(isMasked: true)
-        vm.faces = [face]
-        vm.selectedFaceID = face.id
-        vm.showAdjustmentSliders = true
+    @Test("Circles are stored with a 1:1 rect around the drag center")
+    func addManualCircleKeepsSquare() {
+        let (vm, _) = makeReviewedViewModel()
 
-        vm.didTapFace(id: UUID())
+        let added = vm.addManualRegion(
+            normalizedRect: CGRect(x: 0.2, y: 0.2, width: 0.4, height: 0.1),
+            shape: .circle
+        )
 
-        #expect(vm.faces[0].isMasked == true)
-        #expect(vm.selectedFaceID == face.id)
-        #expect(vm.showAdjustmentSliders == true)
+        #expect(added == .added)
+        let rect = vm.regions[0].rect
+        #expect(rect.width == rect.height)
+        #expect(abs(rect.width - 0.4) < 0.0001)
+        #expect(abs(rect.midX - 0.4) < 0.0001)
+        #expect(abs(rect.midY - 0.25) < 0.0001)
     }
 
-    @Test("face hit testing resolves the tapped face when multiple exist")
-    func faceHitTestingResolvesCorrectFace() {
-        let first = makeFace(x: 0.1, y: 0.2, width: 0.2, height: 0.2)
-        let second = makeFace(x: 0.6, y: 0.2, width: 0.2, height: 0.2)
-        let imageRect = CGRect(x: 0, y: 0, width: 300, height: 300)
+    @Test("Manual regions are clamped into the image")
+    func addManualClamps() {
+        let (vm, _) = makeReviewedViewModel()
 
-        let firstTap = CGPoint(x: 45, y: 90)
-        let secondTap = CGPoint(x: 225, y: 90)
+        let added = vm.addManualRegion(
+            normalizedRect: CGRect(x: 0.85, y: 0.85, width: 0.4, height: 0.4),
+            shape: .ellipse
+        )
+
+        #expect(added == .added)
+        let rect = vm.regions[0].rect
+        #expect(rect.minX >= 0)
+        #expect(rect.minY >= 0)
+        #expect(rect.maxX <= 1)
+        #expect(rect.maxY <= 1)
+    }
+
+    @Test("Regions below the minimum size are rejected")
+    func addManualRejectsTooSmall() {
+        let (vm, _) = makeReviewedViewModel()
+
+        let added = vm.addManualRegion(
+            normalizedRect: CGRect(x: 0.2, y: 0.2, width: 0.005, height: 0.005),
+            shape: .rectangle
+        )
+
+        #expect(added == .tooSmall)
+        #expect(vm.regions.isEmpty)
+        #expect(vm.draftRevision == 0)
+    }
+
+    @Test("Regions at the minimum size are accepted")
+    func addManualAcceptsMinimum() {
+        let (vm, _) = makeReviewedViewModel()
 
         #expect(
-            FaceSelectionHitTester.faceID(
-                at: firstTap,
-                faces: [first, second],
-                imageRect: imageRect
-            ) == first.id
+            vm.addManualRegion(
+                normalizedRect: CGRect(
+                    x: 0.2,
+                    y: 0.2,
+                    width: RegionGeometry.minimumNormalizedSize,
+                    height: RegionGeometry.minimumNormalizedSize
+                ),
+                shape: .rectangle
+            ) == .added
         )
+    }
+
+    @Test("Manual regions are capped at 50")
+    func manualRegionCap() {
+        let (vm, _) = makeReviewedViewModel()
+
+        for _ in 0..<50 {
+            #expect(
+                vm.addManualRegion(
+                    normalizedRect: CGRect(x: 0.1, y: 0.1, width: 0.05, height: 0.05),
+                    shape: .rectangle
+                ) == .added
+            )
+        }
+
         #expect(
-            FaceSelectionHitTester.faceID(
-                at: secondTap,
-                faces: [first, second],
-                imageRect: imageRect
-            ) == second.id
+            vm.addManualRegion(
+                normalizedRect: CGRect(x: 0.1, y: 0.1, width: 0.05, height: 0.05),
+                shape: .rectangle
+            ) == .limitReached
         )
+        #expect(vm.regions.count == 50)
     }
 
-    @Test("face hit testing ignores taps outside the rendered image")
-    func faceHitTestingIgnoresOutsideImage() {
-        let face = makeFace(x: 0.1, y: 0.1, width: 0.2, height: 0.2)
-        let imageRect = CGRect(x: 50, y: 50, width: 200, height: 200)
+    // MARK: - Move / resize
 
-        #expect(
-            FaceSelectionHitTester.faceID(
-                at: CGPoint(x: 20, y: 20),
-                faces: [face],
-                imageRect: imageRect
-            ) == nil
-        )
+    @Test("moveRegion updates a manual region and bumps the draft")
+    func moveRegion() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm, rect: CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.2))
+        let id = vm.regions[0].id
+        let revisionBefore = vm.draftRevision
+
+        let moved = vm.moveRegion(id: id, to: CGRect(x: 0.6, y: 0.5, width: 0.2, height: 0.2))
+
+        #expect(moved)
+        #expect(rectsAreEqual(vm.regions[0].rect, CGRect(x: 0.6, y: 0.5, width: 0.2, height: 0.2)))
+        #expect(vm.draftRevision == revisionBefore + 1)
     }
 
-    // MARK: - selectStyle
+    @Test("moveRegion clamps the region into the image")
+    func moveRegionClamps() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm, rect: CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.2))
+        let id = vm.regions[0].id
 
-    @Test("selectStyle changes selectedStyle and propagates to all faces")
-    func selectStyleChangesPropagates() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        vm.faces = [makeFace(style: .blurredGlass), makeFace(style: .blurredGlass)]
+        #expect(vm.moveRegion(id: id, to: CGRect(x: 0.9, y: 0.9, width: 0.2, height: 0.2)))
 
-        vm.selectStyle(.pixelArt)
-
-        #expect(vm.selectedStyle == .pixelArt)
-        #expect(vm.faces[0].style == .pixelArt)
-        #expect(vm.faces[1].style == .pixelArt)
-        #expect(vm.showAdjustmentSliders == true)
+        let rect = vm.regions[0].rect
+        #expect(rect.maxX <= 1)
+        #expect(rect.maxY <= 1)
     }
 
-    @Test("toggleMask updates selectedFaceID")
-    func toggleMaskUpdatesSelection() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face = makeFace()
-        vm.faces = [face]
-        #expect(vm.selectedFaceID == nil)
+    @Test("Detected faces cannot be moved or resized")
+    func facesAreNotDirectlyMovable() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+        let id = vm.regions[0].id
+        let original = vm.regions[0].rect
 
-        vm.toggleMask(id: face.id)
-        #expect(vm.selectedFaceID == face.id)
+        #expect(vm.moveRegion(id: id, to: CGRect(x: 0.6, y: 0.6, width: 0.2, height: 0.2)) == false)
+        #expect(vm.resizeRegion(id: id, to: CGRect(x: 0.6, y: 0.6, width: 0.2, height: 0.2)) == false)
+        #expect(rectsAreEqual(vm.regions[0].rect, original))
     }
 
-    @Test("toggleMask preserves the current slider visibility")
-    func toggleMaskPreservesSliderVisibility() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face = makeFace()
-        vm.faces = [face]
+    @Test("resizeRegion rejects sizes below the minimum")
+    func resizeRejectsTooSmall() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm)
+        let id = vm.regions[0].id
+        let original = vm.regions[0].rect
+        let revisionBefore = vm.draftRevision
 
-        vm.showAdjustmentSliders = false
-        vm.toggleMask(id: face.id)
-        #expect(vm.showAdjustmentSliders == false)
-
-        vm.showAdjustmentSliders = true
-        vm.toggleMask(id: face.id)
-        #expect(vm.showAdjustmentSliders == true)
+        #expect(vm.resizeRegion(id: id, to: CGRect(x: 0.1, y: 0.1, width: 0.001, height: 0.001)) == false)
+        #expect(rectsAreEqual(vm.regions[0].rect, original))
+        #expect(vm.draftRevision == revisionBefore)
     }
 
-    @Test("Intensity and sizeMultiplier proxy to selected face")
-    func proxyProperties() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        var face1 = makeFace()
-        face1.intensity = 0.5
-        face1.sizeMultiplier = 1.5
-        var face2 = makeFace()
-        face2.intensity = 0.8
-        face2.sizeMultiplier = 0.8
-        
-        vm.faces = [face1, face2]
+    @Test("Circle resizing keeps width equal to height")
+    func resizeCircleKeepsSquare() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm, rect: CGRect(x: 0.2, y: 0.2, width: 0.2, height: 0.2), shape: .circle)
+        let id = vm.regions[0].id
 
-        vm.toggleMask(id: face1.id)
+        #expect(vm.resizeRegion(id: id, to: CGRect(x: 0.2, y: 0.2, width: 0.4, height: 0.15)))
+
+        let rect = vm.regions[0].rect
+        #expect(rect.width == rect.height)
+        #expect(abs(rect.width - 0.4) < 0.0001)
+    }
+
+    // MARK: - Shape switching
+
+    @Test("switchShape converts a manual region and updates the drawing default")
+    func switchShape() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm, rect: CGRect(x: 0.2, y: 0.2, width: 0.4, height: 0.2), shape: .rectangle)
+        let id = vm.regions[0].id
+        let revisionBefore = vm.draftRevision
+
+        #expect(vm.switchShape(id: id, to: .circle))
+
+        let rect = vm.regions[0].rect
+        #expect(vm.regions[0].shape == .circle)
+        #expect(rect.width == rect.height)
+        #expect(abs(rect.midX - 0.4) < 0.0001)
+        #expect(vm.defaultShape == .circle)
+        #expect(vm.selectedRegionID == id)
+        #expect(vm.draftRevision == revisionBefore + 1)
+    }
+
+    @Test("Detected faces cannot switch shape")
+    func faceShapeSwitchRejected() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+        let id = vm.regions[0].id
+
+        #expect(vm.switchShape(id: id, to: .rectangle) == false)
+        #expect(vm.regions[0].shape == .ellipse)
+    }
+
+    @Test("shape setter drives either the selected manual region or the default")
+    func shapeSetter() {
+        let (vm, _) = makeReviewedViewModel()
+        vm.shape = .ellipse
+        #expect(vm.defaultShape == .ellipse)
+        #expect(vm.draftRevision == 0)
+
+        addManual(vm, shape: .rectangle)
+        vm.shape = .circle
+        #expect(vm.regions[0].shape == .circle)
+        #expect(vm.defaultShape == .circle)
+    }
+
+    // MARK: - Delete
+
+    @Test("deleteRegion removes the region and clears selection")
+    func deleteRegion() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm)
+        let id = vm.regions[0].id
+        let revisionBefore = vm.draftRevision
+
+        vm.deleteRegion(id: id)
+
+        #expect(vm.regions.isEmpty)
+        #expect(vm.selectedRegionID == nil)
+        #expect(vm.isAdjustmentPanelVisible == false)
+        #expect(vm.phase == .reviewing)
+        #expect(vm.draftRevision == revisionBefore + 1)
+    }
+
+    @Test("Deleting a non-selected region keeps the current selection")
+    func deleteNonSelectedRegion() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm, rect: CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.2))
+        addManual(vm, rect: CGRect(x: 0.6, y: 0.6, width: 0.2, height: 0.2))
+        let second = vm.regions[1].id
+        vm.selectRegion(id: second)
+
+        vm.deleteRegion(id: vm.regions[0].id)
+
+        #expect(vm.regions.count == 1)
+        #expect(vm.selectedRegionID == second)
+    }
+
+    // MARK: - Styles
+
+    @Test("applyStyle only changes the targeted region")
+    func applyStyleTargetsOneRegion() async {
+        let (vm, _) = makeViewModel(faces: [makeFace(), makeFace(x: 0.6)])
+        await vm.detectFaces()
+        let first = vm.regions[0].id
+
+        vm.applyStyle(.pixelArt, to: first)
+
+        #expect(vm.regions[0].style == .pixelArt)
+        #expect(vm.regions[1].style == .blurredGlass)
+        #expect(vm.defaultStyle == .pixelArt)
+        #expect(vm.selectedRegionID == first)
+        #expect(vm.draftRevision == 1)
+    }
+
+    @Test("applyStyleToAll copies style and emoji to included regions only")
+    func applyStyleToAll() async {
+        let (vm, _) = makeViewModel(faces: [makeFace(), makeFace(x: 0.6), makeFace(x: 0.8)])
+        await vm.detectFaces()
+        vm.regions[1].isIncluded = false
+        vm.regions[0].selectedEmoji = "🐱"
+        vm.regions[0].intensity = 0.4
+        vm.regions[2].intensity = 0.9
+        vm.selectRegion(id: vm.regions[0].id)
+
+        vm.applyStyleToAll(.solidClean)
+
+        #expect(vm.regions[0].style == .solidClean)
+        #expect(vm.regions[2].style == .solidClean)
+        #expect(vm.regions[0].selectedEmoji == "🐱")
+        #expect(vm.regions[2].selectedEmoji == "🐱")
+        // Excluded region and per-region intensity are untouched.
+        #expect(vm.regions[1].style == .blurredGlass)
+        #expect(vm.regions[0].intensity == 0.4)
+        #expect(vm.regions[2].intensity == 0.9)
+        #expect(vm.defaultStyle == .solidClean)
+    }
+
+    // MARK: - Selected-region proxies
+
+    @Test("intensity, size, and emoji proxy to the selected region")
+    func proxies() async {
+        let (vm, _) = makeViewModel(faces: [makeFace(), makeFace(x: 0.6)])
+        await vm.detectFaces()
+        vm.regions[0].intensity = 0.5
+        vm.regions[1].intensity = 0.8
+        vm.regions[1].sizeMultiplier = 1.5
+        vm.selectRegion(id: vm.regions[0].id)
+
         #expect(vm.intensity == 0.5)
-        #expect(vm.sizeMultiplier == 1.5)
+        #expect(vm.sizeMultiplier == 1.0)
 
         vm.intensity = 0.9
-        #expect(vm.faces[0].intensity == 0.9)
+        #expect(vm.regions[0].intensity == 0.9)
 
-        vm.toggleMask(id: face2.id)
+        vm.selectRegion(id: vm.regions[1].id)
         #expect(vm.intensity == 0.8)
-        #expect(vm.sizeMultiplier == 0.8)
+        #expect(vm.sizeMultiplier == 1.5)
 
         vm.sizeMultiplier = 2.0
-        #expect(vm.faces[1].sizeMultiplier == 2.0)
+        #expect(vm.regions[1].sizeMultiplier == 2.0)
+        #expect(vm.draftRevision == 2)
     }
 
-    @Test("selectStyle with the same style toggles the adjustment slider panel")
-    func selectSameStyleTogglesSliders() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        // Default selectedStyle is .blurredGlass
-        #expect(vm.showAdjustmentSliders == false)
+    @Test("Manual regions ignore sizeMultiplier writes")
+    func manualSizeMultiplierIgnored() {
+        let (vm, _) = makeReviewedViewModel()
+        addManual(vm)
+        let revisionBefore = vm.draftRevision
 
-        vm.selectStyle(.blurredGlass)
-        #expect(vm.showAdjustmentSliders == true)
+        vm.sizeMultiplier = 2.0
 
-        vm.selectStyle(.blurredGlass)
-        #expect(vm.showAdjustmentSliders == false)
+        #expect(vm.regions[0].sizeMultiplier == 1.0)
+        #expect(vm.draftRevision == revisionBefore)
     }
 
-    @Test("selectStyle with a different style always shows the slider panel")
-    func selectDifferentStyleAlwaysShowsSliders() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-
-        vm.selectStyle(.pixelArt)
-        #expect(vm.showAdjustmentSliders == true)
-
-        vm.showAdjustmentSliders = false
-        vm.selectStyle(.solidClean)
-        #expect(vm.showAdjustmentSliders == true)
-    }
-
-    @Test("selectStyle preserves unmasked faces' isMasked state")
-    func selectStylePreservesUnmasked() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let unmasked = makeFace(isMasked: false)
-        vm.faces = [unmasked]
-
-        vm.selectStyle(.solidClean)
-
-        #expect(vm.faces[0].isMasked == false)
-    }
-
-    // MARK: - exportTapped
-
-    @Test("exportTapped sets renderedImage and clears isRendering")
-    func exportTappedSetsRenderedImage() async {
-        let image = makeTestImage(size: CGSize(width: 200, height: 200))
-        let vm = EditorViewModel(sourceImage: image)
-        vm.faces = [makeFace(style: .solidClean)]
-
-        await vm.exportTapped()
-
-        #expect(vm.isRendering == false)
-        #expect(vm.renderedImage != nil)
-    }
-
-    @Test("exportTapped with no faces falls back to the source image")
-    func exportTappedNoFaces() async {
-        let image = makeTestImage()
-        let vm = EditorViewModel(sourceImage: image)
-
-        await vm.exportTapped()
-
-        #expect(vm.renderedImage != nil)
-    }
-
-    @Test("exportTapped is idempotent when called while already rendering")
-    func exportTappedIdempotent() async {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        vm.isRendering = true  // simulate an in-progress render
-
-        await vm.exportTapped()  // should return immediately without overwriting state
-
-        #expect(vm.renderedImage == nil)
-    }
-
-    // MARK: - Vision coordinate flip
-
-    @Test("Vision bottom-left y converts correctly to UIKit top-left y")
-    func visionCoordinateFlip() {
-        // Vision uses bottom-left origin. EditorViewModel converts with:
-        //   y_topLeft = 1 - y_bottomLeft - height
-
-        // Face near the top of the image in UIKit has a small y_topLeft
-        let visionYTop: CGFloat = 0.75
-        let height: CGFloat = 0.20
-        let topLeftY = 1 - visionYTop - height
-        #expect(abs(topLeftY - 0.05) < 0.001)
-
-        // Face near the bottom of the image in UIKit has a large y_topLeft
-        let visionYBottom: CGFloat = 0.05
-        let topLeftY2 = 1 - visionYBottom - height
-        #expect(abs(topLeftY2 - 0.75) < 0.001)
-
-        // A centered face has the same y in both coordinate systems
-        let visionYCenter: CGFloat = 0.40
-        let topLeftY3 = 1 - visionYCenter - height
-        #expect(abs(topLeftY3 - 0.40) < 0.001)
-    }
-
-    @Test("Vision coordinate flip preserves width and height")
-    func visionFlipPreservesDimensions() {
-        let visionRect = CGRect(x: 0.2, y: 0.3, width: 0.4, height: 0.25)
-        let flipped = CGRect(
-            x: visionRect.origin.x,
-            y: 1 - visionRect.origin.y - visionRect.height,
-            width: visionRect.width,
-            height: visionRect.height
-        )
-
-        #expect(flipped.width == visionRect.width)
-        #expect(flipped.height == visionRect.height)
-    }
-
-    @Test("selectedEmoji proxies to the currently selected face")
-    func selectedEmojiProxy() {
-        let vm = EditorViewModel(sourceImage: makeTestImage())
-        let face1 = makeFace()
-        let face2 = makeFace()
-        vm.faces = [face1, face2]
-
-        vm.selectedFaceID = face1.id
+    @Test("selectedEmoji proxies to the selected region")
+    func emojiProxy() async {
+        let (vm, _) = makeViewModel(faces: [makeFace(), makeFace(x: 0.6)])
+        await vm.detectFaces()
+        vm.selectRegion(id: vm.regions[0].id)
         #expect(vm.selectedEmoji == "😎")
 
         vm.selectedEmoji = "🐱"
-        #expect(vm.faces[0].selectedEmoji == "🐱")
+        #expect(vm.regions[0].selectedEmoji == "🐱")
 
-        vm.selectedFaceID = face2.id
-        vm.setEmojiForSelectedFace("🎭")
-        #expect(vm.faces[1].selectedEmoji == "🎭")
+        vm.selectRegion(id: vm.regions[1].id)
+        vm.selectedEmoji = "🎭"
+        #expect(vm.regions[1].selectedEmoji == "🎭")
+    }
+
+    @Test("selectedStyle follows the region, falling back to the default")
+    func selectedStyleFallsBack() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+        vm.regions[0].style = .crystalize
+        vm.defaultStyle = .solidClean
+        vm.selectRegion(id: vm.regions[0].id)
+
+        #expect(vm.selectedStyle == .crystalize)
+
+        vm.selectRegion(id: nil)
+        #expect(vm.selectedStyle == .solidClean)
+    }
+
+    // MARK: - Drawing state
+
+    @Test("beginDrawing clears selection and cancelDrawing returns to review")
+    func drawingState() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+
+        vm.beginDrawing()
+        #expect(vm.phase == .drawing)
+        #expect(vm.selectedRegionID == nil)
+        #expect(vm.isAdjustmentPanelVisible == false)
+
+        vm.cancelDrawing()
+        #expect(vm.phase == .reviewing)
+    }
+
+    // MARK: - Confirm / render
+
+    @Test("confirm throws .empty when nothing is included and never renders")
+    func confirmEmptyThrows() async {
+        let (vm, spy) = makeReviewedViewModel()
+
+        await #expect(throws: EditorConfirmError.empty) {
+            try await vm.confirm(allowEmpty: false)
+        }
+
+        #expect(spy.callCount == 0)
+        #expect(vm.renderedImage == nil)
+        #expect(vm.phase == .reviewing)
+    }
+
+    @Test("confirm with an excluded-only draft throws .empty")
+    func confirmAllExcludedThrows() async {
+        let (vm, spy) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+        vm.toggleInclusion(id: vm.regions[0].id)
+
+        await #expect(throws: EditorConfirmError.empty) {
+            try await vm.confirm(allowEmpty: false)
+        }
+
+        #expect(spy.callCount == 0)
+    }
+
+    @Test("allowEmpty returns the original explicitly without rendering")
+    func allowEmptyReturnsOriginal() async throws {
+        let source = makeTestImage(size: CGSize(width: 120, height: 80))
+        let (vm, spy) = makeViewModel(image: source)
+        vm.phase = .reviewing
+
+        let result = try await vm.confirm(allowEmpty: true)
+
+        #expect(result === source)
+        #expect(spy.callCount == 0)
+        #expect(vm.renderedImage == nil)
+    }
+
+    @Test("confirm renders only included regions and caches by revision")
+    func confirmRendersAndCaches() async throws {
+        let expected = makeTestImage(color: .systemRed)
+        let (vm, spy) = makeViewModel(
+            faces: [makeFace(), makeFace(x: 0.6)],
+            renderResult: expected
+        )
+        await vm.detectFaces()
+        vm.toggleInclusion(id: vm.regions[1].id)
+
+        let first = try await vm.confirm(allowEmpty: false)
+
+        #expect(first === expected)
+        #expect(spy.callCount == 1)
+        #expect(spy.capturedRegions.count == 1)
+        #expect(spy.capturedRegions[0].id == vm.regions[0].id)
+        #expect(vm.renderedImage === expected)
+        #expect(vm.renderedRevision == vm.draftRevision)
+        #expect(vm.phase == .reviewing)
+
+        let second = try await vm.confirm(allowEmpty: false)
+
+        #expect(second === expected)
+        #expect(spy.callCount == 1)
+    }
+
+    @Test("A draft change invalidates the render cache")
+    func draftChangeInvalidatesCache() async throws {
+        let (vm, spy) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+
+        _ = try await vm.confirm(allowEmpty: false)
+        #expect(spy.callCount == 1)
+
+        vm.intensity = 0.4
+
+        _ = try await vm.confirm(allowEmpty: false)
+        #expect(spy.callCount == 2)
+        #expect(vm.renderedRevision == vm.draftRevision)
+    }
+
+    @Test("Render failure throws and never falls back to the source image")
+    func renderFailureHasNoFallback() async {
+        let (vm, _) = makeViewModel(faces: [makeFace()], renderError: RenderFailure())
+        await vm.detectFaces()
+
+        await #expect(throws: RenderFailure.self) {
+            try await vm.confirm(allowEmpty: false)
+        }
+
+        #expect(vm.renderedImage == nil)
+        #expect(vm.renderedRevision == nil)
+        #expect(vm.phase == .reviewing)
+    }
+
+    @Test("Changing solidCleanColor invalidates the render cache")
+    func solidColorChangeInvalidatesCache() async throws {
+        let (vm, spy) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+
+        _ = try await vm.confirm(allowEmpty: false)
+        #expect(spy.callCount == 1)
+        let revisionBefore = vm.draftRevision
+
+        vm.solidCleanColor = .red
+        #expect(vm.draftRevision == revisionBefore + 1)
+
+        // Setting the same color again is not a mutation.
+        vm.solidCleanColor = .red
+        #expect(vm.draftRevision == revisionBefore + 1)
+
+        _ = try await vm.confirm(allowEmpty: false)
+        #expect(spy.callCount == 2)
+    }
+
+    @Test("confirm forwards the selected solid color")
+    func confirmForwardsSolidColor() async throws {
+        let (vm, spy) = makeViewModel(faces: [makeFace()])
+        await vm.detectFaces()
+        vm.solidCleanColor = .red
+        vm.regions[0].style = .solidClean
+
+        _ = try await vm.confirm(allowEmpty: false)
+
+        #expect(spy.capturedColor == UIColor(.red))
     }
 }

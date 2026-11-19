@@ -63,10 +63,45 @@ struct ViewInspectorTests {
     @Test("ExportView renders completion badge and action buttons")
     func exportViewElementsExist() {
         let sample = makeSampleImage()
-        let exportView = ExportView(originalImages: [sample], maskedImages: [sample])
+        let exportView = ExportView(
+            originalImages: [sample],
+            maskedImages: [sample],
+            regionCounts: [3]
+        )
             .environment(store)
 
         let host = UIHostingController(rootView: exportView)
+        _ = host.view
+        host.view.layoutIfNeeded()
+
+        #expect(host.view != nil)
+    }
+
+    @Test("ExportView supports the zero-mask override badge")
+    func exportViewZeroRegionCounts() {
+        let sample = makeSampleImage()
+        let exportView = ExportView(
+            originalImages: [sample, sample],
+            maskedImages: [sample, sample],
+            regionCounts: [0, 2]
+        )
+        .environment(store)
+
+        let host = UIHostingController(rootView: exportView)
+        _ = host.view
+        host.view.layoutIfNeeded()
+
+        #expect(host.view != nil)
+    }
+
+    @Test("RegionListView hosts a review model")
+    func regionListViewHosts() {
+        let viewModel = EditorViewModel(sourceImage: makeSampleImage())
+        viewModel.phase = .reviewing
+        let regionView = RegionListView(viewModel: viewModel) {}
+            .environment(store)
+
+        let host = UIHostingController(rootView: regionView)
         _ = host.view
         host.view.layoutIfNeeded()
 

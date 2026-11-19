@@ -32,30 +32,61 @@ struct SwiftUIViewSnapshotTests {
         }
     }
 
-    // MARK: - FaceOverlayView Snapshots
+    // MARK: - RegionOverlayView Snapshots
 
-    @Test("FaceOverlayView snapshot tests for all masking styles")
-    func snapshotFaceOverlayViewAllStyles() {
+    @Test("RegionOverlayView snapshot tests for all masking styles")
+    func snapshotRegionOverlayViewAllStyles() {
         let styles: [MaskingStyle] = [.blurredGlass, .pixelArt, .crystalize, .solidClean, .emojiOverlay]
 
         for style in styles {
-            let faceBox = FaceBox(
+            let region = MaskRegion(
+                source: .detectedFace,
+                shape: .ellipse,
                 rect: CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8),
-                isMasked: true,
+                isIncluded: true,
                 style: style,
                 selectedEmoji: "🐱"
             )
-            let view = FaceOverlayView(
-                faceBox: faceBox,
+            let view = RegionOverlayView(
+                region: region,
                 solidCleanColor: .appPrimary,
-                isSelected: true
+                isSelected: true,
+                canvasSize: CGSize(width: 200, height: 200)
             )
             .frame(width: 200, height: 200)
 
             SnapshotTestingHelper.assertSnapshot(
                 matching: view,
                 size: CGSize(width: 200, height: 200),
-                named: "FaceOverlayView_\(style.rawValue)"
+                named: "RegionOverlayView_\(style.rawValue)"
+            )
+        }
+    }
+
+    @Test("RegionOverlayView snapshots cover manual shapes and excluded state")
+    func snapshotRegionOverlayViewShapes() {
+        let shapes: [MaskRegion.Shape] = [.rectangle, .circle, .ellipse]
+
+        for shape in shapes {
+            let region = MaskRegion(
+                source: .manual,
+                shape: shape,
+                rect: CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8),
+                isIncluded: shape != .rectangle,
+                style: .solidClean
+            )
+            let view = RegionOverlayView(
+                region: region,
+                solidCleanColor: .appPrimary,
+                isSelected: true,
+                canvasSize: CGSize(width: 200, height: 200)
+            )
+            .frame(width: 200, height: 200)
+
+            SnapshotTestingHelper.assertSnapshot(
+                matching: view,
+                size: CGSize(width: 200, height: 200),
+                named: "RegionOverlayView_manual_\(shape.rawValue)"
             )
         }
     }

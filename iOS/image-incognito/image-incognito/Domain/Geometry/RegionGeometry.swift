@@ -98,6 +98,45 @@ nonisolated enum RegionGeometry {
             && standardized.height >= minimumNormalizedSize
     }
 
+    // MARK: - Direct manipulation
+
+    /// Offsets a normalized rect by a drag translation measured in display
+    /// points. The translation is divided by the rendered image size, not the
+    /// region size, so small regions move at the same speed as large ones.
+    /// The caller is responsible for clamping/min-size validation.
+    static func translated(_ rect: CGRect, by delta: CGSize, in canvasSize: CGSize) -> CGRect {
+        guard canvasSize.width > 0, canvasSize.height > 0,
+              delta.width.isFinite, delta.height.isFinite else { return rect }
+        let dx = delta.width / canvasSize.width
+        let dy = delta.height / canvasSize.height
+        return rect.offsetBy(dx: dx, dy: dy)
+    }
+
+    /// Builds a resized normalized rect from a fixed anchor corner and a moved
+    /// target corner. Rectangles and ellipses resize freely; circles use the
+    /// longest dragged edge as their diameter and keep the anchor fixed.
+    /// The caller is responsible for clamping/min-size validation.
+    static func resized(
+        anchor: CGPoint,
+        target: CGPoint,
+        shape: MaskRegion.Shape
+    ) -> CGRect {
+        switch shape {
+        case .rectangle, .ellipse:
+            return CGRect(
+                x: min(anchor.x, target.x),
+                y: min(anchor.y, target.y),
+                width: abs(target.x - anchor.x),
+                height: abs(target.y - anchor.y)
+            )
+        case .circle:
+            let side = max(abs(target.x - anchor.x), abs(target.y - anchor.y))
+            let x = target.x >= anchor.x ? anchor.x : anchor.x - side
+            let y = target.y >= anchor.y ? anchor.y : anchor.y - side
+            return CGRect(x: x, y: y, width: side, height: side)
+        }
+    }
+
     // MARK: - Hit testing
 
     /// Rect hit testing for rectangles, point-in-ellipse for ellipse/circle.

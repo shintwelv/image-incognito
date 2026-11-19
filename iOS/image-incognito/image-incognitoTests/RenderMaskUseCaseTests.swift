@@ -4,8 +4,7 @@
 //
 //  Unit tests for RenderMaskUseCase.
 //  Verifies that all rendering parameters are forwarded to the repository
-//  unchanged, that faces map to detected-face regions, and that errors/results
-//  are passed through correctly.
+//  unchanged and that errors/results are passed through correctly.
 //
 
 import Testing
@@ -102,39 +101,6 @@ struct RenderMaskUseCaseTests {
         #expect(mock.capturedRegions?.count == 3)
     }
 
-    @Test("faces overload maps each FaceBox to a detected-face ellipse region")
-    func executeMapsFacesToRegions() async throws {
-        let face = FaceBox(
-            rect: CGRect(x: 0.2, y: 0.3, width: 0.2, height: 0.25),
-            isMasked: false,
-            style: .pixelArt,
-            intensity: 0.4,
-            sizeMultiplier: 1.7,
-            selectedEmoji: "🐱"
-        )
-        let mock = CapturingRenderRepository()
-        let useCase = RenderMaskUseCase(repository: mock)
-
-        _ = try await useCase.execute(
-            image: makeTestImage(),
-            faces: [face],
-            solidCleanColor: .white
-        )
-
-        let region = try #require(mock.capturedRegions?.first)
-        #expect(mock.capturedRegions?.count == 1)
-        #expect(region.id == face.id)
-        #expect(region.source == .detectedFace)
-        #expect(region.shape == .ellipse)
-        #expect(rectsAreEqual(region.rect, face.rect))
-        #expect(region.isIncluded == false)
-        #expect(region.style == .pixelArt)
-        #expect(region.intensity == 0.4)
-        #expect(region.sizeMultiplier == 1.7)
-        #expect(region.selectedEmoji == "🐱")
-        #expect(region.linkedFaceID == face.id)
-    }
-
     @Test("execute propagates errors thrown by the repository for regions")
     func executePropagatesRegionErrors() async throws {
         struct RenderError: Error {}
@@ -143,20 +109,6 @@ struct RenderMaskUseCaseTests {
         await #expect(throws: RenderError.self) {
             try await useCase.execute(
                 image: makeTestImage(), regions: [],
-                solidCleanColor: .white
-            )
-        }
-    }
-
-    @Test("execute propagates errors thrown by the repository for faces")
-    func executePropagatesFaceErrors() async throws {
-        struct RenderError: Error {}
-        let useCase = RenderMaskUseCase(repository: ThrowingRenderRepository(error: RenderError()))
-        let face = FaceBox(rect: CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.2))
-
-        await #expect(throws: RenderError.self) {
-            try await useCase.execute(
-                image: makeTestImage(), faces: [face],
                 solidCleanColor: .white
             )
         }

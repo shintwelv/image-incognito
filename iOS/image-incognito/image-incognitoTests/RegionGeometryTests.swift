@@ -164,6 +164,85 @@ struct RegionGeometryTests {
         #expect(converted.maxY <= 1)
     }
 
+    // MARK: - Direct manipulation
+
+    @Test("translated normalizes drag deltas against the canvas, not the region")
+    func translatedUsesCanvasSize() {
+        let rect = CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.2)
+        let canvas = CGSize(width: 200, height: 100)
+
+        // 40pt is 20% of a 200pt-wide image → 0.2 normalized.
+        let moved = RegionGeometry.translated(
+            rect,
+            by: CGSize(width: 40, height: 10),
+            in: canvas
+        )
+
+        #expect(rectsAreEqual(moved, CGRect(x: 0.3, y: 0.2, width: 0.2, height: 0.2)))
+    }
+
+    @Test("Small and large regions move at the same normalized speed")
+    func translatedSpeedIsRegionIndependent() {
+        let canvas = CGSize(width: 200, height: 200)
+        let small = CGRect(x: 0.1, y: 0.1, width: 0.05, height: 0.05)
+        let large = CGRect(x: 0.1, y: 0.1, width: 0.6, height: 0.6)
+        let delta = CGSize(width: 20, height: 20)
+
+        let smallMoved = RegionGeometry.translated(small, by: delta, in: canvas)
+        let largeMoved = RegionGeometry.translated(large, by: delta, in: canvas)
+
+        #expect(abs(smallMoved.minX - 0.2) < accuracy)
+        #expect(abs(largeMoved.minX - 0.2) < accuracy)
+        #expect(abs(smallMoved.minY - 0.2) < accuracy)
+        #expect(abs(largeMoved.minY - 0.2) < accuracy)
+    }
+
+    @Test("translated is zero-safe for a degenerate canvas")
+    func translatedDegenerateCanvas() {
+        let rect = CGRect(x: 0.1, y: 0.1, width: 0.2, height: 0.2)
+        let moved = RegionGeometry.translated(rect, by: CGSize(width: 10, height: 10), in: .zero)
+
+        #expect(rectsAreEqual(moved, rect))
+    }
+
+    @Test("resized builds a free rect from the fixed anchor and target")
+    func resizedFreeShapes() {
+        let rect = RegionGeometry.resized(
+            anchor: CGPoint(x: 0.2, y: 0.2),
+            target: CGPoint(x: 0.8, y: 0.7),
+            shape: .rectangle
+        )
+
+        #expect(rectsAreEqual(rect, CGRect(x: 0.2, y: 0.2, width: 0.6, height: 0.5)))
+        #expect(rectsAreEqual(
+            RegionGeometry.resized(
+                anchor: CGPoint(x: 0.2, y: 0.2),
+                target: CGPoint(x: 0.8, y: 0.7),
+                shape: .ellipse
+            ),
+            rect
+        ))
+    }
+
+    @Test("resized keeps circles 1:1 anchored at the opposite corner")
+    func resizedCircleKeepsSquare() {
+        let downRight = RegionGeometry.resized(
+            anchor: CGPoint(x: 0.2, y: 0.2),
+            target: CGPoint(x: 0.8, y: 0.6),
+            shape: .circle
+        )
+        #expect(downRight.width == downRight.height)
+        #expect(rectsAreEqual(downRight, CGRect(x: 0.2, y: 0.2, width: 0.6, height: 0.6)))
+
+        let upLeft = RegionGeometry.resized(
+            anchor: CGPoint(x: 0.8, y: 0.8),
+            target: CGPoint(x: 0.3, y: 0.5),
+            shape: .circle
+        )
+        #expect(upLeft.width == upLeft.height)
+        #expect(rectsAreEqual(upLeft, CGRect(x: 0.3, y: 0.3, width: 0.5, height: 0.5)))
+    }
+
     // MARK: - Hit testing
 
     @Test("Rectangle hit testing includes corners")

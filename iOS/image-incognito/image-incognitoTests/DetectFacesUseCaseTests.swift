@@ -83,20 +83,18 @@ struct DetectFacesUseCaseTests {
         }
     }
 
-    @Test("execute preserves FaceBox isMasked and style from the repository")
-    func executePreservesFaceBoxProperties() async throws {
-        let face = FaceBox(
-            rect: CGRect(x: 0.3, y: 0.3, width: 0.2, height: 0.2),
-            isMasked: false,
-            style: .pixelArt
-        )
+    @Test("execute preserves the FaceBox identity and rect from the repository")
+    func executePreservesFaceBoxIdentity() async throws {
+        let id = UUID()
+        let rect = CGRect(x: 0.3, y: 0.3, width: 0.2, height: 0.2)
+        let face = FaceBox(id: id, rect: rect)
         let useCase = DetectFacesUseCase(
             repository: MockFaceDetectionRepository(facesToReturn: [face])
         )
 
         let result = try await useCase.execute(image: makeTestImage())
 
-        #expect(result[0].isMasked == false)
-        #expect(result[0].style == .pixelArt)
+        #expect(result[0].id == id)
+        #expect(result[0].rect == rect)
     }
 }
