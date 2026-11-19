@@ -130,8 +130,6 @@ struct HomeView: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(height: 300)
-                    .padding(.horizontal, Spacing.large)
 
                 VStack(spacing: Spacing.large) {
                     // Placeholder illustration
@@ -171,7 +169,10 @@ struct HomeView: View {
                         .accessibilityIdentifier("home.heroSteps")
                 }
                 .padding(.horizontal, Spacing.xxLarge)
+                .padding(.vertical, Spacing.large)
             }
+            .frame(maxWidth: .infinity, minHeight: 300)
+            .padding(.horizontal, Spacing.large)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("home.heroCard")
