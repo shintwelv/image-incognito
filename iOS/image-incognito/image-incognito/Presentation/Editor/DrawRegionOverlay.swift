@@ -100,6 +100,7 @@ struct DrawRegionOverlay: View {
             .padding(.top, Spacing.small)
             .frame(maxHeight: .infinity, alignment: .top)
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("editor.drawOverlay")
     }
 
