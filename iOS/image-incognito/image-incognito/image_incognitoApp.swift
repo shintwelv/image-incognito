@@ -6,49 +6,88 @@
 //
 
 import SwiftUI
-
-class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    if ProcessInfo.processInfo.arguments.contains("--uitesting") {
-        UIView.setAnimationsEnabled(false)
-    }
-
-    return true
-  }
-
-  func application(_ application: UIApplication,
-                   supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-    .portrait
-  }
-}
+import UIKit
 
 @main
-struct image_incognitoApp: App {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        if ProcessInfo.processInfo.arguments.contains("--uitesting") {
+            UIView.setAnimationsEnabled(false)
+        }
 
-    @State private var settingsStore = SettingsStore()
-    @State private var incomingImageStore = IncomingImageStore()
+        return true
+    }
+
+    func application(_ application: UIApplication,
+                     configurationForConnecting connectingSceneSession: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(
+            name: "Default Configuration",
+            sessionRole: connectingSceneSession.role
+        )
+        configuration.delegateClass = SceneDelegate.self
+        return configuration
+    }
+
+    func application(_ application: UIApplication,
+                     supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        .portrait
+    }
+}
+
+/// Owns the app's single window and its app-wide observable stores.
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+    var window: UIWindow?
+
+    private let settingsStore = SettingsStore()
+    private let incomingImageStore = IncomingImageStore()
 
     private var isUITesting: Bool {
         ProcessInfo.processInfo.arguments.contains("--uitesting")
     }
 
-    var body: some Scene {
-        WindowGroup {
-            HomeView()
-                .environment(settingsStore)
-                .environment(incomingImageStore)
-                .onOpenURL { url in
-                    handleIncomingURL(url)
-                }
-                .onAppear {
-                    if isUITesting {
-                        injectUITestingState()
-                    }
-                }
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+
+        let rootView = HomeView()
+            .environment(settingsStore)
+            .environment(incomingImageStore)
+            .background(
+                PortraitLockController()
+                    .frame(width: 0, height: 0)
+                    .accessibilityHidden(true)
+            )
+            .onAppear { [weak self] in
+                guard let self, self.isUITesting else { return }
+                self.injectUITestingState()
+            }
+
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = PortraitLockingHostingController(rootView: rootView)
+        self.window = window
+        window.makeKeyAndVisible()
+
+        for context in connectionOptions.urlContexts {
+            handleIncomingURL(context.url)
         }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        for context in URLContexts {
+            handleIncomingURL(context.url)
+        }
+    }
+
+    /// iOS 27 scene-level orientation mask. This replaces the deprecated
+    /// app-delegate mask for this scene and keeps the window portrait.
+    @available(iOS 27.0, *)
+    func supportedInterfaceOrientations(for windowScene: UIWindowScene) -> UIInterfaceOrientationMask {
+        .portrait
     }
 
     private func handleIncomingURL(_ url: URL) {

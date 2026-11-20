@@ -43,5 +43,13 @@ struct OrientationLockTests {
 
         #expect(orientations == .portrait)
     }
+
+    @Test("Portrait lock updates only non-portrait scene geometry")
+    func portraitLockRequestsUpdateOnlyWhenNeeded() {
+        #expect(PortraitLockController.needsPortraitUpdate(current: .portrait) == false)
+        #expect(PortraitLockController.needsPortraitUpdate(current: .landscapeLeft))
+        #expect(PortraitLockController.needsPortraitUpdate(current: .landscapeRight))
+        #expect(PortraitLockController.needsPortraitUpdate(current: .portraitUpsideDown))
+    }
 }
 #endif
