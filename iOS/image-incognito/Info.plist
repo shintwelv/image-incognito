@@ -24,6 +24,8 @@
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Incognify</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
