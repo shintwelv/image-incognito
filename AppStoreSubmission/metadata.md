@@ -14,7 +14,7 @@ This file contains the metadata and submission details required for App Store Co
 - **Primary Language**: English (US)
 - **Privacy Policy URL**: `https://shintwl.notion.site/Incognify-Privacy-Support-334319f036d080f384ddd5c7b765fb6c?source=copy_link`
 - **Support URL**: `https://shintwl.notion.site/Incognify-Support-334319f036d080b9a436dae4e4d99884?source=copy_link`
-- **Marketing URL**: `https://shinil.github.io/image-incognito`
+- **Marketing URL**: `https://shintwelv.github.io/image-incognito/`
 - **Contact Email**: `shintwl@icloud.com`
 - **Price**: Free
 

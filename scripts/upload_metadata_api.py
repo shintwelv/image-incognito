@@ -24,7 +24,7 @@ METADATA_MD_PATH = os.path.join(PROJECT_DIR, "AppStoreSubmission", "metadata.md"
 
 # Default metadata URLs
 SUPPORT_URL = "https://shintwl.notion.site/Incognify-Support-334319f036d080b9a436dae4e4d99884?source=copy_link"
-MARKETING_URL = "https://shinil.github.io/image-incognito"
+MARKETING_URL = "https://shintwelv.github.io/image-incognito/"
 
 LOCALE_MAP = {
     "en-US": "en-US",
