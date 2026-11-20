@@ -1131,31 +1131,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2/2 Preview & save"
+            "value" : "2/2 Preview"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2/2 Vista previa y guardar"
+            "value" : "2/2 Vista previa"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2/2 プレビューと保存"
+            "value" : "2/2 プレビュー"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2/2 미리보기 & 저장"
+            "value" : "2/2 미리보기"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2/2 预览并保存"
+            "value" : "2/2 预览"
           }
         }
       }
@@ -3122,31 +3122,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1/2 Choose what to hide"
+            "value" : "1/2 Review"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1/2 Elige qué ocultar"
+            "value" : "1/2 Revisar"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1/2 隠す場所を選択"
+            "value" : "1/2 確認"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1/2 가릴 곳 선택"
+            "value" : "1/2 확인"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1/2 选择要遮挡的区域"
+            "value" : "1/2 确认"
           }
         }
       }
@@ -3190,31 +3190,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Checking all photos"
+            "value" : "Checking…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Comprobando todas las fotos"
+            "value" : "Comprobando…"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "すべての写真を確認中"
+            "value" : "確認中"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "모든 사진을 확인하는 중"
+            "value" : "확인 중"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在检查所有照片"
+            "value" : "检查中"
           }
         }
       }
@@ -4040,31 +4040,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Confirm · Hide %d areas"
+            "value" : "Hide %d"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Confirmar · Ocultar %d áreas"
+            "value" : "Ocultar %d"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "確定 · %dか所を隠す"
+            "value" : "隠す %dか所"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "확정 · %d곳 가리기"
+            "value" : "가리기 %d곳"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "确认 · 遮挡 %d 处"
+            "value" : "遮挡 %d"
           }
         }
       }
@@ -4074,31 +4074,31 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Confirm · Hide %d areas (%d photos)"
+            "value" : "Hide %d (%d)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Confirmar · Ocultar %d áreas (%d fotos)"
+            "value" : "Ocultar %d (%d)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "確定 · %dか所を隠す（%d枚）"
+            "value" : "隠す %dか所（%d枚）"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "확정 · %d곳 가리기 (%d장)"
+            "value" : "가리기 %d곳 (%d장)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "确认 · 遮挡 %d 处（%d 张）"
+            "value" : "遮挡 %d（%d 张）"
           }
         }
       }
@@ -4652,13 +4652,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Processing"
+            "value" : "Rendering…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Procesando"
+            "value" : "Procesando…"
           }
         },
         "ja" : {

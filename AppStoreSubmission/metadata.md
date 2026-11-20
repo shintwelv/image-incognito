@@ -1,6 +1,6 @@
 # App Store Submission Materials (Version 1.8.0)
 
-This file contains the metadata and submission details required for App Store Connect when publishing version 1.8.0 (Build 9) of Incognify.
+This file contains the metadata and submission details required for App Store Connect when publishing version 1.8.0 (Build 10) of Incognify.
 
 ---
 
@@ -8,7 +8,7 @@ This file contains the metadata and submission details required for App Store Co
 
 - **App Name**: Incognify
 - **Version**: 1.8.0
-- **Build**: 9
+- **Build**: 10
 - **Subtitle**: Face Privacy on Your Terms
 - **Category**: Photo & Video / Utilities
 - **Primary Language**: English (US)

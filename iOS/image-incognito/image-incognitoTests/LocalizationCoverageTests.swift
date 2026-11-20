@@ -114,10 +114,10 @@ struct LocalizationCoverageTests {
         let strings = try #require(catalog["strings"] as? [String: Any])
 
         let expectations: [String: (korean: String, english: String)] = [
-            "editor.review.title": ("1/2 가릴 곳 선택", "1/2 Choose what to hide"),
-            "editor.confirm": ("확정 · %d곳 가리기", "Confirm · Hide %d areas"),
+            "editor.review.title": ("1/2 확인", "1/2 Review"),
+            "editor.confirm": ("가리기 %d곳", "Hide %d"),
             "editor.discard.title": ("편집 내용을 버릴까요?", "Discard changes?"),
-            "export.title": ("2/2 미리보기 & 저장", "2/2 Preview & save"),
+            "export.title": ("2/2 미리보기", "2/2 Preview"),
             "export.backButton": ("다시 편집", "Edit areas"),
             "home.hero.subtitle": ("AI가 얼굴을 찾고, 가릴 곳은 직접 정하세요.", "AI finds faces. You decide what to hide."),
             "home.hero.steps": ("사진 선택 → 얼굴/영역 확인 → 미리보기 & 저장", "Pick photos → Review faces and areas → Preview and save")

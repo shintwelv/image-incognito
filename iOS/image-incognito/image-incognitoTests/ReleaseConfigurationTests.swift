@@ -42,7 +42,7 @@ struct ReleaseConfigurationTests {
     }
 
     @Test("Release project contains no Firebase configuration and uses the prepared version")
-    func releaseProjectHasNoFirebaseAndUsesVersion180Build9() throws {
+    func releaseProjectHasNoFirebaseAndUsesVersion180Build10() throws {
         let project = try sourceContents("iOS/image-incognito/image-incognito.xcodeproj/project.pbxproj")
         let appBootstrap = try sourceContents("iOS/image-incognito/image-incognito/image_incognitoApp.swift")
 
@@ -54,7 +54,7 @@ struct ReleaseConfigurationTests {
         let packageResolutionURL = repositoryRoot.appending(path: "iOS/image-incognito/image-incognito.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved")
         #expect(!FileManager.default.fileExists(atPath: packageResolutionURL.path))
 
-        #expect(occurrences(of: "CURRENT_PROJECT_VERSION = 9;", in: project) == 6)
+        #expect(occurrences(of: "CURRENT_PROJECT_VERSION = 10;", in: project) == 6)
         #expect(occurrences(of: "MARKETING_VERSION = 1.8.0;", in: project) == 6)
     }
 
@@ -73,7 +73,7 @@ struct ReleaseConfigurationTests {
         }
 
         #expect(metadata.contains("App Store Submission Materials (Version 1.8.0)"))
-        #expect(metadata.contains("version 1.8.0 (Build 9)"))
+        #expect(metadata.contains("version 1.8.0 (Build 10)"))
         #expect(occurrences(of: "### What's New in Version 1.8.0", in: metadata) == 5)
         #expect(!metadata.contains("### What's New in Version 1.7.1"))
     }
