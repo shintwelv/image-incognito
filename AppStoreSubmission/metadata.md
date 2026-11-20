@@ -1,13 +1,15 @@
-# App Store Submission Materials (Version 1.7.1)
+# App Store Submission Materials (Version 1.8.0)
 
-This file contains the metadata and submission details required for App Store Connect when publishing version 1.7.1 (Build 8) of Incognify.
+This file contains the metadata and submission details required for App Store Connect when publishing version 1.8.0 (Build 9) of Incognify.
 
 ---
 
 ## 1. General App Information
 
 - **App Name**: Incognify
-- **Subtitle**: Auto Face Privacy for Photos
+- **Version**: 1.8.0
+- **Build**: 9
+- **Subtitle**: Face Privacy on Your Terms
 - **Category**: Photo & Video / Utilities
 - **Primary Language**: English (US)
 - **Privacy Policy URL**: `https://shintwl.notion.site/Incognify-Privacy-Support-334319f036d080f384ddd5c7b765fb6c?source=copy_link`
@@ -21,26 +23,29 @@ This file contains the metadata and submission details required for App Store Co
 ## 2. Localization: English (en-US)
 
 ### Subtitle
-Auto Face Privacy for Photos
+Face Privacy on Your Terms
 
 ### Promotional Text
-Protect portrait rights without sacrificing aesthetics. Faces masked, style intact.
+AI suggests the faces, you decide what to hide. Draw a rectangle, circle, or ellipse anywhere — all on-device.
 
 ### Keywords
-face blur, privacy photo, emoji mask, sticker face, mask face, blur face, incognito, pixelate
+face blur, privacy photo, emoji mask, manual mask, rectangle mask, blur face, incognito, pixelate
 
-### What's New in Version 1.7.1
-- Automatic detection now focuses exclusively on faces, preventing ordinary text such as signs, dates, and prices from being incorrectly masked.
-- Removed analytics and crash-reporting SDKs. Photo processing remains entirely on-device, with no tracking.
+### What's New in Version 1.8.0
+- Manual masking is here: draw a rectangle, circle, or ellipse over plates, documents, tags, or any face AI missed.
+- Faces are now suggestions. Review them, include or exclude what you want, and confirm before anything renders.
+- Removed automatic plate and text detection, so numbers and signs are no longer masked by mistake.
+- The app is portrait-only for a consistent, focused editing experience.
 
 ### Description
-Protect portrait rights without sacrificing aesthetics. Share freely on Instagram and beyond — faces masked, style intact.
+Protect portrait rights without sacrificing aesthetics. Share freely on Instagram and beyond — the AI suggests faces, you decide what to hide, and every edit stays on your device.
 
-Incognify uses Apple's advanced Vision framework to automatically detect faces in your photos and apply stunning, customizable privacy masks instantly.
+Incognify uses Apple's advanced Vision framework to suggest faces in your photos, then lets you apply stunning, customizable privacy masks — including manual shapes for anything the AI missed.
 
 Key Features:
-- **Automatic Face Detection**: Detects multiple faces in background crowds or chaotic settings instantly.
-- **Aesthetic Masks**: Choose from Blur, Pixelation, Crystalize, and the all-new Emoji & Graphic Sticker Overlay style. Every mask feels like an artistic design, not an ugly patch.
+- **AI Face Suggestions**: Detects multiple faces in background crowds or chaotic settings instantly, then lets you review and confirm before rendering.
+- **Manual Masking**: Draw a rectangle, circle, or ellipse over plates, documents, tags, or any face AI missed.
+- **Aesthetic Masks**: Choose from Blur, Pixelation, Crystalize, and the Emoji & Graphic Sticker Overlay style. Every mask feels like an artistic design, not an ugly patch.
 - **Customizable Emoji Presets**: Express yourself by picking from default emoji presets or adding your own favorite custom emojis.
 - **100% On-Device Processing**: Your photos never leave your device. Zero cloud uploads, zero tracking.
 - **High-Resolution Export**: Save and share lossless high-quality photos perfect for social networks.
@@ -51,26 +56,29 @@ Key Features:
 ## 3. Localization: Korean (ko)
 
 ### Subtitle
-자동 얼굴 프라이버시 보호
+얼굴은 AI가, 선택은 직접
 
 ### Promotional Text
-사진의 아름다움을 해치지 않고 초상권을 보호하세요. 얼굴은 가리고 스타일은 유지됩니다.
+AI가 얼굴을 제안하고, 가릴 곳은 직접 결정하세요. 사각형·원·타원을 그려 어디든 가릴 수 있으며 모든 처리는 기기에서 이루어집니다.
 
 ### Keywords
-얼굴 블러, 프라이버시 사진, 이모지 마스크, 얼굴 스티커, 사진 모자이크, 얼굴 가리기, 익명 사진, 픽셀화, 크리스탈라이즈, 온디바이스, 사진 편집
+얼굴 블러, 프라이버시 사진, 이모지 마스크, 수동 마스크, 도형 가리기, 얼굴 가리기, 익명 사진, 픽셀화
 
-### What's New in Version 1.7.1
-- 자동 감지가 얼굴에만 집중하도록 개선하여 간판, 날짜, 가격 등 일반 텍스트가 잘못 가려지지 않도록 했습니다.
-- 분석 및 비정상 종료 보고 SDK를 제거했습니다. 사진 처리는 계속 기기 내에서만 이루어지며 추적하지 않습니다.
+### What's New in Version 1.8.0
+- 직접 가리기 기능이 추가되었습니다. 번호판, 문서, 태그, AI가 놓친 얼굴 위에 사각형·원·타원을 그려 가릴 수 있습니다.
+- 이제 얼굴은 자동 마스킹이 아닌 '제안'입니다. 제안을 확인하고 포함하거나 제외한 뒤 확정해야 렌더링됩니다.
+- 번호판·텍스트 자동 감지를 제거하여 숫자나 간판이 실수로 가려지지 않습니다.
+- 일관되고 집중된 편집 환경을 위해 세로 모드 전용 UI로 변경했습니다.
 
 ### Description
-사진의 아름다움을 해치지 않으면서 초상권을 보호하세요. 인스타그램이나 다른 SNS에 얼굴은 마스킹하되 스타일은 그대로 유지한 채 자유롭게 공유하세요.
+사진의 아름다움을 해치지 않으면서 초상권을 보호하세요. AI가 얼굴을 제안하고 가릴 곳은 직접 결정하며, 모든 편집은 기기 안에서만 이루어집니다.
 
-Incognify는 Apple의 최첨단 Vision 프레임워크를 사용하여 사진 속 얼굴을 자동으로 감지하고 세련된 프라이버시 마스크를 즉시 적용합니다.
+Incognify는 Apple의 첨단 Vision 프레임워크로 사진 속 얼굴을 제안하고, AI가 놓친 부분까지 직접 그려 세련된 프라이버시 마스크를 적용할 수 있습니다.
 
 주요 기능:
-- **자동 얼굴 감지**: 복잡한 배경이나 군중 속에서도 여러 개의 얼굴을 순식간에 감지합니다.
-- **미적 감각의 마스크**: 블러, 픽셀화, 크리스탈라이즈(Crystalize), 그리고 새롭게 추가된 이모지 & 스티커 오버레이 스타일 중에서 선택할 수 있습니다.
+- **AI 얼굴 제안**: 복잡한 배경이나 군중 속에서도 여러 얼굴을 순식간에 감지하고, 렌더링 전에 직접 확인하고 확정합니다.
+- **직접 가리기**: 번호판, 문서, 태그, AI가 놓친 얼굴 위에 사각형·원·타원을 그려 가릴 수 있습니다.
+- **미적 감각의 마스크**: 블러, 픽셀화, 크리스탈라이즈(Crystalize), 그리고 이모지 & 스티커 오버레이 스타일 중에서 선택할 수 있습니다.
 - **커스텀 이모지 프리셋**: 기본 제공 이모지뿐만 아니라 원하는 이모지를 직접 추가하여 개성 있게 얼굴을 가릴 수 있습니다.
 - **100% 온디바이스 처리**: 사진은 기기 밖으로 절대 전송되지 않습니다. 클라우드 업로드 및 추적이 전혀 없습니다.
 - **고해상도 내보내기**: SNS 업로드에 완벽한 무손실 고화질 사진을 저장하고 공유할 수 있습니다.
@@ -81,26 +89,29 @@ Incognify는 Apple의 최첨단 Vision 프레임워크를 사용하여 사진 �
 ## 4. Localization: Japanese (ja)
 
 ### Subtitle
-写真の自動顔プライバシー保護
+顔はAIが、選択はあなた
 
 ### Promotional Text
-写真の美しさを損なうことなく、肖像権を保護します。顔をマスクしつつ、スタイルはそのまま。
+AIが顔を提案し、隠す場所はあなたが決めます。四角形・円・楕円を描いて自在にマスク。処理はすべてデバイス上で完結します。
 
 ### Keywords
-顔ぼかし, プライバシー写真, 絵文字マスク, ステッカー顔, 写真モザイク, 顔隠し, 匿名写真, ピクセル化, クリスタライズ, 写真編集, オンデバイス
+顔ぼかし, プライバシー写真, 絵文字マスク, 手動マスク, 図形マスク, 顔隠し, 匿名写真, ピクセル化
 
-### What's New in Version 1.7.1
-- 自動検出を顔のみに絞り、看板、日付、価格などの一般的な文字が誤ってマスクされないよう改善しました。
-- 分析・クラッシュレポートSDKを削除しました。写真処理は引き続きすべてデバイス上で行われ、トラッキングはしません。
+### What's New in Version 1.8.0
+- 手動マスキングが登場。ナンバープレート、書類、タグ、AIが見逃した顔の上に四角形・円・楕円を描いて隠せます。
+- 顔は自動で隠すのではなく「提案」されるようになりました。提案を確認し、含める／除外を選んでから確定すると描画されます。
+- ナンバープレートとテキストの自動検出を削除したため、数字や看板が誤って隠れることはありません。
+- 一貫した集中しやすい編集体験のため、縦向き専用のUIになりました。
 
 ### Description
-写真の美しさを損なうことなく、肖像権を保護します。顔をマスクしつつ、スタイルはそのまま維持して、Instagramやその他のSNSに自由に共有しましょう。
+写真の美しさを損なうことなく、肖像権を保護します。AIが顔を提案し、隠す場所はあなたが決めます。編集はすべてデバイス上で完結します。
 
-Incognifyは、Appleの先進的なVisionフレームワークを使用して、写真内の顔を自動的に検出し、スタイリッシュなプライバシーマスクを瞬時に適用します。
+Incognifyは、Appleの先進的なVisionフレームワークで写真内の顔を提案し、AIが見逃した部分にも四角形・円・楕円を描いて、スタイリッシュなプライバシーマスクを適用できます。
 
 主な機能：
-- **自動顔検出**：混雑した背景や人混みの中でも、複数の顔を瞬時に検出します。
-- **美学的なマスク**：ぼかし（Blur）、モザイク（Pixelation）、クリスタライズ（Crystalize）、顔隠し用絵文字＆ステッカーオーバーレイから選択できます。
+- **AIによる顔の提案**：混雑した背景や人混みの中でも複数の顔を瞬時に検出し、描画前に確認・確定できます。
+- **手動マスキング**：ナンバープレート、書類、タグ、AIが見逃した顔の上に四角形・円・楕円を描いて隠せます。
+- **美学的なマスク**：ぼかし（Blur）、モザイク（Pixelation）、クリスタライズ（Crystalize）、絵文字＆ステッカーオーバーレイから選択できます。
 - **カスタム絵文字プリセット**：お気に入りの絵文字を追加して、自分らしく個性的に顔を隠せます。
 - **100%オンデバイス処理**：写真はデバイス外に送信されません。クラウドへのアップロードや追跡は一切ありません。
 - **高解像度書き出し**：SNSへの投稿に最適な無損失・高品質な写真を保存して共有できます。
@@ -111,26 +122,29 @@ Incognifyは、Appleの先進的なVisionフレームワークを使用して、
 ## 5. Localization: Spanish (es)
 
 ### Subtitle
-Privacidad facial automática
+Privacidad facial a tu manera
 
 ### Promotional Text
-Protege los derechos de imagen sin sacrificar la estética. Rostros enmascarados, estilo intacto.
+La IA sugiere los rostros y tú decides qué ocultar. Dibuja rectángulos, círculos o elipses donde quieras, todo en tu dispositivo.
 
 ### Keywords
-desenfoque cara, privacidad foto, emoji mascara, sticker cara, ocultar cara, foto anonima, pixelar
+desenfoque cara, privacidad foto, emoji mascara, mascara manual, ocultar cara, pixelar
 
-### What's New in Version 1.7.1
-- La detección automática ahora se centra solo en rostros, para evitar ocultar por error texto común como carteles, fechas y precios.
-- Eliminamos los SDK de análisis y reportes de fallos. El procesamiento continúa realizándose totalmente en el dispositivo, sin seguimiento.
+### What's New in Version 1.8.0
+- Llega el enmascarado manual: dibuja un rectángulo, círculo o elipse sobre matrículas, documentos, etiquetas o cualquier rostro que la IA no haya detectado.
+- Ahora los rostros son sugerencias. Revísalas, incluye o excluye las que quieras y confirma antes de que se renderice nada.
+- Eliminamos la detección automática de matrículas y texto, para que los números y carteles ya no se oculten por error.
+- La interfaz es solo vertical para una experiencia de edición coherente y enfocada.
 
 ### Description
-Protege los derechos de imagen sin sacrificar la estética. Comparte libremente en Instagram y más allá: rostros enmascarados, estilo intacto.
+Protege los derechos de imagen sin sacrificar la estética. La IA sugiere los rostros, tú decides qué ocultar y cada edición permanece en tu dispositivo.
 
-Incognify utiliza el avanzado framework Vision de Apple para detectar automáticamente rostros en tus fotos y aplicar impresionantes máscaras de privacidad personalizables al instante.
+Incognify utiliza el avanzado framework Vision de Apple para sugerir rostros en tus fotos y te permite aplicar impresionantes máscaras de privacidad personalizables, incluidas formas manuales para todo lo que la IA no detectó.
 
 Características clave:
-- **Detección automática de rostros**: Detecta múltiples rostros en multitudes o entornos caóticos al instante.
-- **Máscaras estéticas**: Elige entre Difuminado, Pixelado, Crystalize y el nuevo estilo de Superposición de Emojis y Stickers.
+- **Sugerencias de rostros con IA**: Detecta múltiples rostros en multitudes o entornos caóticos al instante y te permite revisarlos y confirmarlos antes de renderizar.
+- **Enmascarado manual**: Dibuja un rectángulo, círculo o elipse sobre matrículas, documentos, etiquetas o cualquier rostro que la IA no haya detectado.
+- **Máscaras estéticas**: Elige entre Difuminado, Pixelado, Crystalize y el estilo de Superposición de Emojis y Stickers.
 - **Ajustes preestablecidos de emoji personalizables**: Expresa tu estilo añadiendo tus emojis favoritos.
 - **Procesamiento 100% en el dispositivo**: Tus fotos nunca salen de tu dispositivo. Cero subidas a la nube, cero rastreo.
 - **Exportación en alta resolución**: Guarda y comparte fotos sin pérdidas de alta calidad, ideales para redes sociales.
@@ -141,48 +155,30 @@ Características clave:
 ## 6. Localization: Simplified Chinese (zh-Hans)
 
 ### Subtitle
-照片人脸自动隐私保护
+人脸隐私，由你决定
 
 ### Promotional Text
-在不牺牲画面美感的前提下，完美保护肖像权。面部做美学打码，艺术风格依然在线。
+AI 建议人脸，由你决定遮挡哪里。可用矩形、圆形或椭圆遮挡任意位置，全程在设备本地处理。
 
 ### Keywords
-人脸打码, 隐私保护, 表情打码, 贴纸打码, 遮罩人脸, 匿名照片, 像素化, 水晶化, 本地处理, 照片编辑
+人脸打码, 隐私保护, 表情打码, 手动遮罩, 形状遮罩, 匿名照片, 像素化, 本地处理
 
-### What's New in Version 1.7.1
-- 自动检测现仅聚焦人脸，避免将招牌、日期、价格等普通文字误判并遮挡。
-- 已移除分析和崩溃报告 SDK。照片处理仍完全在设备本地完成，不会进行跟踪。
+### What's New in Version 1.8.0
+- 新增手动遮罩：在车牌、文件、标签或 AI 漏检的人脸上绘制矩形、圆形或椭圆进行遮挡。
+- 人脸现在只是建议。请先查看建议，选择包含或排除，确认后才会渲染。
+- 移除了车牌和文字自动检测，数字和招牌不会再被误遮。
+- 采用竖屏专用界面，带来一致、专注的编辑体验。
 
 ### Description
-在不牺牲画面美感的前提下，完美保护肖像权。自由分享至社交平台：面部做美学打码，艺术风格依然在线。
+在不牺牲画面美感的前提下，完美保护肖像权。AI 建议人脸，由你决定遮挡哪里，所有编辑均在设备本地完成。
 
-Incognify 依托 Apple 先进的 Vision 框架，可自动、精准检测照片中的多张人脸，并即时应用精美而个性化的隐私遮罩。
+Incognify 依托 Apple 先进的 Vision 框架为照片中的人脸提供建议，并支持手动绘制矩形、圆形或椭圆，遮挡 AI 漏检的内容，应用精美而个性化的隐私遮罩。
 
 核心功能：
-- **自动人脸检测**：即使在喧闹拥挤的人群或复杂背景中，也能在毫秒间精准锁定每张面孔。
+- **AI 人脸建议**：即使在喧闹拥挤的人群或复杂背景中，也能在毫秒间识别多张面孔，并在渲染前供你查看和确认。
+- **手动遮罩**：在车牌、文件、标签或 AI 漏检的人脸上绘制矩形、圆形或椭圆进行遮挡。
 - **美学打码遮罩**：提供模糊、像素化、“水晶化 (Crystalize)”以及表情符号与贴纸艺术打码风格。
 - **自定义 Emoji 预设**：可自定义添加您最爱的表情符号，个性化遮挡面部。
 - **100% 本地设备处理**：所有的照片检测与修改均在您的 iPhone 内部完成，绝不上传至任何云端，零数据跟踪。
+- **高分辨率导出**：保存并分享无损高画质照片，完美适配社交网络。
 - **完美支持深色模式**：极致视觉美学，完美融入 iOS 系统生态。
-
----
-
-## 7. Next Release Draft — Manual Masking (Version 1.8)
-
-> **Draft only.** These notes target a future 1.8 submission. All version 1.7.1 sections above, including their version and build numbers, remain unchanged.
-
-### English (en-US) — What's New (Draft)
-- Manual masking is here: draw a rectangle, circle, or ellipse over license plates, documents, tags, or any face AI missed.
-- AI now suggests faces instead of masking automatically. Review the suggestions, include or exclude them, and confirm before anything renders.
-- Removed automatic plate and text detection, so numbers and signs are no longer masked by mistake.
-
-### Korean (ko) — What's New (Draft)
-- 직접 가리기 기능이 추가되었습니다. 번호판, 문서, 태그, 놓친 얼굴 위에 사각형·원·타원을 그려 가릴 수 있습니다.
-- AI가 얼굴을 자동으로 가리는 대신 제안합니다. 제안을 확인하고 포함/제외한 뒤 확정해야만 렌더링됩니다.
-- 번호판·텍스트 자동 감지를 제거하여 숫자나 간판이 실수로 가려지지 않습니다.
-
-### Description update guidance (ja / es / zh-Hans)
-- **Japanese:** Add a line such as 「AIは顔を提案し、隠す場所はあなたが決めます。四角形・円・楕円で番号板や書類も隠せます。」
-- **Spanish:** Añade una línea como «La IA sugiere rostros y tú decides qué ocultar. Dibuja rectángulos, círculos o elipses sobre matrículas, documentos o caras no detectadas.»
-- **Simplified Chinese:** 添加一句“AI 建议人脸，由你决定遮挡哪里。可用矩形、圆形或椭圆遮挡车牌、文件或漏检的人脸。”
-- Keep the existing feature list and append these sentences to the first description paragraph; no other metadata changes are required for this draft.

@@ -441,4 +441,4 @@ def sync_app_store_metadata(version_string="1.5"):
     print(f"\n🎉 All 5 App Info and version localizations successfully updated on App Store Connect for Version {version_string}!")
 
 if __name__ == "__main__":
-    sync_app_store_metadata("1.7.1")
+    sync_app_store_metadata("1.8.0")
