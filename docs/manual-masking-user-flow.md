@@ -6,6 +6,7 @@
 - 범위: 제품 UX, 화면 상태, 데이터/아키텍처 변경 제안, 검증 계획
 - 비범위: 실제 소스 코드, 테스트, 로컬라이제이션, 메타데이터 변경. 이 문서는 코드 변경을 포함하지 않는다.
 - 경로 표기: 앱 소스 경로는 `iOS/image-incognito/image-incognito/` 기준 상대 경로, 테스트 경로는 `iOS/image-incognito/image-incognitoTests/` 기준 상대 경로로 표기한다.
+- 2026-11-20: 가로 모드 지원 제거 — 앱은 세로 모드 전용.
 
 ## TL;DR
 
@@ -650,7 +651,7 @@ stateDiagram-v2
 | 영역이 많음 | 50개 초과 | 소프트 캡 50개. 초과 시 추가 버튼 비활성화 + 안내 | 기존 영역 삭제/통합 |
 | 다중 이미지 일부 0개 | 일부 이미지에 포함 영역 없음 | 확정 시 이미지 번호와 함께 경고. `돌아가기`/`계속` | 해당 이미지로 이동해 추가 |
 | 다중 이미지 전체 0개 | 모든 이미지 0개 | 단일 0개 경고와 동일. `원본 그대로 내보내기`만 허용 | 검토로 복귀 |
-| 방향(orientation) | 세로/가로 사진, EXIF orientation | 감지/렌더링 전에 orientation 정규화. 수동 좌표는 표시 좌표계 기준 | 자동 보정. 테스트로 검증 |
+| 방향(orientation) | 세로/가로 사진, EXIF orientation | 앱 UI는 세로 모드 전용(가로 회전 미지원). 사진 자체의 EXIF orientation은 감지/렌더링 전에 정규화하고, 수동 좌표는 표시 좌표계 기준 | 자동 보정. 테스트로 검증 |
 | 뒤로/취소 | 검토에서 뒤로 | 초안이 있으면 "편집 내용을 버릴까요?" 확인. `계속 편집`/`나가기` | 나가면 초안 폐기 |
 | 시스템 뒤로 제스처 | 초안이 있는 상태에서 swipe-back | 커스텀 상단 바 뒤로 버튼과 시스템 swipe-back 모두 같은 확인 다이얼로그를 거쳐야 한다. `draftRevision > 0`일 때 interactive pop을 비활성화하고, 확인 없이는 나갈 수 없게 한다 | `계속 편집`/`나가기` |
 | Export에서 뒤로 | Export에서 뒤로 | 검토로 복귀. 초안 유지. 렌더 결과는 VM 캐시에 유지 | 다시 확정 가능 |
@@ -1026,7 +1027,7 @@ python3 scripts/sync_metadata.py
 | 16 | 5개 로케일이 모두 채워져 있다 | `Localizable.xcstrings` 감사 테스트/스크립트 |
 | 17 | VoiceOver로 모든 영역을 선택/포함/제외/삭제할 수 있다 | 실기기/시뮬레이터 VoiceOver 수동 QA |
 | 18 | 44pt 터치 타깃, Reduce Motion, Dynamic Type을 준수한다 | 접근성 Inspector + 수동 QA |
-| 19 | 얼굴 감지가 실기기에서 정상 동작한다 | 실기기 QA: 정면/측면/다중 얼굴/세로/가로 |
+| 19 | 얼굴 감지가 실기기에서 정상 동작한다 | 실기기 QA: 정면/측면/다중 얼굴/세로 사진 (앱 UI는 세로 전용) |
 | 20 | 스냅샷이 의도한 UI 변경만 반영한다 | `SwiftUIViewSnapshotTests` + `Snapshots/` diff 리뷰 |
 | 21 | 모든 이미지 감지 완료 전에는 확정할 수 없다 | `EditorView` 집계 테스트: 하나라도 `.analyzing`이면 confirm disabled, "모든 사진을 확인하는 중" 표시 |
 | 22 | 원은 리사이즈 후에도 1:1을 유지하고 타원으로 히트 테스트된다 | `RegionHitTester`/`EditorViewModel` 테스트: `width == height`, point-in-ellipse |

@@ -79,10 +79,6 @@ struct EditorView: View {
                         value: currentVM.isAdjustmentPanelVisible
                     )
             }
-            // Keep the control/content column readable on regular-width iPad;
-            // the outer frame centers it while the background stays full-screen.
-            .frame(maxWidth: LayoutMetrics.maxContentWidth)
-            .frame(maxWidth: .infinity)
 
             if let renderProgress {
                 RenderingOverlayView(current: renderProgress.current, total: renderProgress.total)

@@ -28,13 +28,6 @@ enum Spacing {
     static let xxxLarge: CGFloat = 40
 }
 
-// MARK: - Layout
-
-enum LayoutMetrics {
-    /// 1000pt – keeps editor controls readable and centered on regular-width iPad.
-    static let maxContentWidth: CGFloat = 1000
-}
-
 // MARK: - Corner Radius  (Continuous / squircle style)
 
 enum Radius {

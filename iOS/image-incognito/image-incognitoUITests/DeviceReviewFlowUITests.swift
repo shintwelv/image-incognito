@@ -106,21 +106,6 @@ final class DeviceReviewFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["editor.addRegion"].exists)
     }
 
-    func testLandscapeManualDrawConfirmAndExport() {
-        XCUIDevice.shared.orientation = .landscapeLeft
-        launchToEditor()
-
-        addRegion()
-        drawManualRegion()
-        assertAdjustmentPanelVisible()
-
-        let confirm = app.buttons["editor.confirmButton"]
-        waitUntilEnabled(confirm)
-        confirm.tap()
-
-        assertExportReached()
-    }
-
     // MARK: - Flow helpers
 
     private func launchToEditor() {
